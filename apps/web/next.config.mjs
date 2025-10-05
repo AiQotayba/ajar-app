@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -8,7 +9,10 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains: [],
   },
-}
+  basePath: '',
+};
 
-export default nextConfig
+// في ES Modules استخدم export default
+export default nextConfig;
