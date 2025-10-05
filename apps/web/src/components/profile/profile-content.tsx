@@ -19,7 +19,7 @@ const MenuItems = [
   },
   {
     title: "إعلاناتي",
-    href: "/profile/my-ads",
+    href: "/my-ads",
     icon: FileText
   },
   {

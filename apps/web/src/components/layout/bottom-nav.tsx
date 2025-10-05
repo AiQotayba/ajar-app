@@ -15,7 +15,7 @@ export function BottomNav() {
   const navItems = [
     { id: "home", label: "الرئيسية", icon: (props: React.SVGProps<SVGSVGElement>) => <HomeIcon  {...props} />, href: "/" },
     { id: "map", label: "الخريطة", icon: (props: React.SVGProps<SVGSVGElement>) => <Map  {...props} />, href: "/map" },
-    { id: "add", label: "إضافة", icon: Plus, href: "/add", isSpecial: true },
+    { id: "add", label: "إضافة", icon: Plus, href: "/my-listings/add", isSpecial: true },
     { id: "favorites", label: "المفضلة", icon: (props: React.SVGProps<SVGSVGElement>) => <HeartIcon {...props} />, href: "/favorites" },
     { id: "profile", label: "حسابي", icon: (props: React.SVGProps<SVGSVGElement>) => <Profile  {...props} />, href: "/profile" },
   ]
