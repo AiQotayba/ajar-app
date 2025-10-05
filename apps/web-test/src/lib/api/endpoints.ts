@@ -1,0 +1,61 @@
+// Authentication endpoints
+export const AUTH_ENDPOINTS = {
+  REGISTER: '/auth/register',
+  LOGIN: '/auth/login',
+  VERIFY_OTP: '/auth/verify-otp',
+  FORGOT_PASSWORD: '/auth/forgot-password',
+  RESET_PASSWORD: '/auth/reset-password',
+  LOGOUT: '/auth/logout',
+} as const;
+
+// User endpoints
+export const USER_ENDPOINTS = {
+  HOME: '/user/home',
+  CATEGORIES: '/user/categories',
+  CATEGORY_DETAIL: (id: number) => `/user/categories/${id}`,
+  PROPERTIES: '/user/properties',
+  FEATURES: '/user/features',
+  LISTINGS: '/user/listings',
+  LISTING_DETAIL: (id: number) => `/user/listings/${id}`,
+  LISTING_REVIEWS: (id: number) => `/user/listings/${id}/reviews`,
+  GOVERNORATES: '/user/governorates',
+  GOVERNORATE_DETAIL: (id: number) => `/user/governorates/${id}`,
+  CITIES: '/user/cities',
+  CITY_DETAIL: (id: number) => `/user/cities/${id}`,
+  SLIDERS_ACTIVE: '/user/sliders/active',
+  SLIDER_CLICK: (id: number) => `/user/sliders/${id}/click`,
+  SETTINGS_PUBLIC: '/user/settings/public',
+  NOTIFICATIONS: '/user/notifications',
+  NOTIFICATION_READ: (id: number) => `/user/notifications/${id}/read`,
+  REVIEWS: '/user/reviews',
+  REVIEW_DETAIL: (id: number) => `/user/reviews/${id}`,
+  LISTING_TOGGLE_FAVORITE: (id: number) => `/user/listings/${id}/toggle-favorite`,
+} as const;
+
+// Admin endpoints
+export const ADMIN_ENDPOINTS = {
+  CATEGORIES: '/admin/categories',
+  CATEGORY_DETAIL: (id: number) => `/admin/categories/${id}`,
+  CATEGORY_REORDER: (id: number) => `/admin/categories/${id}/reorder`,
+  PROPERTIES: '/admin/properties',
+  PROPERTY_DETAIL: (id: number) => `/admin/properties/${id}`,
+  FEATURES: '/admin/features',
+  FEATURE_DETAIL: (id: number) => `/admin/features/${id}`,
+  GOVERNORATES: '/admin/governorates',
+  GOVERNORATE_DETAIL: (id: number) => `/admin/governorates/${id}`,
+  CITIES: '/admin/cities',
+  CITY_DETAIL: (id: number) => `/admin/cities/${id}`,
+  SLIDERS: '/admin/sliders',
+  SLIDER_DETAIL: (id: number) => `/admin/sliders/${id}`,
+  LISTINGS: '/admin/listings',
+  LISTING_DETAIL: (id: number) => `/admin/listings/${id}`,
+  REVIEWS: '/admin/reviews',
+  REVIEW_DETAIL: (id: number) => `/admin/reviews/${id}`,
+  NOTIFICATIONS: '/admin/notifications',
+  NOTIFICATION_DETAIL: (id: number) => `/admin/notifications/${id}`,
+  SETTINGS: '/admin/settings',
+  SETTING_DETAIL: (id: number) => `/admin/settings/${id}`,
+  USERS: '/admin/users',
+  USER_DETAIL: (id: number) => `/admin/users/${id}`,
+  REPORTS: '/admin/reports',
+} as const;

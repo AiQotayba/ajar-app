@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# ajar-app
-=======
 # 🏠 Ajar - Real Estate Platform
 
 A comprehensive real estate rental and sale platform with multi-language support (Arabic/English) and full administrative capabilities.
@@ -215,4 +212,3 @@ For support and questions:
 - Email: support@ajar.com
 - Documentation: [docs.ajar.com](https://docs.ajar.com)
 - Issues: [GitHub Issues](https://github.com/ajar/platform/issues)
->>>>>>> 6109085 (initial commit)
