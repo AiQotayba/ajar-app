@@ -1,5 +1,5 @@
-import { createFullApi } from '@useApi';
 import { toast } from 'sonner';
+import { createFullApi } from './api/index';
 
 export const api = createFullApi(
     process.env.NEXT_PUBLIC_API_URL || 'https://ajar-backend.mystore.social/api/v1',
