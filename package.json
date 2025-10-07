@@ -19,7 +19,10 @@
     "admin:dev": "pnpm --filter admin dev",
     "admin:build": "pnpm --filter admin build",
     "seed": "pnpm --filter @ajar/seed seed",
-    "seed:dev": "pnpm --filter @ajar/seed dev"
+    "seed:dev": "pnpm --filter @ajar/seed dev",
+    "npm:web:build": "cd apps/web && npm run build",
+    "npm:build": "npm run build --workspace=apps/web",
+    "vercel-build": "pnpm --filter web build"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

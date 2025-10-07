@@ -57,16 +57,26 @@ pnpm run start
 ### Build Process
 
 1. Install dependencies with pnpm (including workspace packages)
-2. Build workspace packages (@useApi)
+2. Build workspace packages (@useApi, @ajar/seed)
 3. Build the Next.js application
 4. Deploy to Vercel
 
 ### Monorepo Configuration
 
-This project uses a monorepo structure with workspace packages:
+This project uses a pnpm monorepo structure with workspace packages:
 - `@useApi`: Custom API library
+- `@ajar/seed`: Database seeding package
 - The build process ensures workspace packages are built before the main app
-- Vercel is configured to handle the monorepo structure correctly
+- Vercel is configured to handle the pnpm monorepo structure correctly
+- Uses pnpm with proper workspace configuration
+- Workspace packages are properly linked using `workspace:*` syntax
+
+### Vercel Configuration
+
+The `vercel.json` file is configured for pnpm monorepo deployment:
+- `installCommand`: Runs `pnpm install` from the root directory
+- `buildCommand`: Runs `pnpm run vercel-build` which builds the web app
+- Proper workspace handling ensures all dependencies are installed correctly
 
 ### Monitoring
 
