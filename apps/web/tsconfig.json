@@ -1,5 +1,5 @@
 {
-  // "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "plugins": [
       {
@@ -13,7 +13,7 @@
       "@/lib/*": ["./src/lib/*"],
       "@/types/*": ["./src/types/*"],
       "@/utils/*": ["./src/utils/*"],
-      "@useApi": ["../../packages/useApi/src"]
+      // "@useApi": ["../../packages/useApi/src"]
     }
   },
   "include": [
