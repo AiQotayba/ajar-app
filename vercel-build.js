@@ -27,6 +27,18 @@ try {
     fs.copyFileSync('package-vercel.json', 'package.json');
   }
 
+  // Copy the Vercel-specific next.config
+  console.log('📦 Setting up next.config.mjs for Vercel...');
+  if (fs.existsSync('next.config.vercel.mjs')) {
+    fs.copyFileSync('next.config.vercel.mjs', 'next.config.mjs');
+  }
+
+  // Remove .npmrc to avoid workspace conflicts
+  console.log('📦 Removing .npmrc to avoid workspace conflicts...');
+  if (fs.existsSync('.npmrc')) {
+    fs.unlinkSync('.npmrc');
+  }
+
   // Install dependencies using npm (Vercel's default)
   console.log('📦 Installing dependencies...');
   execSync('npm install', { stdio: 'inherit' });
