@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function NotFound() {
   return (
@@ -37,11 +38,12 @@ export function NotFound() {
         <p className="text-sm text-muted-foreground text-center mb-8 leading-relaxed max-w-sm">
           عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها إلى موقع آخر.
         </p>
-
-        <Button className="w-full max-w-sm h-12 rounded-2xl bg-primary hover:bg-primary-hover text-white font-medium">
-          العودة للرئيسية
-        </Button>
-      </main> 
+        <Link href="/" className="w-full max-w-sm h-12 rounded-2xl bg-primary hover:bg-primary-hover text-white font-medium">
+          <Button className="w-full max-w-sm h-12 rounded-2xl bg-primary hover:bg-primary-hover text-white font-medium">
+            العودة للرئيسية
+          </Button>
+        </Link>
+      </main>
     </div>
   )
 }

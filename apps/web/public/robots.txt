@@ -1,0 +1,33 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://ajar.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /settings/
+
+# Allow important pages
+Allow: /ar/
+Allow: /en/
+Allow: /listings/
+Allow: /categories/
+Allow: /search/
+
+# Block bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

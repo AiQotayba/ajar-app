@@ -1,0 +1,71 @@
+{
+    "name": "@useApi",
+    "version": "1.0.0",
+    "description": "A lightweight, framework-agnostic API layer with config injection for auth, i18n, and error handling",
+    "main": "dist/index.js",
+    "module": "dist/index.esm.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE",
+        "CHANGELOG.md"
+    ],
+    "scripts": {
+        "build": "rollup -c",
+        "dev": "rollup -c -w",
+        "type-check": "tsc --noEmit",
+        "lint": "eslint src --ext .ts",
+        "lint:fix": "eslint src --ext .ts --fix",
+        "format": "prettier --write \"src/**/*.{ts,js,json,md}\"",
+        "format:check": "prettier --check \"src/**/*.{ts,js,json,md}\"",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "clean": "rm -rf dist",
+        "prepublishOnly": "npm run clean && npm run build && npm run test"
+    },
+    "keywords": [
+        "api",
+        "http",
+        "fetch",
+        "typescript",
+        "framework-agnostic",
+        "config-injection",
+        "i18n",
+        "authentication",
+        "error-handling",
+        "developer-experience",
+        "react",
+        "nextjs",
+        "nodejs"
+    ],
+    "author": "Qutaiba <qutaiba@ajar.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ajar/use-api-lib.git"
+    },
+    "bugs": {
+        "url": "https://github.com/ajar/use-api-lib/issues"
+    },
+    "homepage": "https://github.com/ajar/use-api-lib#readme",
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^25.0.7",
+        "@rollup/plugin-node-resolve": "^15.2.3",
+        "@rollup/plugin-typescript": "^11.1.5",
+        "@types/jest": "^29.5.8",
+        "@typescript-eslint/eslint-plugin": "^6.10.0",
+        "@typescript-eslint/parser": "^6.10.0",
+        "eslint": "^8.53.0",
+        "jest": "^29.7.0",
+        "prettier": "^3.1.0",
+        "rollup": "^4.6.1",
+        "rollup-plugin-dts": "^6.1.0",
+        "ts-jest": "^29.1.1",
+        "typescript": "^5.2.2"
+    },
+    "engines": {
+        "node": ">=16.0.0"
+    }
+}

@@ -1,12 +1,15 @@
-import { Bath, Wifi, Wind, Car } from "lucide-react"
+import { Bath, Car, CheckCircle, Heart, Settings, Shield, Truck, Wifi, Wind } from "lucide-react"
 
 interface Feature {
-  icon: string
-  label: string
+  id: number
+  name: string
+  description?: string
+  icon?: string
 }
 
 interface PropertyFeaturesProps {
   features: Feature[]
+  locale?: string
 }
 
 const iconMap = {
@@ -14,22 +17,65 @@ const iconMap = {
   wifi: Wifi,
   ac: Wind,
   parking: Car,
+  delivery: Truck,
+  handmade: Settings,
+  adjustable: Settings,
+  foldable: Settings,
+  storage: Shield,
+  wheels: Car,
+  waterproof: Shield,
+  eco: Heart,
+  default: CheckCircle,
 }
 
-export function PropertyFeatures({ features }: PropertyFeaturesProps) {
+export function PropertyFeatures({ features, locale = 'ar' }: PropertyFeaturesProps) {
+  if (!features || features.length === 0) {
+    return null
+  }
+
+  const getIcon = (featureName: string, icon?: string) => {
+    const name = featureName.toLowerCase()
+    
+    // Check for specific keywords in the feature name
+    if (name.includes('توصيل') || name.includes('delivery')) return Truck
+    if (name.includes('يدوي') || name.includes('handmade')) return Settings
+    if (name.includes('تعديل') || name.includes('adjustable')) return Settings
+    if (name.includes('طي') || name.includes('foldable')) return Settings
+    if (name.includes('تخزين') || name.includes('storage')) return Shield
+    if (name.includes('عجلات') || name.includes('wheel')) return Car
+    if (name.includes('ماء') || name.includes('water')) return Shield
+    if (name.includes('بيئ') || name.includes('eco')) return Heart
+    
+    // Return default icon
+    return CheckCircle
+  }
+
   return (
     <div className="space-y-3">
-      <h2 className="text-base font-bold text-foreground">مزايا:</h2>
-      <div className="flex flex-wrap gap-2">
-        {features.map((feature, index) => {
-          const Icon = iconMap[feature.icon as keyof typeof iconMap]
+      <h2 className="text-lg font-bold text-foreground">
+        {locale === 'ar' ? 'المميزات:' : 'Features:'}
+      </h2>
+      <div className="grid grid-cols-2 gap-3">
+        {features.map((feature) => {
+          const Icon = getIcon(feature.name, feature.icon)
           return (
             <div
-              key={index}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary-light text-primary text-sm font-medium"
+              key={feature.id}
+              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted/70 transition-colors"
             >
-              {Icon && <Icon className="h-4 w-4" />}
-              <span>{feature.label}</span>
+              <div className="flex-shrink-0">
+                <Icon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium text-foreground block">
+                  {feature.name}
+                </span>
+                {feature.description && (
+                  <span className="text-xs text-muted-foreground block mt-0.5">
+                    {feature.description}
+                  </span>
+                )}
+              </div>
             </div>
           )
         })}

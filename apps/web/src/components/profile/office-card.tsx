@@ -6,7 +6,7 @@ export function OfficeCard() {
     <div className="relative bg-card rounded-3xl border p-4 space-y-3" dir="rtl">
       <div className="flex items-start gap-3">
         <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
-          <img src="/modern-office-building.png" alt="Office" className="w-full h-full object-cover" />
+          <img src="/images/modern-office-building.png" alt="Office" className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 text-right">
           <h3 className="font-bold text-lg">مكتب الأحمد</h3>

@@ -1,36 +1,34 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
+import { cn } from "@/lib/utils"
 import Autoplay from "embla-carousel-autoplay"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
-const slides = [
-  {
-    id: 1,
-    image: "/luxury-modern-house-exterior-wooden-deck.jpg",
-    title: "شقة للإيجار في مدينة إدلب",
-    subtitle: "ابدأ رحلتك للعثور على منزل أحلامك",
-    badge: "جديد",
-  },
-  {
-    id: 2,
-    image: "/luxury-modern-house-exterior-wooden-deck.jpg",
-    title: "فيلا فاخرة مع مسبح",
-    subtitle: "فيلا للبيع في دمشق",
-    badge: "مميز",
-  },
-  {
-    id: 3,
-    image: "/luxury-modern-house-exterior-wooden-deck.jpg",
-    title: "مكتب تجاري للإيجار",
-    subtitle: "موقع مميز في حلب",
-    badge: "عرض خاص",
-  },
-]
 
-export function HeroSlider() {
+interface Slider {
+  id: number;
+  title: {
+    ar: string;
+    en: string;
+  };
+  description: {
+    ar: string;
+    en: string;
+  };
+  image_url: string;
+  target_url: string;
+  start_at: string;
+  end_at: string;
+  active: boolean;
+  clicks: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export function HeroSlider({ sliders }: { sliders: Slider[] | undefined }) {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }))
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [api, setApi] = useState<any>(null)
@@ -46,6 +44,11 @@ export function HeroSlider() {
     return () => api.off("select", onSelect)
   }, [api])
 
+  // إذا لم تكن هناك سلايدرز، لا نعرض المكون
+  if (!sliders || sliders.length === 0) {
+    return null;
+  }
+
   return (
     <div dir="rtl" className="relative w-full group">
       <Carousel
@@ -58,25 +61,22 @@ export function HeroSlider() {
         plugins={[plugin.current as any]}
         className="w-full pb-4"
       >
-        <CarouselContent>
-          {slides.map((slide) => (
-            <CarouselItem key={slide.id} className="basis-[90%]">
-              <div className="relative h-56  rounded-3xl overflow-hidden">
+        <CarouselContent className="rounded-3xl gap-2 mx-2 w-full px-2" >
+          {sliders.map((slide: Slider) => (
+            <CarouselItem key={slide.id} className="basis-[90%] mx-auto">
+              <div className="relative h-56 rounded-3xl overflow-hidden cursor-pointer"
+                onClick={() => window.open(slide.target_url, '_blank')}>
                 <Image
-                  src={slide.image || "/luxury-modern-house-exterior-wooden-deck.jpg"}
-                  alt={slide.title}
+                  src={slide.image_url || "/luxury-modern-house-exterior-wooden-deck.jpg"}
+                  alt={slide.title.ar}
                   fill
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground shadow-lg">
-                  {slide.badge}
-                </Badge>
-
                 <div className="absolute bottom-0 right-0 left-0 p-6 text-white text-right">
-                  <h2 className="text-2xl font-bold mb-1">{slide.title}</h2>
-                  <p className="text-sm text-white/80">{slide.subtitle}</p>
+                  <h2 className="text-2xl font-bold mb-1">{slide.title.ar}</h2>
+                  <p className="text-sm text-white/80">{slide.description.ar}</p>
                 </div>
               </div>
             </CarouselItem>
@@ -85,12 +85,14 @@ export function HeroSlider() {
       </Carousel>
 
       {/* ✅ مؤشرات أسفل السلايدر */}
-      <div className="absolute  left-0 right-0 flex justify-center gap-2">
-        {slides.map((_, index) => (
+      <div className="absolute left-0 right-0 flex justify-center gap-2">
+        {sliders.map((_, index) => (
           <span
             key={index}
-            className={`h-2 w-2 rounded-full transition-all bg-primary duration-300 ${index === selectedIndex ? "w-[30px] scale-125 mx-2" : "p-1"
-              }`}
+            className={cn(
+              "h-2 w-2 rounded-full transition-all bg-primary duration-300 ",
+              index === selectedIndex ? "w-[30px] scale-125 mx-2" : "p-1"
+            )}
           />
         ))}
       </div>

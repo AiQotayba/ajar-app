@@ -1,14 +1,14 @@
 "use client"
 
-import { Star, Phone } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Phone, Star } from "lucide-react"
 
 const agents = [
   {
     id: 1,
     name: "أحمد محمود",
-    image: "/placeholder.svg?height=100&width=100",
+    image: "/images/placeholder.svg?height=100&width=100",
     rating: 4.9,
     properties: 45,
     verified: true,
@@ -16,7 +16,7 @@ const agents = [
   {
     id: 2,
     name: "فاطمة السيد",
-    image: "/placeholder.svg?height=100&width=100",
+    image: "/images/placeholder.svg?height=100&width=100",
     rating: 4.8,
     properties: 38,
     verified: true,
@@ -24,7 +24,7 @@ const agents = [
   {
     id: 3,
     name: "محمد علي",
-    image: "/placeholder.svg?height=100&width=100",
+    image: "/images/placeholder.svg?height=100&width=100",
     rating: 4.7,
     properties: 32,
     verified: false,
@@ -49,7 +49,7 @@ export function FeaturedAgents() {
           >
             <div className="relative">
               <img
-                src={agent.image || "/placeholder.svg"}
+                src={agent.image || "/images/placeholder.svg"}
                 alt={agent.name}
                 className="h-16 w-16 rounded-full object-cover border-2 border-primary"
               />

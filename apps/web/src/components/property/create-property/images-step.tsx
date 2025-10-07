@@ -2,10 +2,10 @@
 
 import type React from "react"
 
-import { useRef, useState } from "react"
-import { ImagePlus, X, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { ImagePlus, Star, X } from "lucide-react"
+import { useRef, useState } from "react"
 import type { PropertyFormData } from "../create-property-form"
 
 interface ImagesStepProps {
@@ -77,7 +77,7 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
             {previewUrls.map((url, index) => (
               <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted">
                 <img
-                  src={url || "/placeholder.svg"}
+                  src={url || "/images/placeholder.svg"}
                   alt={`Property ${index + 1}`}
                   className="w-full h-full object-cover"
                 />

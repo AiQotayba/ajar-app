@@ -73,10 +73,10 @@ const listings = [
   },
 ]
 
-export function ListingGrid() {
+export function ListingGrid({ data }: any) {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-center">
-      {listings.map((listing) => (
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-center">
+      {data?.map((listing: any) => (
         <div key={listing.id} className="w-full mx-auto">
           <ListingCard listing={listing} />
         </div>

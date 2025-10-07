@@ -1,0 +1,518 @@
+{
+    "id": 2871,
+    "title": {
+        "ar": "غرف نوم Used - Good - جودة عالية",
+        "en": "Used - Good Bedroom - High Quality"
+    },
+    "ribon_text": {
+        "ar": null,
+        "en": null
+    },
+    "ribon_color": null,
+    "description": {
+        "ar": "غرف نوم Used - Good جميل مصنوع من مواد عالية الجودة. مثالي للمنازل العصرية. التوصيل متاح.",
+        "en": "Beautiful Used - Good Bedroom made from quality materials. Perfect for modern homes. Delivery available."
+    },
+    "price": 1605,
+    "currency": "USD",
+    "latitude": "35.1319",
+    "longitude": "36.7198",
+    "status": "approved",
+    "available_from": "2025-10-12",
+    "available_until": "2026-07-24",
+    "type": "sale",
+    "pay_every": null,
+    "insurance": null,
+    "is_featured": false,
+    "views_count": 626,
+    "is_favorite": false,
+    "favorites_count": 8,
+    "average_rating": 0,
+    "reviews_count": 0,
+    "cover_image": "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800",
+    "whatsapp_url": "",
+    "owner": null,
+    "category": {
+        "id": 528,
+        "name": {
+            "ar": "غرف نوم",
+            "en": "Bedroom"
+        },
+        "description": {
+            "ar": null,
+            "en": null
+        },
+        "parent_id": 527,
+        "icon": null,
+        "properties_source": "parent_and_custom",
+        "sort_order": 1,
+        "is_visible": true,
+        "listings_count": 0,
+        "created_at": "2025-10-06 16:53:41",
+        "updated_at": "2025-10-06 16:53:41"
+    },
+    "governorate": {
+        "id": 12,
+        "name": {
+            "ar": "حماة",
+            "en": "Hama"
+        },
+        "code": "ChIJGS8F1ZOCJBURlu05HFjhbW4",
+        "sort_order": 12,
+        "created_at": "2025-05-14 23:25:21",
+        "updated_at": "2025-05-14 23:25:21"
+    },
+    "city": null,
+    "images": [
+        {
+            "id": 4913,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800",
+            "full_url": "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800",
+            "source": "link",
+            "sort_order": 1,
+            "created_at": "2025-10-06 17:50:13"
+        },
+        {
+            "id": 4914,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800",
+            "full_url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800",
+            "source": "link",
+            "sort_order": 2,
+            "created_at": "2025-10-06 17:50:13"
+        },
+        {
+            "id": 4915,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800",
+            "full_url": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800",
+            "source": "link",
+            "sort_order": 3,
+            "created_at": "2025-10-06 17:50:13"
+        },
+        {
+            "id": 4916,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
+            "full_url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
+            "source": "link",
+            "sort_order": 4,
+            "created_at": "2025-10-06 17:50:13"
+        }
+    ],
+    "media": [
+        {
+            "id": 4913,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800",
+            "full_url": "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800",
+            "source": "link",
+            "sort_order": 1,
+            "created_at": "2025-10-06 17:50:13"
+        },
+        {
+            "id": 4914,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800",
+            "full_url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800",
+            "source": "link",
+            "sort_order": 2,
+            "created_at": "2025-10-06 17:50:13"
+        },
+        {
+            "id": 4915,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800",
+            "full_url": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800",
+            "source": "link",
+            "sort_order": 3,
+            "created_at": "2025-10-06 17:50:13"
+        },
+        {
+            "id": 4916,
+            "type": "image",
+            "url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
+            "full_url": "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800",
+            "source": "link",
+            "sort_order": 4,
+            "created_at": "2025-10-06 17:50:13"
+        }
+    ],
+    "features": [
+        {
+            "id": 49,
+            "category_id": 527,
+            "name": {
+                "ar": "متوفر توصيل",
+                "en": "Delivery Available"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 1,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        },
+        {
+            "id": 51,
+            "category_id": 527,
+            "name": {
+                "ar": "صناعة يدوية",
+                "en": "Handmade"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 3,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        },
+        {
+            "id": 52,
+            "category_id": 527,
+            "name": {
+                "ar": "قابل للتعديل",
+                "en": "Adjustable"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 4,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        },
+        {
+            "id": 53,
+            "category_id": 527,
+            "name": {
+                "ar": "قابل للطي",
+                "en": "Foldable"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 5,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        },
+        {
+            "id": 54,
+            "category_id": 527,
+            "name": {
+                "ar": "مساحة تخزين",
+                "en": "Storage Space"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 6,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        },
+        {
+            "id": 55,
+            "category_id": 527,
+            "name": {
+                "ar": "عجلات متحركة",
+                "en": "Wheels/Casters"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 7,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        },
+        {
+            "id": 57,
+            "category_id": 527,
+            "name": {
+                "ar": "مقاوم للماء",
+                "en": "Water Resistant"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 9,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        },
+        {
+            "id": 58,
+            "category_id": 527,
+            "name": {
+                "ar": "صديق للبيئة",
+                "en": "Eco-Friendly"
+            },
+            "description": {
+                "ar": null,
+                "en": null
+            },
+            "icon": null,
+            "sort_order": 10,
+            "created_at": "2025-10-06 16:53:41",
+            "updated_at": "2025-10-06 16:53:41"
+        }
+    ],
+    "properties": [
+        {
+            "id": 949,
+            "property_id": 20,
+            "value": "\"New\"",
+            "sort_order": 1,
+            "property": {
+                "id": 20,
+                "category_id": 527,
+                "name": {
+                    "ar": "الحالة",
+                    "en": "Condition"
+                },
+                "description": {
+                    "ar": "حالة القطعة",
+                    "en": "Item condition"
+                },
+                "icon": null,
+                "type": "string",
+                "is_filter": true,
+                "options": [
+                    {
+                        "ar": "جديد",
+                        "en": "New"
+                    },
+                    {
+                        "ar": "مستعمل - ممتاز",
+                        "en": "Used - Excellent"
+                    },
+                    {
+                        "ar": "مستعمل - جيد",
+                        "en": "Used - Good"
+                    },
+                    {
+                        "ar": "مستعمل - مقبول",
+                        "en": "Used - Fair"
+                    }
+                ],
+                "sort_order": 1,
+                "created_at": "2025-10-06 16:53:41",
+                "updated_at": "2025-10-06 16:53:41"
+            }
+        },
+        {
+            "id": 950,
+            "property_id": 21,
+            "value": "\"Leather\"",
+            "sort_order": 2,
+            "property": {
+                "id": 21,
+                "category_id": 527,
+                "name": {
+                    "ar": "المادة",
+                    "en": "Material"
+                },
+                "description": {
+                    "ar": "المادة الأساسية",
+                    "en": "Primary material"
+                },
+                "icon": null,
+                "type": "string",
+                "is_filter": true,
+                "options": [
+                    {
+                        "ar": "خشب",
+                        "en": "Wood"
+                    },
+                    {
+                        "ar": "معدن",
+                        "en": "Metal"
+                    },
+                    {
+                        "ar": "بلاستيك",
+                        "en": "Plastic"
+                    },
+                    {
+                        "ar": "زجاج",
+                        "en": "Glass"
+                    },
+                    {
+                        "ar": "قماش",
+                        "en": "Fabric"
+                    },
+                    {
+                        "ar": "جلد",
+                        "en": "Leather"
+                    },
+                    {
+                        "ar": "مختلط",
+                        "en": "Mixed"
+                    }
+                ],
+                "sort_order": 2,
+                "created_at": "2025-10-06 16:53:41",
+                "updated_at": "2025-10-06 16:53:41"
+            }
+        },
+        {
+            "id": 951,
+            "property_id": 22,
+            "value": "\"Brown\"",
+            "sort_order": 3,
+            "property": {
+                "id": 22,
+                "category_id": 527,
+                "name": {
+                    "ar": "اللون",
+                    "en": "Color"
+                },
+                "description": {
+                    "ar": "اللون الأساسي",
+                    "en": "Primary color"
+                },
+                "icon": null,
+                "type": "string",
+                "is_filter": true,
+                "options": [
+                    {
+                        "ar": "أبيض",
+                        "en": "White"
+                    },
+                    {
+                        "ar": "أسود",
+                        "en": "Black"
+                    },
+                    {
+                        "ar": "بني",
+                        "en": "Brown"
+                    },
+                    {
+                        "ar": "بيج",
+                        "en": "Beige"
+                    },
+                    {
+                        "ar": "رمادي",
+                        "en": "Gray"
+                    },
+                    {
+                        "ar": "أزرق",
+                        "en": "Blue"
+                    },
+                    {
+                        "ar": "أحمر",
+                        "en": "Red"
+                    },
+                    {
+                        "ar": "أخضر",
+                        "en": "Green"
+                    },
+                    {
+                        "ar": "ذهبي",
+                        "en": "Gold"
+                    },
+                    {
+                        "ar": "فضي",
+                        "en": "Silver"
+                    },
+                    {
+                        "ar": "متعدد الألوان",
+                        "en": "Multi-color"
+                    }
+                ],
+                "sort_order": 3,
+                "created_at": "2025-10-06 16:53:41",
+                "updated_at": "2025-10-06 16:53:41"
+            }
+        },
+        {
+            "id": 952,
+            "property_id": 23,
+            "value": 0,
+            "sort_order": 4,
+            "property": {
+                "id": 23,
+                "category_id": 527,
+                "name": {
+                    "ar": "العرض",
+                    "en": "Width"
+                },
+                "description": {
+                    "ar": "العرض بالسنتيمتر",
+                    "en": "Width in cm"
+                },
+                "icon": null,
+                "type": "float",
+                "is_filter": false,
+                "options": null,
+                "sort_order": 4,
+                "created_at": "2025-10-06 16:53:41",
+                "updated_at": "2025-10-06 16:53:41"
+            }
+        },
+        {
+            "id": 953,
+            "property_id": 24,
+            "value": 0,
+            "sort_order": 5,
+            "property": {
+                "id": 24,
+                "category_id": 527,
+                "name": {
+                    "ar": "الارتفاع",
+                    "en": "Height"
+                },
+                "description": {
+                    "ar": "الارتفاع بالسنتيمتر",
+                    "en": "Height in cm"
+                },
+                "icon": null,
+                "type": "float",
+                "is_filter": false,
+                "options": null,
+                "sort_order": 5,
+                "created_at": "2025-10-06 16:53:41",
+                "updated_at": "2025-10-06 16:53:41"
+            }
+        },
+        {
+            "id": 954,
+            "property_id": 25,
+            "value": 0,
+            "sort_order": 6,
+            "property": {
+                "id": 25,
+                "category_id": 527,
+                "name": {
+                    "ar": "العمق",
+                    "en": "Depth"
+                },
+                "description": {
+                    "ar": "العمق بالسنتيمتر",
+                    "en": "Depth in cm"
+                },
+                "icon": null,
+                "type": "float",
+                "is_filter": false,
+                "options": null,
+                "sort_order": 6,
+                "created_at": "2025-10-06 16:53:41",
+                "updated_at": "2025-10-06 16:53:41"
+            }
+        }
+    ],
+    "reviews": [],
+    "created_at": "2025-10-06 17:50:13",
+    "updated_at": "2025-10-07 11:54:37"
+}

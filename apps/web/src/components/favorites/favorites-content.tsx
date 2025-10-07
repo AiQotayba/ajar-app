@@ -82,7 +82,7 @@ const mockFavoritesNone = [
   },
   {
     id: 1,
-    image: "/placeholder.svg?height=400&width=600",
+    image: "/images/placeholder.svg?height=400&width=600",
     title: "شقة عائلية واسعة ومفروشة بالكامل للإيجار بموقع مركزي",
     description: "قريب من المدارس والأسواق",
     price: "400",
@@ -97,7 +97,7 @@ const mockFavoritesNone = [
   },
   {
     id: 2,
-    image: "/placeholder.svg?height=400&width=600",
+    image: "/images/placeholder.svg?height=400&width=600",
     title: "شقة عائلية واسعة ومفروشة بالكامل للإيجار بموقع مركزي",
     description: "قريب من المدارس والأسواق",
     price: "400",
@@ -124,7 +124,7 @@ export function FavoritesContent() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <Header title="المفضلة" showNotification />
+      <Header title="المفضلة" showNotification showBack />
 
       <div className="p-4 pt-4">
         <SearchBar />

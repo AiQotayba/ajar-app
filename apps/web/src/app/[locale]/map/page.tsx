@@ -17,10 +17,10 @@ export default function MapPage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log("[v0] Location granted:", position.coords)
+          console.log(" Location granted:", position.coords)
         },
         (error) => {
-          console.log("[v0] Location denied:", error)
+          console.log(" Location denied:", error)
         },
       )
     }

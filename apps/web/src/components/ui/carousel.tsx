@@ -1,13 +1,13 @@
 'use client'
 
-import * as React from 'react'
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import * as React from 'react'
 
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
@@ -143,8 +143,8 @@ function CarouselContent({ className, ...props }: React.ComponentProps<'div'>) {
     >
       <div
         className={cn(
-          'flex',
-          orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col',
+          'flex mx-auto',
+          // orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col',
           className,
         )}
         {...props}
@@ -163,7 +163,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot="carousel-item"
       className={cn(
         'min-w-0 shrink-0 grow-0 basis-full',
-        orientation === 'horizontal' ? 'pl-4' : 'pt-4',
+        // orientation !== 'horizontal' ? 'pl-4' : 'pt-4',
         className,
       )}
       {...props}
@@ -232,10 +232,8 @@ function CarouselNext({
 }
 
 export {
-  type CarouselApi,
   Carousel,
   CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
+  CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi
 }
+

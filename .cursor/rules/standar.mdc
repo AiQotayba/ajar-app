@@ -1,0 +1,50 @@
+---
+alwaysApply: true
+---
+
+- add translation for the app use Next-intl
+- add support RTL and LTR for the app
+- split translation to different files
+    - auth.json
+    - profile.json
+    - ...
+- Framer Motion for animations
+- support SEO for the app and use SSR and CSR
+
+```yaml
+/app
+    - default support RTL all content
+    - default support SEO-important pages
+    - default support CSR and SSR
+    - default support lazy loading
+    - default support code splitting
+    - max files 400 lines
+    - create files *.test.tsx for components
+    - Automated testing coverage (minimum 80%)
+    - Content Security Policy (CSP)
+    /page.tsx
+        - For SEO-important pages:
+        - Use Server-Side Rendering (SSR)
+        - Move client-side components (using hooks/animations) to separate files
+        - For non-SEO pages:
+        - Can use Client-Side Rendering (CSR) or SSR freely
+        - data fetching
+        - use react-query if client-side
+        - use swr if server-side
+    /loading.tsx # use for loading skeleton
+    /error.tsx # use for error page
+    /layout.tsx # use for layout
+    /not-found.tsx # use for 404 page
+    ... # this rules for all pages
+```
+
+- integrate with the [API](API-docx.json)
+- use React Query for the app
+- use Skeleton for All pages app
+- use context7 for shadcn/ui
+- A dish of the highest quality and performance standards in the application
+- data validation with zod
+- notifications with sonner
+
+
+> note: not always use use-toast and replace it with sonner

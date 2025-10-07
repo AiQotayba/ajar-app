@@ -2,13 +2,13 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import Link from "next/link"
-import { ChevronLeft, ImagePlus, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { ChevronLeft, ImagePlus, Phone } from "lucide-react"
+import Link from "next/link"
+import { useState } from "react"
 
 export function AddOfficeForm() {
   const [image, setImage] = useState<string | null>(null)
@@ -45,7 +45,7 @@ export function AddOfficeForm() {
             className="w-64 h-64 bg-primary/10 border-2 border-primary border-dashed rounded-3xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-primary/20 transition-colors overflow-hidden"
           >
             {image ? (
-              <img src={image || "/placeholder.svg"} alt="Office" className="w-full h-full object-cover" />
+              <img src={image || "/images/placeholder.svg"} alt="Office" className="w-full h-full object-cover" />
             ) : (
               <>
                 <ImagePlus className="h-12 w-12 text-primary" />

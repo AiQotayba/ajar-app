@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { MapPin, Star, Edit2 } from "lucide-react"
+import { Edit2, MapPin, Star } from "lucide-react"
 import Image from "next/image"
 import type { PropertyFormData } from "../create-property-form"
 
@@ -178,7 +178,7 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
             {data.images.map((image, index) => (
               <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted">
                 <Image
-                  src={image.url || "/placeholder.svg"}
+                  src={image.url || "/images/placeholder.svg"}
                   alt={`Property image ${index + 1}`}
                   fill
                   className="object-cover"

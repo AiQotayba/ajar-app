@@ -1,10 +1,8 @@
-import { Header } from "@/components/layout/header"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function LoadingSkeleton() {
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Header title="الرئيسية" showNotification />
 
       <main className="px-4 pt-4 space-y-4">
         {/* Search Bar Skeleton */}
@@ -52,7 +50,7 @@ export function LoadingSkeleton() {
             </div>
           ))}
         </div>
-      </main> 
+      </main>
     </div>
   )
 }

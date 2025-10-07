@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { MapPin, Minus, Plus, Locate } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Locate, MapPin, Minus, Plus } from "lucide-react"
+import { useState } from "react"
 
 interface MapViewProps {
   hasPermission: boolean
@@ -23,7 +23,7 @@ export function MapView({ hasPermission }: MapViewProps) {
   return (
     <div className="relative h-[calc(100vh-180px)] rounded-3xl overflow-hidden bg-muted">
       {/* Map Placeholder */}
-      <img src="/map-of-aleppo-syria.jpg" alt="Map" className="w-full h-full object-cover" />
+      <img src="/images/map-of-aleppo-syria.jpg" alt="Map" className="w-full h-full object-cover" />
 
       {/* Property Markers */}
       {properties.map((property) => (
@@ -47,7 +47,7 @@ export function MapView({ hasPermission }: MapViewProps) {
       {selectedProperty && (
         <div className="absolute top-4 left-4 right-4 bg-white rounded-2xl shadow-lg p-4 animate-in slide-in-from-top">
           <div className="flex gap-3">
-            <img src="/modern-apartment-living.png" alt="Property" className="w-24 h-20 rounded-xl object-cover" />
+            <img src="/images/modern-apartment-living.png" alt="Property" className="w-24 h-20 rounded-xl object-cover" />
             <div className="flex-1">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex gap-2">

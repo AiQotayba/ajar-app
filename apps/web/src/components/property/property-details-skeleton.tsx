@@ -1,9 +1,7 @@
-import { Header } from "@/components/layout/header"
 
 export function PropertyDetailsSkeleton() {
   return (
-    <div className="min-h-screen bg-background pb-24 animate-pulse">
-      <Header title="تفاصيل العقار" showBack showNotifications />
+    <div className="min-h-screen bg-background pb-24 animate-pulse"> 
 
       <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Gallery Skeleton */}

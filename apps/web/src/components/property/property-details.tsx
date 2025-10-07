@@ -1,97 +1,276 @@
 "use client"
 import { Header } from "@/components/layout/header"
+import { PropertyDetailsSkeleton } from "@/components/property/property-details-skeleton"
+import { PropertyFeatures } from "@/components/property/property-features"
 import { PropertyGallery } from "@/components/property/property-gallery"
 import { PropertyInfo } from "@/components/property/property-info"
-import { PropertyFeatures } from "@/components/property/property-features"
 import { PropertyLocation } from "@/components/property/property-location"
 import { PropertyReviews } from "@/components/property/property-reviews"
 import { Button } from "@/components/ui/button"
-import { MessageCircle } from "lucide-react"
+import { useTranslationsHook } from "@/hooks/use-translations"
+import { api } from "@/lib/api"
+import { useQuery } from "@tanstack/react-query"
+import { Eye, Heart } from "lucide-react"
+import { notFound } from "next/navigation"
+import { useState } from "react"
 
 interface PropertyDetailsProps {
-  propertyId: string
+  id: string
+  locale?: string
 }
 
-export function PropertyDetails({ propertyId }: PropertyDetailsProps) {
-  // Mock data - in real app, fetch based on propertyId
-  const property = {
-    id: propertyId,
-    images: [
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/attachments/gen-images/public/modern-apartment-living-YRbPNUUbeCTyrJJXR2uhtUrlgNnplt.png",
-      "/luxury-villa-exterior.png",
-      "/modern-kitchen.png",
-      "/spacious-bedroom.jpg",
-      "/elegant-bathroom.png",
-      "/beautiful-garden.jpg",
-    ],
-    title: "شقة عائلية واسعة ومفروشة بالكامل للإيجار بموقع مركزي",
-    description: "قريب من المدارس والأسواق.",
-    price: "400",
-    period: "دفع 6 أشهر",
-    badge: "مؤجر",
-    bedrooms: 5,
-    area: "250 م²",
-    deposit: "$200 تأمين",
-    furnished: true,
-    features: [
-      { icon: "bath", label: "2 حمام" },
-      { icon: "wifi", label: "شبكة WiFi" },
-      { icon: "ac", label: "تكييف" },
-      { icon: "parking", label: "موقف" },
-    ],
-    location: {
-      address: "حلب - مدينة إعزاز",
-      neighborhood: "الحي الجنوبي",
-      lat: 36.2012,
-      lng: 37.1343,
-    },
-    rating: 4.9,
-    reviews: [
-      {
-        id: 1,
-        author: "أحمد الأحمد",
-        rating: 3,
-        comment: "الشقة واسعة ومميزة، الأثاث بحالة جيدة جداً، والمكان هادئ ومناسب للعائلات.",
-        date: "2024-01-15",
-      },
-      {
-        id: 2,
-        author: "أحمد الأحمد",
-        rating: 3,
-        comment: "الشقة واسعة ومميزة، الأثاث بحالة جيدة جداً، والمكان هادئ ومناسب للعائلات.",
-        date: "2024-01-10",
-      },
-    ],
+interface ListingData {
+  id: number
+  is_favorite: boolean
+  ribon_text?: { ar: string; en: string }
+  ribon_color?: string
+  title: { ar: string; en: string }
+  description: { ar: string; en: string }
+  price: number
+  currency: string
+  type: 'rent' | 'sale'
+  pay_every?: number | null
+  insurance?: number | null
+  is_featured: boolean
+  views_count: number
+  favorites_count: number
+  average_rating: number
+  reviews_count: number
+  cover_image?: string
+  whatsapp_url?: string
+  images?: Array<{
+    id: number
+    url: string
+    full_url: string
+    sort_order: number
+  }>
+  features?: Array<{
+    id: number
+    name: { ar: string; en: string }
+    description?: { ar: string; en: string }
+    icon?: string
+  }>
+  properties?: Array<{
+    id: number
+    property_id: number
+    value: any
+    sort_order: number
+    property: {
+      id: number
+      name: { ar: string; en: string }
+      description: { ar: string; en: string }
+      type: string
+    }
+  }>
+  category?: {
+    id: number
+    name: { ar: string; en: string }
+  }
+  governorate?: {
+    id: number
+    name: { ar: string; en: string }
+  }
+  city?: {
+    id: number
+    name: { ar: string; en: string }
+  } | null
+  latitude?: string
+  longitude?: string
+  reviews?: any[]
+  created_at: string
+  updated_at: string
+}
+
+export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
+  const t = useTranslationsHook()
+  const [isFavorite, setIsFavorite] = useState(false)
+
+  const { data: response, isLoading, error } = useQuery({
+    queryKey: ['property', id, locale],
+    queryFn: () => api.get(`/user/listings/${id}`),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  })
+
+  if (isLoading) return <PropertyDetailsSkeleton />
+
+  if (error || !response?.data) {
+    return (
+      <div className="min-h-screen bg-background pb-24">
+        <Header title={locale === 'ar' ? 'تفاصيل العقار' : 'Property Details'} showBack />
+        <div className="container max-w-2xl mx-auto px-4 py-6">
+          <div className="text-center">
+            <p className="text-muted-foreground">
+              {locale === 'ar' ? 'حدث خطأ في تحميل العقار' : 'Error loading property'}
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
+  const property: ListingData = response.data
+  const isArabic = locale === 'ar'
+
+  if (response.isError) return notFound()
+  // Helper function to get localized text
+  const getLocalizedText = (text: { ar: string; en: string }) => {
+    return text[locale as keyof typeof text] || text.ar
+  }
+
+  // Get property details
+  const title = getLocalizedText(property.title)
+  const description = getLocalizedText(property.description)
+  const location = property.city
+    ? `${getLocalizedText(property.city.name)}, ${getLocalizedText(property.governorate?.name || { ar: '', en: '' })}`
+    : getLocalizedText(property.governorate?.name || { ar: '', en: '' })
+
+  // Get category name
+  const categoryName = property.category ? getLocalizedText(property.category.name) : ''
+
+  // Get properties for display
+  const conditionProperty = property.properties?.find(p =>
+    getLocalizedText(p.property.name).toLowerCase().includes('حالة') ||
+    getLocalizedText(p.property.name).toLowerCase().includes('condition')
+  )
+  const materialProperty = property.properties?.find(p =>
+    getLocalizedText(p.property.name).toLowerCase().includes('مادة') ||
+    getLocalizedText(p.property.name).toLowerCase().includes('material')
+  )
+  const colorProperty = property.properties?.find(p =>
+    getLocalizedText(p.property.name).toLowerCase().includes('لون') ||
+    getLocalizedText(p.property.name).toLowerCase().includes('color')
+  )
+  const widthProperty = property.properties?.find(p =>
+    getLocalizedText(p.property.name).toLowerCase().includes('عرض') ||
+    getLocalizedText(p.property.name).toLowerCase().includes('width')
+  )
+  const heightProperty = property.properties?.find(p =>
+    getLocalizedText(p.property.name).toLowerCase().includes('ارتفاع') ||
+    getLocalizedText(p.property.name).toLowerCase().includes('height')
+  )
+  const depthProperty = property.properties?.find(p =>
+    getLocalizedText(p.property.name).toLowerCase().includes('عمق') ||
+    getLocalizedText(p.property.name).toLowerCase().includes('depth')
+  )
+
+  // Parse property values
+  const parsePropertyValue = (value: any) => {
+    if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+      return value.slice(1, -1)
+    }
+    return value
+  }
+
+  // Format price
+  const formattedPrice = `${property.price.toLocaleString()} ${property.currency}`
+  const priceText = property.type === 'rent'
+    ? `${formattedPrice}${property.pay_every ? ` كل ${property.pay_every} شهر` : ' / شهر'}`
+    : formattedPrice
+
+  // Prepare gallery images
+  const galleryImages = property.images || []
+  const coverImage = property.cover_image
+
+  // Prepare features for display
+  const displayFeatures = property.features?.map(feature => ({
+    id: feature.id,
+    name: getLocalizedText(feature.name),
+    description: feature.description ? getLocalizedText(feature.description) : undefined,
+    icon: feature.icon
+  })) || []
   return (
     <div className="min-h-screen bg-background pb-24">
-      <Header title="تفاصيل العقار" showBack showNotifications />
+      <Header title={isArabic ? 'تفاصيل العقار' : 'Property Details'} showBack />
 
       <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
-        <PropertyGallery images={property.images} badge={property.badge} />
-
-        <PropertyInfo
-          title={property.title}
-          description={property.description}
-          price={property.price}
-          period={property.period}
-          bedrooms={property.bedrooms}
-          area={property.area}
-          deposit={property.deposit}
-          furnished={property.furnished}
+        {/* Gallery */}
+        <PropertyGallery
+          images={galleryImages}
+          coverImage={coverImage}
+          isFavorite={property.is_favorite}
+          listingId={property.id}
+          badge={property.is_featured ? (isArabic ? 'مميز' : 'Featured') : undefined}
+          ribon_text={property.ribon_text?.[locale as keyof typeof property.ribon_text]}
+          ribon_color={property.ribon_color}
+          locale={locale}
         />
 
-        <PropertyFeatures features={property.features} />
+        {/* Property Info */}
+        <PropertyInfo
+          title={title}
+          description={description}
+          price={priceText}
+          currency={property.currency}
+          type={property.type}
+          category={categoryName}
+          location={location}
+          condition={parsePropertyValue(conditionProperty?.value)}
+          material={parsePropertyValue(materialProperty?.value)}
+          color={parsePropertyValue(colorProperty?.value)}
+          insurance={property.insurance}
+          payEvery={property.pay_every}
+          width={widthProperty?.value}
+          height={heightProperty?.value}
+          depth={depthProperty?.value}
+        />
 
-        <PropertyLocation location={property.location} />
+        {/* Stats */}
+        <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Eye className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {property.views_count} {isArabic ? 'مشاهدة' : 'views'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Heart className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {property.favorites_count} {isArabic ? 'إعجاب' : 'favorites'}
+            </span>
+          </div>
+        </div>
 
-        <PropertyReviews rating={property.rating} reviews={property.reviews} propertyId={property.id} />
+        {/* Features */}
+        {displayFeatures.length > 0 && (
+          <PropertyFeatures features={displayFeatures} locale={locale} />
+        )}
+
+        {/* Location */}
+        <PropertyLocation
+          location={location}
+          latitude={property.latitude}
+          longitude={property.longitude}
+          locale={locale}
+        />
+
+        {/* Reviews */}
+        <PropertyReviews
+          rating={property.average_rating}
+          reviews={property.reviews || []}
+          reviewsCount={property.reviews_count}
+          propertyId={property.id.toString()}
+          locale={locale}
+        />
 
         {/* WhatsApp Contact Button */}
-        <Button className="w-full h-14 text-lg font-bold rounded-2xl bg-primary hover:bg-primary/90">
-          <MessageCircle className="ml-2 h-5 w-5" />
-          تواصل واتساب
+        <Button
+          className="w-full h-14 text-md font-bold rounded-2xl bg-primary hover:bg-primary/90"
+          onClick={() => {
+            if (property.whatsapp_url) {
+              window.open(property.whatsapp_url, '_blank')
+            } else {
+              // Fallback WhatsApp URL
+              const message = encodeURIComponent(`${isArabic ? 'مرحباً، أريد الاستفسار عن' : 'Hi, I want to inquire about'}: ${title}`)
+              window.open(`https://wa.me/?text=${message}`, '_blank')
+            }
+          }}
+        >
+          <svg fill="#ffffff" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+            <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+            <path d="M26.576 5.363c-2.69-2.69-6.406-4.354-10.511-4.354-8.209 0-14.865 6.655-14.865 14.865 0 2.732 0.737 5.291 2.022 7.491l-0.038-0.070-2.109 7.702 7.879-2.067c2.051 1.139 4.498 1.809 7.102 1.809h0.006c8.209-0.003 14.862-6.659 14.862-14.868 0-4.103-1.662-7.817-4.349-10.507l0 0zM16.062 28.228h-0.005c-0 0-0.001 0-0.001 0-2.319 0-4.489-0.64-6.342-1.753l0.056 0.031-0.451-0.267-4.675 1.227 1.247-4.559-0.294-0.467c-1.185-1.862-1.889-4.131-1.889-6.565 0-6.822 5.531-12.353 12.353-12.353s12.353 5.531 12.353 12.353c0 6.822-5.53 12.353-12.353 12.353h-0zM22.838 18.977c-0.371-0.186-2.197-1.083-2.537-1.208-0.341-0.124-0.589-0.185-0.837 0.187-0.246 0.371-0.958 1.207-1.175 1.455-0.216 0.249-0.434 0.279-0.805 0.094-1.15-0.466-2.138-1.087-2.997-1.852l0.010 0.009c-0.799-0.74-1.484-1.587-2.037-2.521l-0.028-0.052c-0.216-0.371-0.023-0.572 0.162-0.757 0.167-0.166 0.372-0.434 0.557-0.65 0.146-0.179 0.271-0.384 0.366-0.604l0.006-0.017c0.043-0.087 0.068-0.188 0.068-0.296 0-0.131-0.037-0.253-0.101-0.357l0.002 0.003c-0.094-0.186-0.836-2.014-1.145-2.758-0.302-0.724-0.609-0.625-0.836-0.637-0.216-0.010-0.464-0.012-0.712-0.012-0.395 0.010-0.746 0.188-0.988 0.463l-0.001 0.002c-0.802 0.761-1.3 1.834-1.3 3.023 0 0.026 0 0.053 0.001 0.079l-0-0.004c0.131 1.467 0.681 2.784 1.527 3.857l-0.012-0.015c1.604 2.379 3.742 4.282 6.251 5.564l0.094 0.043c0.548 0.248 1.25 0.513 1.968 0.74l0.149 0.041c0.442 0.14 0.951 0.221 1.479 0.221 0.303 0 0.601-0.027 0.889-0.078l-0.031 0.004c1.069-0.223 1.956-0.868 2.497-1.749l0.009-0.017c0.165-0.366 0.261-0.793 0.261-1.242 0-0.185-0.016-0.366-0.047-0.542l0.003 0.019c-0.092-0.155-0.34-0.247-0.712-0.434z"></path>
+          </svg>
+          {isArabic ? 'تواصل واتساب' : 'WhatsApp Contact'}
         </Button>
       </div>
     </div>

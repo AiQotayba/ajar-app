@@ -15,8 +15,8 @@ async function getPropertyData(id: string) {
     latitude: 36.2021,
     longitude: 37.1343,
     images: [
-      { url: "/placeholder.svg?height=400&width=600", isCover: true },
-      { url: "/placeholder.svg?height=400&width=600", isCover: false },
+      { url: "/images/placeholder.svg?height=400&width=600", isCover: true },
+      { url: "/images/placeholder.svg?height=400&width=600", isCover: false },
     ],
     price: "400",
     paymentFrequency: "كل شهر تقريباً",

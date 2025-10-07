@@ -2,13 +2,13 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import Link from "next/link"
-import { ChevronLeft, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { ChevronLeft, Phone } from "lucide-react"
+import Link from "next/link"
+import { useState } from "react"
 
 export function EditOfficeForm() {
   const [image, setImage] = useState<string>("/modern-office-building.png")
@@ -44,7 +44,7 @@ export function EditOfficeForm() {
             htmlFor="office-image"
             className="w-64 h-64 bg-primary/10 border-2 border-primary rounded-3xl cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
           >
-            <img src={image || "/placeholder.svg"} alt="Office" className="w-full h-full object-cover" />
+            <img src={image || "/images/placeholder.svg"} alt="Office" className="w-full h-full object-cover" />
           </label>
           <input id="office-image" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
         </div>
