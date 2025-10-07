@@ -29,3 +29,13 @@ README.md
 *.md
 doc/
 docs/
+
+# Ignore Turbo cache
+.turbo
+.turbo-cache
+
+# Ignore node_modules (will be installed fresh)
+node_modules
+
+# Ignore TypeScript build info
+*.tsbuildinfo
