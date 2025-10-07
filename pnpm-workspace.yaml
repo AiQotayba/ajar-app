@@ -1,3 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Turbo configuration
+turbo:
+  enabled: true

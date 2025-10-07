@@ -216,4 +216,4 @@ Thumbs.db
 
 # Turbo
 .turbo
-*pnpm-lock.yaml
+.turbo-cache

@@ -1,12 +1,13 @@
 {
     "version": 2,
+    "buildCommand": "turbo run build --filter=web",
+    "outputDirectory": "apps/web/.next",
+    "installCommand": "pnpm install",
+    "framework": "nextjs",
     "builds": [
         {
             "src": "apps/web/package.json",
-            "use": "@vercel/next",
-            "config": {
-                "distDir": "apps/web/.next"
-            }
+            "use": "@vercel/next"
         }
     ],
     "routes": [
@@ -14,8 +15,5 @@
             "src": "/(.*)",
             "dest": "apps/web/$1"
         }
-    ],
-    "installCommand": "pnpm install",
-    "buildCommand": "pnpm run vercel-build",
-    "outputDirectory": "apps/web/.next"
+    ]
 }

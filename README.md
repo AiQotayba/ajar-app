@@ -32,6 +32,7 @@ A comprehensive real estate rental and sale platform with multi-language support
 
 ### Development Tools
 - **Package Manager**: pnpm (workspace)
+- **Build System**: Turbo (monorepo)
 - **Linting**: ESLint + Prettier
 - **Type Checking**: TypeScript
 
@@ -43,21 +44,21 @@ ajar-platform/
 │   ├── web/                    # Public-facing Next.js application
 │   └── admin/                  # Administrative dashboard
 ├── packages/
-│   ├── ui/                     # Shared UI components
-│   ├── types/                  # Shared TypeScript definitions
-│   ├── utils/                  # Utility functions
-│   └── config/                 # Shared configuration
-├── infra/                      # Infrastructure configuration
-├── docs/                       # Documentation
-└── scripts/                    # Build and utility scripts
+│   └── useApi/                 # Shared API client library
+├── doc/                        # Documentation and API specs
+├── turbo.json                  # Turbo configuration
+├── .turborc                    # Turbo settings
+├── Makefile                    # Development commands
+└── TURBO.md                    # Turbo documentation
 ```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+ (see `.nvmrc`)
 - pnpm 8+
+- Turbo (installed automatically)
 
 ### Installation
 
@@ -80,12 +81,17 @@ cp apps/admin/.env.example apps/admin/.env.local
 
 4. Start development servers:
 ```bash
-# Start all applications
+# Start all applications with Turbo
 pnpm dev
 
 # Or start individually
 pnpm web:dev      # Web app (port 3000)
-pnpm admin:dev    # Admin app (port 3001)
+pnpm admin:dev    # Admin app (port 3100)
+
+# Or use Makefile for convenience
+make dev          # Start all apps
+make dev-web      # Start web app only
+make dev-admin    # Start admin app only
 ```
 
 ## 🌐 Applications
@@ -96,7 +102,7 @@ pnpm admin:dev    # Admin app (port 3001)
 - User authentication and profiles
 - Multi-language support
 
-### Admin Dashboard (Port 3001)
+### Admin Dashboard (Port 3100)
 - Administrative interface
 - User and listing management
 - Analytics and reporting
@@ -107,12 +113,12 @@ pnpm admin:dev    # Admin app (port 3001)
 ### Available Scripts
 
 ```bash
-# Development
+# Development (with Turbo)
 pnpm dev                 # Start all applications
 pnpm web:dev            # Start web app only
 pnpm admin:dev          # Start admin app only
 
-# Building
+# Building (with Turbo)
 pnpm build              # Build all applications
 pnpm web:build          # Build web app only
 pnpm admin:build        # Build admin app only
@@ -120,7 +126,15 @@ pnpm admin:build        # Build admin app only
 # Code Quality
 pnpm lint               # Lint all packages
 pnpm type-check         # Type check all packages
+pnpm test               # Run all tests
 pnpm clean              # Clean all build artifacts
+pnpm format             # Format all code
+
+# Makefile commands (alternative)
+make help               # Show all available commands
+make setup              # Setup project
+make reset              # Reset project
+make status             # Show project status
 ```
 
 ### Adding New Packages

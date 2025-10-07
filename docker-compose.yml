@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Web Application
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+    networks:
+      - ajar-network
+
+  # Admin Application
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    ports:
+      - "3100:3100"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    volumes:
+      - ./apps/admin:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+    networks:
+      - ajar-network
+
+networks:
+  ajar-network:
+    driver: bridge

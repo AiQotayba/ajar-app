@@ -1,0 +1,66 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production builds
+.next
+out
+dist
+build
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+TURBO.md
+*.md
+
+# Turbo cache
+.turbo
+.turbo-cache
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# Temporary folders
+tmp
+temp
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo

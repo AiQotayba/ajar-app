@@ -11,6 +11,12 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Turbo monorepo support
+  transpilePackages: ['@useApi'],
+  experimental: {
+    // Enable standalone output for Docker
+    outputFileTracingRoot: '../../',
+  },
   images: {
     unoptimized: true,
     domains: [

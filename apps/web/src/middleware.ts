@@ -2,18 +2,18 @@ import createMiddleware from "next-intl/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
 import { routing } from "./lib/i18n/routing";
-export const authRoutes = [
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/verify-code",
-  "/reset-password",
-  "/verify-code",
-  "/request-delete-account",
-  "/delete-account",
-  "/privacy",
-  "/terms",
-];
+// export const authRoutes = [
+//   "/login",
+//   "/register",
+//   "/forgot-password",
+//   "/verify-code",
+//   "/reset-password",
+//   "/verify-code",
+//   "/request-delete-account",
+//   "/delete-account",
+//   "/privacy",
+//   "/terms",
+// ];
 export const protectedRoutes = [
   "/dashboard",
   "/appointments",
@@ -36,14 +36,14 @@ export const middleware = async (req: NextRequest) => {
   // استثناء طلب ملف الـ Service Worker
   if (req.nextUrl.pathname === '/firebase-messaging-sw.js') return NextResponse.next();
 
-  if (token && authRoutes.includes(req.nextUrl.pathname.slice(3))) {
-    return NextResponse.redirect(
-      new URL(`/`, req.nextUrl.origin).toString()
-    );
-  }
-  if (!token && protectedRoutes.includes(req.nextUrl.pathname.slice(3))) {
-    return NextResponse.redirect(new URL(`/`, req.nextUrl.origin).toString());
-  }
+  // if (token && authRoutes.includes(req.nextUrl.pathname.slice(3))) {
+  //   return NextResponse.redirect(
+  //     new URL(`/`, req.nextUrl.origin).toString()
+  //   );
+  // }
+  // if (!token && protectedRoutes.includes(req.nextUrl.pathname.slice(3))) {
+  //   return NextResponse.redirect(new URL(`/`, req.nextUrl.origin).toString());
+  // }
   // }
 
   // Run next-intl middleware logic
