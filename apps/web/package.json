@@ -6,9 +6,14 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "prebuild": "cd ../../packages/useApi && pnpm build",
+    "postbuild": "echo 'Build completed successfully'"
   },
   "dependencies": {
+    "@useApi": "workspace:*",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
