@@ -1,4 +1,4 @@
-# 🏠 Ajar - Real Estate Platform
+# 🏠 Ajar - Real Estate Platform 
 
 A comprehensive real estate rental and sale platform with multi-language support (Arabic/English) and full administrative capabilities.
 
