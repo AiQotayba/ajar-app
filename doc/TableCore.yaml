@@ -1,0 +1,130 @@
+
+table-library:
+  name: "SmartDataTable"
+  description: >
+    مكتبة جدول تفاعلي متقدمة مبنية بـ React + Tailwind،
+    تدعم CSR بشكل ديناميكي، وتقدم تجربة مستخدم عالية بفضل
+    دعم skeletons، drag & drop، التخصيص الكامل للأعمدة،
+    وحالات التحميل/الخطأ الذكية.
+
+  structure:
+    files:
+      - TableCore.tsx                # مكون الجدول الرئيسي only one file
+    components:  
+      - TableCore                # مكون الجدول الرئيسي
+      - TableHeader          # مكون رأس الجدول (العناوين + الفلاتر)
+      - TableBody            # مكون جسم الجدول (الصفوف + البيانات)
+      - TableRow             # إدارة الصفوف الفردية + التفاعل
+      - TableSkeleton        # حالة التحميل
+      - TableToolbar         # أزرار التحكم والفلاتر العامة
+      - TablePagination      # إدارة التصفح بين الصفحات
+      - useTableData          # hook لجلب البيانات وإدارتها (CSR)
+      - useTableDrag   
+      - Form Dynmic
+  core:
+    tech_stack:
+      - React 18+
+      - TailwindCSS
+      - Framer Motion (اختياري للحركات)
+      - Zustand أو React Query (للـstate/data)
+      - TypeScript (للتنميط والدقة)
+    rendering_modes:
+      - CSR: ✅ افتراضي 
+    styling_strategy:
+      - Utility-first design باستخدام Tailwind
+      - Skeletons default loading 
+
+  features:
+    core:
+      - CSR
+      - header:
+        - Sorting and Filtering config 
+        - search config ✔️
+        - filter config
+        - multi select config
+        - date range filter
+        - Export to CSV / Excel
+        - form edit and add
+      - table:
+        - Skeleton loading default
+        - columns config          # form || table
+          - form fild enable
+          - hidden col
+          - responsive config
+            - minWidth=[md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl,8xl,9xl,10xl] 
+            - maxWidth=[md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl,8xl,9xl,10xl]
+        - data rows
+        - Drag and Drop
+        - empty state
+        - actions toolbar
+      - footer:
+        - pagination default
+        - actions toolbar
+    actions:
+      - edit
+      - delete
+      - view 
+      - columns config 
+      - actions toolbar
+      - Pagination  
+    optional:
+      - button to enable Drag & Drop (CSR Only)
+      - support keyboard shortcuts 
+      - connect to external API through Config
+
+  ux_guidelines:
+    - clarity of texts and actions (UX Writing)
+    - use Feedback toasts on each action
+    - consistency in visual hierarchy in all columns
+    - states (Loading / Empty / Error / Success) designed in advance
+    - support skeleton default when loading data
+    - visual interactive motion
+
+  future_improvements:
+    - dynamic column system through drag to show and hide
+    - improve accessibility for keyboard and reading
+    - support full dark mode through dynamic toggle
+    - add Compact / Comfortable styles for display
+    - support advanced bulk selection operations
+    - improve integration with React Query + Suspense
+
+  notes:
+    - سوف اعطيه رابط من خلاله يقوم بتحميل البيانات من الـ API
+      - اضافة الفلاتر وعند تحديث اي فلتر يقوم بتحديث search params في الصفحة والذي ينعكس فورا على طلب البيانات سواء بحث او فلترة او ترتيب 
+      - الرباط نستفيد منه لحذف العنصر
+      - 
+    - drag and edit operations must remain CSR only.
+    - Skeleton always shows on first loading of data.
+    - when Drag & Drop is enabled, sorting is temporarily disabled to avoid conflicts.
+    - the texts inside the table must follow the defined UX Writing rules (clarity + simplicity + consistency).
+
+  StapsBuild: 
+    beta now:
+      - CSR ✔️
+      - header: ✔️
+        - search config ✔️
+        - date range filter  ✔️
+        - Filtering config ✔️
+        - filter config ✔️
+      - table: # ✔️
+        - Skeleton loading default ✔️
+        - columns config ✔️          # form || table
+          - sorting ✔️
+        - data rows ✔️
+        - Drag and Drop ✔️
+        - empty state  ✔️
+        - actions toolbar ✔️
+      - footer: # ✔️
+        - pagination default ✔️ 
+    futuer: 
+      - header:  
+        - multi select config
+        - Export to CSV / Excel
+        - form edit and add
+      - table: 
+        - columns config          # form || table 
+          - form fild enable
+          - hidden col
+          - responsive config
+            - minWidth=[md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl,8xl,9xl,10xl] 
+            - maxWidth=[md,lg,xl,2xl,3xl,4xl,5xl,6xl,7xl,8xl,9xl,10xl]

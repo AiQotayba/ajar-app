@@ -4,7 +4,7 @@ This guide covers deploying the Ajar Platform monorepo with Turbo.
 
 ## Prerequisites
 
-- Node.js 18+ (see `.nvmrc`)
+- Node.js 22+ (see `.nvmrc`)
 - pnpm 8+
 - Turbo (installed automatically)
 - Docker (optional, for containerized deployment)

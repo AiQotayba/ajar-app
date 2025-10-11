@@ -1,50 +1,190 @@
+ممتاز 👌 قتيبة، فهمت قصدك تمامًا —
+أنت تريد ملف **rules منسّق بصيغة Cursor** بحيث يكون عملي وفعّال،
+بدون إلزام بـ Jest، فقط استخدام **console log / dev logs** لتتبّع الأداء أو الأخطاء أثناء التطوير.
+
+إليك النسخة المُحسّنة والجاهزة للاستخدام مباشرة داخل مجلد `.cursor/rules/app-standards.mdc`
+🎯 مصممة خصيصًا لـ **Next.js + TypeScript + shadcn/ui + next-intl + React Query**
+
 ---
+
+## 📄 **`.cursor/rules/app-standards.mdc`**
+
+````md
+---
+title: "Ajar Admin Panel Development Standards"
+description: "Unified rules for building consistent, secure, and high-performance Next.js apps"
 alwaysApply: true
 ---
 
-- add translation for the app use Next-intl
-- add support RTL and LTR for the app
-- split translation to different files
-    - auth.json
-    - profile.json
-    - ...
-- Framer Motion for animations
-- support SEO for the app and use SSR and CSR
+# 🧭 General Principles
 
-```yaml
-/app
-    - default support RTL all content
-    - default support SEO-important pages
-    - default support CSR and SSR
-    - default support lazy loading
-    - default support code splitting
-    - max files 400 lines
-    - create files *.test.tsx for components
-    - Automated testing coverage (minimum 80%)
-    - Content Security Policy (CSP)
-    /page.tsx
-        - For SEO-important pages:
-        - Use Server-Side Rendering (SSR)
-        - Move client-side components (using hooks/animations) to separate files
-        - For non-SEO pages:
-        - Can use Client-Side Rendering (CSR) or SSR freely
-        - data fetching
-        - use react-query if client-side
-        - use swr if server-side
-    /loading.tsx # use for loading skeleton
-    /error.tsx # use for error page
-    /layout.tsx # use for layout
-    /not-found.tsx # use for 404 page
-    ... # this rules for all pages
+- Use **Next.js App Router** with **TypeScript**.
+- Keep code **clean, modular, and reusable**.
+- Each feature folder must be **self-contained** (`page.tsx`, `api.ts`, `components/`, `hooks/`).
+- Maximum file length: **400 lines**.
+- Use `console.info`, `console.warn`, and `console.error` for **debug logging** — Jest testing not required.
+- Follow the **principles of security, accessibility, and scalability** in all modules.
+
+---
+
+# 🌍 Internationalization (i18n)
+
+- Use **Next-intl** for translation and locale management.
+- Support **RTL** and **LTR** directions.
+- Language files must be split logically:
+
+```bash
+/locales
+  /en
+    auth.json
+    profile.json
+    settings.json
+  /ar
+    auth.json
+    profile.json
+    settings.json
+````
+
+* Ensure `<html dir>` is dynamic based on locale in `/app/layout.tsx`.
+
+---
+
+# 💡 Rendering Rules
+
+## SEO-important pages:
+
+* Use **Server-Side Rendering (SSR)**.
+* Implement `generateMetadata` for SEO.
+* Client components (animations, forms) should be separated from SSR components.
+
+## Non-SEO pages:
+
+* Use **Client-Side Rendering (CSR)**.
+* Handle data fetching with **React Query** (client) or **SWR** (server).
+
+## Performance:
+
+* Use **lazy loading** and **dynamic imports** where possible.
+* Apply **code splitting** for large UI modules.
+* Always define a `loading.tsx` and `error.tsx` in each page directory.
+
+---
+
+# 🔐 Security Principles
+
+* Apply **Content Security Policy (CSP)** headers via `next-safe-middleware` or `next.config.js`.
+* Use **HttpOnly session cookies** for authentication.
+* Validate all inputs with **Zod**.
+* Encode all outputs in user-facing content to prevent XSS.
+* Sanitize HTML if rendering from user data.
+* Never expose **API keys or environment variables** in the frontend.
+* Ensure all API routes are protected by middleware with role-based access control.
+
+---
+
+# ⚙️ API Integration
+
+* Follow `API-docx.json` structure for endpoints and params.
+* All API calls must go through a single wrapper (`apiClient.ts`).
+* Use **React Query** for fetching, caching, and mutations.
+* Handle errors with `toast` or **sonner** (prefer sonner).
+
+```ts
+// Example
+try {
+  const data = await apiClient.get("/admin/listings");
+  console.info("✅ Listings fetched", data);
+} catch (error) {
+  console.error("❌ Error fetching listings", error);
+}
 ```
 
-- integrate with the [API](API-docx.json)
-- use React Query for the app
-- use Skeleton for All pages app
-- use context7 for shadcn/ui
-- A dish of the highest quality and performance standards in the application
-- data validation with zod
-- notifications with sonner
+---
 
+# 🧱 UI & Components
 
-> note: not always use use-toast and replace it with sonner
+* Use **shadcn/ui** components and extend via `context7`.
+* Default theme direction: **RTL**.
+* Avoid inline styles; use **Tailwind CSS**.
+* Each UI component must have:
+
+  * Proper accessibility attributes (`aria-*`, `role`).
+  * Minimal coupling (no business logic inside).
+* For animations, use **Framer Motion**.
+* Skeleton loaders for all major content sections.
+
+---
+
+# 📈 Performance Monitoring
+
+* Add **Sentry** for runtime error tracking.
+* Use `console.time()` and `console.timeEnd()` in critical functions to log performance.
+* Avoid unnecessary re-renders: use `React.memo` or `useCallback`.
+
+---
+
+# 🔔 Notifications & Feedback
+
+* Prefer **sonner** over `use-toast`.
+* Do not import `use-toast` directly.
+* For background actions (e.g., saving, deleting), show success/error via sonner.
+
+```ts
+import { toast } from "sonner";
+toast.success("Listing updated successfully!");
+```
+
+---
+
+# 🧩 Folder-Level Standards
+
+## `/app`
+
+* Default: RTL layout
+* Use SEO optimizations for public-facing routes
+* CSR + SSR both supported based on page type
+* Must include:
+
+  * `/loading.tsx`
+  * `/error.tsx`
+  * `/layout.tsx`
+  * `/not-found.tsx`
+
+## `/components`
+
+* Reusable, small, and focused.
+* Avoid logic in presentation components.
+
+## `/lib`
+
+* Only utility functions (pure, reusable).
+* Add `console.debug()` logs for tracking.
+
+---
+
+# 🧠 Development Notes
+
+* Always document complex logic with `/** JSDoc */` comments.
+* Use environment variables via `process.env.*` — never hardcode.
+* Keep dependencies updated (`pnpm audit fix --latest`).
+* Ensure accessibility (color contrast, focus states, keyboard navigation).
+* Apply security headers in production build:
+
+  * `X-Frame-Options: DENY`
+  * `X-Content-Type-Options: nosniff`
+  * `Referrer-Policy: strict-origin-when-cross-origin`
+
+---
+
+# ✅ Summary
+
+| Category      | Principle                           |
+| ------------- | ----------------------------------- |
+| i18n          | next-intl + RTL/LTR dynamic         |
+| SEO           | SSR + Metadata                      |
+| Security      | CSP, input validation, safe cookies |
+| API           | React Query + structured client     |
+| UI            | shadcn/ui + RTL                     |
+| Performance   | Lazy load, code splitting, logging  |
+| Notifications | sonner only                         |
+| Testing       | console-based logs only             |

@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from '@/lib/i18n/routing';
 import { Globe } from 'lucide-react';
 import { useLocale } from 'next-intl';
+import { saveLocalePreference } from '@/lib/i18n/locale-cookie';
 
 const languages = [
   { code: 'ar', name: 'العربية', flag: '🇸🇦', targetLocale: 'en' },
@@ -18,6 +19,9 @@ export function LanguageSwitcher() {
   const targetLocale = currentLanguage?.targetLocale || 'ar';
 
   const handleLanguageSwitch = () => {
+    // Save locale preference to cookie
+    saveLocalePreference(targetLocale);
+    
     // Use next-intl's router to switch locale while keeping the same path
     router.push(pathname, { locale: targetLocale });
   };

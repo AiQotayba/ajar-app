@@ -1,0 +1,228 @@
+ajar-admin:
+  ref:
+    apiDoc: doc/api-docx.json
+    db: doc/db.sql
+    techRoadmap: doc/tech-roadmap-admin.md
+    uxRules: doc/ux-rules-admin.md
+  app:
+    dashboard:
+      page: page.tsx ✔️
+      features:
+        - count_listings_published
+        - count_listings_pending_review
+        - count_new_users
+        - average_rating
+        - count_whatsapp_clicks
+        - view_trends_graphs
+      api:
+        - GET: /admin/dashboard/summary
+    listings:
+      page: page.tsx ✔️
+      features:
+        - filter_by_status:
+            [draft, pending, published, rejected, hidden, rented]
+        - view_details
+        - approve_reject_with_reason
+        - reorder_drag_drop
+        - change_status_directly
+      api:
+        - POST: /admin/listings 
+        - PUT: /admin/listings/{id}/status
+        - PUT: /admin/listings/reorder
+      details[id]:
+        page: page.tsx
+        features:
+          - view_details
+          - approve_reject_with_reason
+          - reorder_drag_drop
+          - change_status_directly
+        api:
+          - GET: /admin/listings/{id}
+          - PUT: /admin/listings/{id}
+          - DELETE: /admin/listings/{id}
+          - PUT: /admin/listings/{id}/status
+          - PUT: /admin/listings/reorder
+    users:
+      page: page.tsx
+      features:
+        - change_role: [user, manager]
+        - block_activate_account
+        - view_user_ads
+        - view_user_ratings
+      api:
+        - GET: /admin/users
+        - POST: /admin/users
+        - PUT: /admin/users/{id}
+        - DELETE: /admin/users/{id}
+      details[id]:
+        page: page.tsx
+        features:
+          - view_details
+          - change_role: [user, manager]
+          - block_activate_account
+          - view_user_ads
+          - view_user_ratings
+        api:
+          - GET: /admin/users/{id}
+          - PUT: /admin/users/{id}
+          - DELETE: /admin/users/{id}
+    categories:
+      page: page.tsx
+      features:
+        - data_types: [integer, decimal, yes/no, date, list_of_values]
+        - edit_delete_categories
+      api: 
+        - POST: /admin/categories 
+        - PUT: /admin/categories/{id}/reorder
+      details[id]:
+        page: page.tsx
+        features:
+          - data_types: [integer, decimal, yes/no, date, list_of_values]
+          - edit_delete_categories
+        api:
+          - GET: /admin/categories/{id}
+          - PUT: /admin/categories/{id} 
+          - PUT: /admin/categories/{id}/reorder
+    properties:
+      page: page.tsx
+      features:
+        - data_types: [integer, decimal, yes/no, date, list_of_values]
+        - edit_delete_properties
+      api:
+        - POST: /admin/properties
+        - PUT: /admin/properties/{id} 
+      details[id]:
+        page: page.tsx
+        features:
+          - data_types: [integer, decimal, yes/no, date, list_of_values]
+          - edit_delete_properties
+        api:
+          - GET: /admin/properties/{id}
+          - PUT: /admin/properties/{id}
+          - DELETE: /admin/properties/{id}
+    features:
+      page: page.tsx
+      features:
+        - link_to_categories
+        - reorder_drag_drop
+        - edit_delete_features
+      api:
+        - POST: /admin/features
+        - PUT: /admin/features/{id} 
+      details[id]:
+        page: page.tsx
+        features:
+          - link_to_categories
+          - reorder_drag_drop
+          - edit_delete_features
+        api:
+          - GET: /admin/features/{id}
+          - PUT: /admin/features/{id}
+          - DELETE: /admin/features/{id}
+    locations:
+      page: page.tsx ✔️
+      features:
+        - modify_order
+        - activate_deactivate
+      api:
+        - POST: /admin/governorates 
+        - POST: /admin/cities
+      details[id]:
+        page: page.tsx
+        features:
+          - modify_order
+          - activate_deactivate
+        api:
+          - GET: /admin/governorates/{id}
+          - POST: /admin/governorates/{id}
+          - GET: /admin/cities/{id}
+          - POST: /admin/cities/{id}
+    sliders:
+      page: page.tsx ✔️
+      features:
+        - edit_delete_sliders
+        - set_image_links: [internal, external]
+        - set_display_duration_and_date
+        - reorder_drag_drop
+      api:
+        - POST: /admin/sliders
+      details[id]:
+        page: page.tsx
+        features:
+          - edit_delete_sliders
+          - set_image_links: [internal, external]
+          - set_display_duration_and_date
+          - reorder_drag_drop
+        api:
+          - GET: /admin/sliders/{id}
+          - PUT: /admin/sliders/{id}
+          - DELETE: /admin/sliders/{id}
+    notifications:
+      page: page.tsx
+      features:
+        - select_recipients: [all_users, selected_users]
+        - set_offer_period
+        - track_reads
+      api:
+        - GET: /admin/notifications
+        - POST: /admin/notifications
+        - PUT: /admin/notifications/{id} 
+    reviews:
+      page: page.tsx
+      features:
+        - approve_withhold
+        - display_reviewer_name_comment_stars_time
+      api:
+        - GET: /admin/reviews
+      details[id]:
+        page: page.tsx
+        features:
+          - approve_withhold
+          - display_reviewer_name_comment_stars_time
+        api:
+          - GET: /admin/reviews/{id}
+          - PUT: /admin/reviews/{id}
+          - DELETE: /admin/reviews/{id}
+    settings:
+      page: page.tsx
+      features:
+        - edit_texts
+        - edit_currency
+        - edit_external_links
+        - add_modify_languages_translations
+      api:
+        - POST: /admin/settings
+        - PUT: /admin/settings/{id}
+      details[id]:
+        page: page.tsx
+        features:
+          - edit_texts
+          - edit_currency
+          - edit_external_links
+          - add_modify_languages_translations
+        api:
+          - GET: /admin/settings/{id}
+          - PUT: /admin/settings/{id}
+    reports:
+      page: page.tsx
+      features:
+        - interactive_reports
+        - view_graphs_charts
+      api:
+        - GET: /admin/reports
+      details[id]:
+        page: page.tsx
+        features:
+          - interactive_reports
+          - view_graphs_charts
+        api:
+          - GET: /admin/reports/{id}
+    my-account:
+      page: page.tsx ✔️
+      features:
+        - view_edit_profile 
+        - reset_password  
+      api:
+        - GET: /user/me
+        - PUT: /user/me
+now: 250 ✔️✔️✔️

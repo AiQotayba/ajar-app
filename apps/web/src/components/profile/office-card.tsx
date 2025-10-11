@@ -3,7 +3,7 @@ import Link from "next/link"
 
 export function OfficeCard() {
   return (
-    <div className="relative bg-card rounded-3xl border p-4 space-y-3" dir="rtl">
+    <div className="relative bg-card rounded-3xl border p-4 space-y-3 max-w-lg mx-auto" dir="rtl">
       <div className="flex items-start gap-3">
         <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
           <img src="/images/modern-office-building.png" alt="Office" className="w-full h-full object-cover" />

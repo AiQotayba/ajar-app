@@ -10,7 +10,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_API_URL=https://ajar-backend.mystore.social/api/v1
     volumes:
       - ./apps/web:/app
       - /app/node_modules
@@ -29,7 +29,7 @@ services:
       - "3100:3100"
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_API_URL=https://ajar-backend.mystore.social/api/v1
     volumes:
       - ./apps/admin:/app
       - /app/node_modules

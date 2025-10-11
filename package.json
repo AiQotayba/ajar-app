@@ -1,6 +1,6 @@
 {
   "name": "ajar-platform",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A comprehensive real estate rental and sale platform with multi-language support",
   "private": true,
   "workspaces": [

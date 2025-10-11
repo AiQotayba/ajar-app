@@ -223,8 +223,8 @@ export class ApiCore implements ApiInstance {
         if (options.query && this.config.getSearchParams) {
             const searchParams = this.config.getSearchParams();
             if (searchParams) {
-                const queryString = typeof searchParams === 'string' 
-                    ? searchParams 
+                const queryString = typeof searchParams === 'string'
+                    ? searchParams
                     : new URLSearchParams(searchParams).toString();
                 fullUrl += endpoint.includes('?') ? `&${queryString}` : `?${queryString}`;
             }
@@ -287,41 +287,26 @@ export class ApiCore implements ApiInstance {
      */
     private async parseResponse<T>(response: Response): Promise<ApiResponse<T>> {
         const isError = !response.ok;
-        let data: T | undefined;
+        let data: T | undefined = await response.json();
         let message: string | undefined;
 
         try {
             const contentType = response.headers.get('content-type');
-
-            if (contentType && contentType.includes('application/json')) {
-                const jsonData = await response.json();
-
-                // Handle different response formats
-                if (jsonData.data !== undefined) {
-                    data = jsonData.data;
-                    message = jsonData.message;
-                } else if (jsonData.message) {
-                    message = jsonData.message;
-                    data = jsonData;
-                } else {
-                    data = jsonData;
-                }
-            } else {
-                const textData = await response.text();
-                message = textData || response.statusText;
-                data = textData as unknown as T;
-            }
+            
+            console.log(data)
+            return {
+                isError,  
+                ...data,
+            };
         } catch (parseError) {
             message = 'Failed to parse response';
             data = undefined;
+            return {
+                isError,
+                ...data, 
+            };
         }
 
-        return {
-            isError,
-            data,
-            message,
-            status: response.status,
-        };
     }
 
     /**

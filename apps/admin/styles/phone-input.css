@@ -1,0 +1,90 @@
+/* Phone Input Custom Styles */
+
+.PhoneInput {
+  display: flex;
+  align-items: center;
+}
+
+.PhoneInputCountry {
+  padding-inline: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.PhoneInputCountryIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.PhoneInputCountrySelectArrow {
+  width: 0.75rem;
+  height: 0.75rem;
+  opacity: 0.5;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  padding: 0 1rem;
+  color: inherit;
+}
+
+.PhoneInputInput::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* RTL Support */
+[dir="rtl"] .PhoneInputCountry {
+  padding-right: 1rem;
+  padding-left: 0.5rem;
+}
+
+[dir="rtl"] .PhoneInputInput {
+  text-align: right;
+  direction: ltr;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .PhoneInputCountrySelectArrow {
+    filter: invert(1);
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .PhoneInputCountrySelectArrow {
+    margin-left: 0;
+    margin-right: 0.25rem;
+  }
+  
+  [dir="rtl"] .PhoneInput {
+    direction: ltr; /* Keep phone input in LTR for better phone number formatting */
+  }
+  
+  [dir="rtl"] .PhoneInputInput {
+    text-align: left; /* Phone numbers should be left-aligned even in RTL */
+  }
+  
+  [dir="rtl"] .PhoneInputCountry {
+    order: -1; /* Keep country selector on the left in RTL */
+  }
+  
+
+.PhoneInputCountryIcon {
+    border: 0 !important;
+    background-color: white;
+    box-shadow: none;
+  }
+  
+  
+  .PhoneInput {
+    display: flex;
+    /* flex-direction: row-reverse; */
+  }
+  .PhoneInputInput {
+    padding: 0;
+  } 

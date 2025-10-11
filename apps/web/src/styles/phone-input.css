@@ -1,0 +1,78 @@
+/* Custom styles for react-phone-number-input */
+.PhoneInput {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  min-width: 0;
+  outline: none;
+}
+
+.PhoneInputInput:focus {
+  outline: none;
+}
+
+.PhoneInputCountrySelect {
+  outline: none;
+  border: none;
+  background: transparent;
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+.PhoneInputCountrySelect:focus {
+  outline: none;
+}
+
+.PhoneInputCountryIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.PhoneInputCountrySelectArrow {
+  margin-left: 0.25rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* RTL Support */
+[dir="rtl"] .PhoneInputCountrySelectArrow {
+  margin-left: 0;
+  margin-right: 0.25rem;
+}
+
+[dir="rtl"] .PhoneInput {
+  direction: ltr; /* Keep phone input in LTR for better phone number formatting */
+}
+
+[dir="rtl"] .PhoneInputInput {
+  text-align: left; /* Phone numbers should be left-aligned even in RTL */
+}
+
+[dir="rtl"] .PhoneInputCountry {
+  order: -1; /* Keep country selector on the left in RTL */
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .PhoneInputCountrySelectArrow {
+    opacity: 0.7;
+  }
+}
+
+.PhoneInputCountryIcon {
+  border: 0 !important;
+  background-color: white;
+  box-shadow: none;
+}
+
+
+.PhoneInput {
+  display: flex;
+  /* flex-direction: row-reverse; */
+}
+.PhoneInputInput {
+  padding: 0;
+} 

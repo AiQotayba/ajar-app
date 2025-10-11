@@ -1,36 +1,70 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
+  "ui": "tui",
+  "globalDependencies": [
+    "**/.env.*local",
+    ".env",
+    "tsconfig.json",
+    "turbo.json"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "VERCEL_ENV"
+  ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["NODE_ENV", "NEXT_PUBLIC_*"]
+      "dependsOn": ["^build", "type-check"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        ".vercel/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_*",
+        "DATABASE_URL",
+        "API_URL"
+      ],
+      "cache": true
     },
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["NODE_ENV", "NEXT_PUBLIC_*"]
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_*",
+        "DATABASE_URL",
+        "API_URL"
+      ]
     },
     "lint": {
-      "dependsOn": ["^lint"],
-      "outputs": []
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "cache": true
     },
     "type-check": {
       "dependsOn": ["^type-check"],
-      "outputs": []
+      "outputs": ["*.tsbuildinfo"],
+      "cache": true
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"],
-      "env": ["NODE_ENV"]
+      "outputs": ["coverage/**", ".jest-cache/**"],
+      "env": ["NODE_ENV"],
+      "cache": true
     },
     "clean": {
       "cache": false,
       "outputs": []
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["build"]
     }
   },
-  "remoteCache": {
-    "enabled": true
-  }
+  "cacheDir": ".turbo"
 }

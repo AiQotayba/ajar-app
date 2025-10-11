@@ -1,6 +1,6 @@
 "use client";
 
-import LoadingSkeleton from "@/app/[locale]/loading";
+import LoadingSkeleton from "@/app/[locale]/(public)/loading";
 import { CategoryFilter } from "@/components/filters/category-filter";
 import { HeroSlider } from "@/components/home/hero-slider";
 import { Header } from "@/components/layout/header";
