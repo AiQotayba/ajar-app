@@ -14,6 +14,13 @@ import { HeartFillIcon } from "../icons/heart-fill"
 import { PinIcon } from "../icons/pin"
 import { ShareIcon } from "../icons/share"
 import { ShieldCheckIcon } from "../icons/shield-check"
+import { MoreVertical, Edit, Trash2 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface ListingCardProps {
   listing: {
@@ -58,15 +65,79 @@ interface ListingCardProps {
     favorites_count: number
     pay_every?: number | null
     insurance?: number | null
-    isFavorite?: boolean
+    is_favorite?: boolean
+    status?: "draft" | "in_review" | "approved" | "rejected"
+    availability_status?: "available" | "rented" | "sold"
+    status_badge?: {
+      color: string
+      text: string
+    }
   }
   locale?: string
+  onFavoriteRemoved?: (listingId: number) => void
+  openEdit?: boolean
+  deleteListing?: boolean
 }
 
-export function ListingCard({ listing, locale = 'ar' }: ListingCardProps) {
-  const [isFavorite, setIsFavorite] = useState(listing.isFavorite || false)
+// مكون منفصل لأزرار الحذف والتعديل
+interface ListingActionsProps {
+  listingId: number
+  onEdit?: (listingId: number) => void
+  onDelete?: (listingId: number) => void
+}
+
+function ListingActions({ listingId, onEdit, onDelete }: ListingActionsProps) {
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!onDelete) return
+
+    setIsDeleting(true)
+    try {
+      await onDelete(listingId)
+    } catch (error) {
+      console.error('Error deleting listing:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleEdit = () => onEdit && onEdit(listingId)
+
+  return (
+    <DropdownMenu dir="rtl">
+      <DropdownMenuTrigger asChild>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-10 w-10 rounded-full shadow-lg backdrop-blur-sm bg-white/90 hover:bg-white"
+        >
+          <MoreVertical className="h-5 w-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48 bg-white">
+        <DropdownMenuItem onClick={handleEdit} className="cursor-pointer hover:text-primary">
+          <Edit className="mx-2 h-4 w-4 text-primary" />
+          <span className="text-primary">تعديل الإعلان</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleDelete}
+          className="cursor-pointer text-destructive focus:text-destructive"
+          disabled={isDeleting}
+        >
+          <Trash2 className="mx-2 h-4 w-4 text-destructive" />
+          {isDeleting ? 'جاري الحذف...' : 'حذف الإعلان'}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdit, deleteListing }: ListingCardProps) {
+  const [isFavorite, setIsFavorite] = useState(listing.is_favorite || false)
+  const [favoritesCount, setFavoritesCount] = useState(listing.favorites_count || 0)
   const [isLoading, setIsLoading] = useState(false)
-  
+
   const getLocalizedText = (text: { ar: string; en: string }) => text[locale as keyof typeof text] || text.ar
 
 
@@ -89,15 +160,34 @@ export function ListingCard({ listing, locale = 'ar' }: ListingCardProps) {
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation to listing details
     e.stopPropagation()
-    
+
     setIsLoading(true)
     try {
-      const { isError, data } = await api.post(`/user/listings/${listing.id}/toggle-favorite`)
-      if (!isError && data.success) {
-        setIsFavorite(!isFavorite)
-      }
+      const data: any = await api.post(`/user/listings/${listing.id}/toggle-favorite`)
 
-      toast.success(data.message)
+      if (!data.isError) {
+        // Update favorite state based on API response
+        const action = data?.data?.action
+
+        if (action === 'added') {
+          setIsFavorite(true)
+          setFavoritesCount(prev => prev + 1)
+        } else if (action === 'removed') {
+          setIsFavorite(false)
+          setFavoritesCount(prev => Math.max(0, prev - 1))
+
+          // Notify parent component if callback is provided
+          if (onFavoriteRemoved) {
+            onFavoriteRemoved(listing.id)
+          }
+        }
+
+        // Show success message
+        toast.success(data.message)
+      } else {
+        // Handle API error
+        toast.error(data.message || (locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites'))
+      }
     } catch (error) {
       console.error('Error toggling favorite:', error)
       toast.error(locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites')
@@ -109,7 +199,7 @@ export function ListingCard({ listing, locale = 'ar' }: ListingCardProps) {
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation to listing details
     e.stopPropagation()
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -127,8 +217,30 @@ export function ListingCard({ listing, locale = 'ar' }: ListingCardProps) {
     }
   }
 
+  const handleEdit = (listingId: number) => {
+    // Navigate to edit page
+    window.location.href = `/my-listings/${listingId}`
+  }
+
+  const handleDelete = async (listingId: number) => {
+    try {
+      const response = await api.delete(`/user/listings/${listingId}`)
+
+      if (!response.isError) {
+        toast.success('تم حذف الإعلان بنجاح')
+        // Refresh the page or update the list
+        window.location.reload()
+      } else {
+        toast.error(response.message || 'حدث خطأ في حذف الإعلان')
+      }
+    } catch (error) {
+      console.error('Error deleting listing:', error)
+      toast.error('حدث خطأ في حذف الإعلان')
+    }
+  }
+
   return (
-    <Link href={`${locale}/listings/${listing.id}`} className="block group">
+    <Link href={`/listings/${listing.id}`} className="block group">
       <div className="bg-card  overflow-hidden transition-all duration-300">
         <div className="relative h-56 overflow-hidden">
           <Image
@@ -141,15 +253,25 @@ export function ListingCard({ listing, locale = 'ar' }: ListingCardProps) {
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 !rounded-2xl via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-          {/* Badge */}
-          {listing.is_featured && (
-            <Badge
-              variant="default"
-              className="absolute top-4 right-4 shadow-lg"
-            >
-              مميز
-            </Badge>
-          )}
+          {/* Badges */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            {listing.is_featured && (
+              <Badge
+                variant="default"
+                className="shadow-lg"
+              >
+                مميز
+              </Badge>
+            )}
+            {listing.status_badge && (
+              <Badge
+                variant="secondary"
+                className={`shadow-lg ${listing.status_badge.color}`}
+              >
+                {listing.status_badge.text}
+              </Badge>
+            )}
+          </div>
 
           {/* Action Buttons */}
           <div className="absolute top-4 left-4 flex gap-2">
@@ -173,8 +295,8 @@ export function ListingCard({ listing, locale = 'ar' }: ListingCardProps) {
               )}
             >
               {isFavorite ?
-                <HeartFillIcon className={cn("!h-6 !w-6 fill-red-500")} />
-                : <HeartIcon className={cn("!h-6 !w-6 fill-red-500")} />
+                <HeartFillIcon className={cn("!h-6 !w-6 text-red-500")} />
+                : <HeartIcon className={cn("!h-6 !w-6 text-muted-foreground hover:text-red-500")} />
               }
             </Button>
           </div>
@@ -189,15 +311,25 @@ export function ListingCard({ listing, locale = 'ar' }: ListingCardProps) {
           </div>
 
           {/* Price */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="p-2 text-primary font-bold w-max">
-              {displayPrice}
-              {listing.type === 'rent' && ' / شهر'}
+          <div className="flex items-center justify-between gap-2 ">
+            <div className="flex flex-wrap  items-center gap-2">
+              <div className="p-2 text-primary font-bold w-max">
+                {displayPrice}
+                {listing.type === 'rent' && ' / شهر'}
+              </div>
+              {periodText && (
+                <Badge variant="default" className="text-md p-2 rounded-full px-4 text-[14px] text-gray-600 bg-primary/10">
+                  {periodText}
+                </Badge>
+              )}
             </div>
-            {periodText && (
-              <Badge variant="default" className="text-md p-2 rounded-full px-4 text-[14px] text-gray-600 bg-primary/10">
-                {periodText}
-              </Badge>
+            {/* أزرار الحذف والتعديل */}
+            {(openEdit || deleteListing) && (
+              <ListingActions
+                listingId={listing.id}
+                onEdit={openEdit ? handleEdit : undefined}
+                onDelete={deleteListing ? handleDelete : undefined}
+              />
             )}
           </div>
 

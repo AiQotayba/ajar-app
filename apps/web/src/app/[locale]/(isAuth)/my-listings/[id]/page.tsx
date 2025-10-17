@@ -24,8 +24,9 @@ async function getPropertyData(id: string) {
   }
 }
 
-export default async function EditPropertyPage({ params }: { params: { id: string } }) {
-  const propertyData = await getPropertyData(params.id)
+export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const propertyData = await getPropertyData(id)
 
   return <CreatePropertyForm initialData={propertyData} isEditing={true} />
 }

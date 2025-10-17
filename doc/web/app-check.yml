@@ -1,0 +1,41 @@
+references:
+  api[../API-docx.json]:
+app:
+  (public):
+    - map:
+        api: GET /user/listings?map=true
+    - pages/[slug]:
+        api: GET /user/settings/{slug}
+    - listings:
+        - create:
+            @FormSteps{5}:
+              api:
+                - GET: /user/categories
+                - GET: /user/features
+                - GET: /user/governorates
+                - GET: /user/cities/{governorate_id}
+                - POST: /user/listings
+  (authenticated): 
+    - listings[id]: 
+          @Location:
+              api: GET /user/listings/{id}
+          @Reviews:
+            api: 
+              - POST: /user/reviews 
+[All Tasks {{75}}]
+next:
+  - my-listings:
+      api:
+        - POST: /user/listings
+        - GET: /user/listings/{id}
+        - PUT: /user/listings/{id} 
+bugs:
+  - notifications:
+      - GET: /user/notifications
+      - POST: /user/notifications/{id}/read 
+  - my-listings:
+      api:
+        - GET: /user/listings?owner_id=1
+  - Change Password:
+      api: POST /profile/change-password
+      note: مطلوب api جديد لتغيير كلمة المرور لانه هيك اي واحد بيغير كلمة المرور بدون حماية

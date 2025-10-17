@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight, Heart, TvIcon, ZoomIn, ZoomOut } from "lucide-react"
+import { ChevronLeft, ChevronRight, TvIcon, ZoomIn, ZoomOut } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { ShareIcon } from "../icons/share"
+import { HeartIcon } from "../icons/heart"
+import { HeartFillIcon } from "../icons/heart-fill"
 
 interface GalleryImage {
   id: number
@@ -26,10 +28,24 @@ interface PropertyGalleryProps {
   listingId?: number
   ribon_text?: string
   ribon_color?: string
+  favoritesCount?: number
+  onFavoriteToggle?: (isFavorite: boolean, favoritesCount: number) => void
 }
 
-export function PropertyGallery({ images = [], coverImage, badge, locale = 'ar', isFavorite: initialFavorite = false, listingId, ribon_text, ribon_color }: PropertyGalleryProps) {
+export function PropertyGallery({ 
+  images = [], 
+  coverImage, 
+  badge, 
+  locale = 'ar', 
+  isFavorite: initialFavorite = false, 
+  listingId, 
+  ribon_text, 
+  ribon_color,
+  favoritesCount: initialFavoritesCount = 0,
+  onFavoriteToggle
+}: PropertyGalleryProps) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite)
+  const [favoritesCount, setFavoritesCount] = useState(initialFavoritesCount)
   const [isLoading, setIsLoading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
@@ -92,13 +108,31 @@ export function PropertyGallery({ images = [], coverImage, badge, locale = 'ar',
 
     setIsLoading(true)
     try {
-      const { isError, data } = await api.post(`/user/listings/${listingId}/toggle-favorite`)
-      if (!isError && data.success) {
-        setIsFavorite(!isFavorite)
-      }
-      console.log(data);
+      const data: any = await api.post(`/user/listings/${listingId}/toggle-favorite`)
 
-      toast.success(data.message)
+      if (!data.isError) {
+        // Update favorite state based on API response
+        const action = data?.data?.action
+
+        if (action === 'added') {
+          setIsFavorite(true)
+          setFavoritesCount(prev => prev + 1)
+        } else if (action === 'removed') {
+          setIsFavorite(false)
+          setFavoritesCount(prev => Math.max(0, prev - 1))
+        }
+
+        // Notify parent component if callback is provided
+        if (onFavoriteToggle) {
+          onFavoriteToggle(isFavorite, favoritesCount)
+        }
+
+        // Show success message
+        toast.success(data.message)
+      } else {
+        // Handle API error
+        toast.error(data.message || (locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites'))
+      }
     } catch (error) {
       console.error('Error toggling favorite:', error)
       toast.error(locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites')
@@ -203,11 +237,14 @@ export function PropertyGallery({ images = [], coverImage, badge, locale = 'ar',
               disabled={isLoading}
               className={cn(
                 "h-10 w-10 rounded-full bg-white/95 hover:bg-white shadow-md transition-colors",
-                isFavorite ? "text-destructive" : "text-foreground",
+                isFavorite && "text-destructive",
                 isLoading && "opacity-50 cursor-not-allowed"
               )}
             >
-              <Heart className={cn("h-5 w-5", isFavorite && "fill-red")} />
+              {isFavorite ?
+                <HeartFillIcon className={cn("h-5 w-5 text-red-500")} />
+                : <HeartIcon className={cn("h-5 w-5 text-muted-foreground hover:text-red-500")} />
+              }
             </Button>
             <Button
               size="icon"
@@ -215,7 +252,7 @@ export function PropertyGallery({ images = [], coverImage, badge, locale = 'ar',
               onClick={handleShare}
               className="h-10 w-10 rounded-full bg-white/95 hover:bg-white text-foreground shadow-md"
             >
-              <ShareIcon className="h-5 w-5" />
+              <ShareIcon className="!h-5 !w-5" />
             </Button>
           </div>
 

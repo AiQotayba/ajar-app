@@ -1,0 +1,90 @@
+---
+description: "Security Principles for Next.js Project"
+globs:
+  - "app/api/**/*.ts"
+  - "pages/api/**/*.ts"
+  - "app/**/*.tsx"
+  - "middleware.ts"
+  - "lib/**/*.ts"
+  - "components/**/*.tsx"
+alwaysApply: true
+---
+
+# 🧠 Security Principles (Cursor Rules for Next.js)
+
+## 🔒 1. Security Headers
+- Always add HTTP Security Headers in `middleware.ts` using `next-safe-middleware` or `helmet`.
+- Include the following headers:
+  - `Content-Security-Policy` – restrict allowed sources.
+  - `X-Frame-Options: DENY`
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: no-referrer`
+  - `Permissions-Policy` to disable unnecessary APIs.
+
+---
+
+## 🧮 2. Input Validation
+- Use `Zod` schemas to validate all incoming data in API routes.
+- Never trust `req.body`, `req.query`, or `req.params` directly.
+- Always return a 400 error for invalid input.
+- Validate types and ensure numerical or string constraints (`min`, `max`, `positive`, etc.).
+- Escape user-provided data before using it in HTML or JSX.
+
+---
+
+## 🧱 3. Output Encoding
+- Never render user data directly inside HTML.
+- Use output encoding libraries like `he` or manual escaping (`replace(/[<>]/g, '')`).
+- When using `dangerouslySetInnerHTML`, ensure the content is sanitized first.
+
+---
+
+## 🔑 4. Authentication & Cookies
+- All authentication cookies must:
+  - Be marked as `HttpOnly`, `Secure`, and `SameSite=strict`.
+  - Have a reasonable expiration.
+- Never expose JWT tokens in localStorage.
+- Avoid passing secrets or tokens in URLs.
+
+---
+
+## 🧰 5. Dependency Security
+- Regularly run `pnpm audit` and update vulnerable packages.
+- Prefer stable, actively maintained libraries.
+- Avoid using unverified or random GitHub packages.
+
+---
+
+## 🧩 6. Error Handling
+- Do not leak stack traces or error details to clients.
+- Return generic messages like `"Something went wrong"` for 5xx errors.
+- Use `Sentry` or similar monitoring for internal logs.
+
+---
+
+## 🛡️ 7. Access Control
+- Protect admin or sensitive routes with server-side authentication checks.
+- Never rely solely on client-side protection.
+- Use middleware or server actions to enforce permissions.
+
+---
+
+## 🧠 8. Secure Default Behavior
+- Use `strict` mode in TypeScript and Next.js.
+- Avoid `any` type for critical data structures.
+- Use HTTPS-only URLs for API calls, assets, and external resources.
+
+---
+
+## 🧩 9. Rate Limiting (Optional Enhancement)
+- For login or API-heavy routes, apply rate limiting via middleware (e.g. `upstash/ratelimit`).
+- Return 429 status for excessive requests.
+
+---
+
+## ✅ 10. Security Reviews
+- Every new route or module should be reviewed for:
+  - Input validation.
+  - Safe output rendering.
+  - Correct use of headers and cookies.
+  - No sensitive data exposure.

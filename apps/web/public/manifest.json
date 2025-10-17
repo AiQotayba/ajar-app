@@ -1,0 +1,58 @@
+{
+    "name": "أجار - منصة العقارات",
+    "short_name": "أجار",
+    "description": "منصة شاملة للعقارات في سوريا",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2563eb",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "ar",
+    "dir": "rtl",
+    "icons": [
+        {
+            "src": "/images/placeholder-logo.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/images/placeholder-logo.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "business",
+        "lifestyle",
+        "productivity"
+    ],
+    "shortcuts": [
+        {
+            "name": "البحث عن عقارات",
+            "short_name": "البحث",
+            "description": "ابحث عن عقارات في سوريا",
+            "url": "/ar/listings",
+            "icons": [
+                {
+                    "src": "/images/placeholder-logo.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "إضافة إعلان",
+            "short_name": "إضافة",
+            "description": "أضف إعلان عقاري جديد",
+            "url": "/ar/listings/create",
+            "icons": [
+                {
+                    "src": "/images/placeholder-logo.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ]
+}

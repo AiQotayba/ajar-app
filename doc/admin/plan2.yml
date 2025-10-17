@@ -4,221 +4,42 @@ ajar-admin:
     db: doc/db.sql
     techRoadmap: doc/tech-roadmap-admin.md
     uxRules: doc/ux-rules-admin.md
-  app:
+    build: @sprint.2 only
+  sprint.2:  
+  sprint.3: 
     listings:
-      types: [table, FormCreate, FormEdit]
+      types: [FormCreate, FormEdit] 
+  sprint.4:
+  sprint.5: 
     categories:
-      types: [tableTree, FormCreate, FormEdit]
+      types: [tableTree, FormCreate, FormEdit] 
       sub:
         properties:
           types: [table, FormCreate, FormEdit]
         features:
           types: [table, FormCreate, FormEdit]
-    locations:
-      types: [table, FormCreate, FormEdit]
-    sliders:
-      types: [table, FormCreate, FormEdit]
-    notifications:
-      types: [table, FormCreate, FormEdit]
-    reviews:
-      types: [table, FormCreate, FormEdit]
-    settings:
-      types: [table, FormCreate, FormEdit]
-    reports:
-      types: [table, FormCreate, FormEdit]
-    my-account:
-      types: [table, FormCreate, FormEdit]
-  v0.1:
-    dashboard:
-      page: page.tsx
-      api:
-        - GET: /admin/dashboard/summary
-    listings:
-      page: page.tsx
-      features:
-        - add listing
-        - edit listing
-        - view listing
-      api:
-        - POST: /admin/listings
-        - POST: /admin/listings/{id}/status
-      details[id]:
-        page: page.tsx
-        features:
-          - view_details
-          - approve_reject_with_reason
-          - reorder_drag_drop
-          - delete listing
-          - change_status_directly
-          - view reviews
-        api:
-          - GET: /admin/listings/{id}
-          - POST: /admin/listings/{id}
-          - DELETE: /admin/listings/{id}
-          - POST: /admin/listings/{id}/status
-    users:
-      page: page.tsx
-      backend:
-        - all api related to users 
     categories:
-      page: page.tsx
-      features:
-        - add category
-        - edit category
-        - delete category
-        - view category
-      api: 
-        - POST: /admin/categories 
-        - PUT: /admin/categories/{id}/reorder
-      details[id]:
-        page: page.tsx
-        features:
-          - data_types: [integer, decimal, yes/no, date, list_of_values]
-          - edit_delete_categories
-        api:
-          - GET: /admin/categories/{id}
-          - PUT: /admin/categories/{id} 
-          - PUT: /admin/categories/{id}/reorder
-    properties:
-      page: page.tsx
-      features:
-        - data_types: [integer, decimal, yes/no, date, list_of_values]
-        - edit_delete_properties
-      api:
-        - POST: /admin/properties
-        - PUT: /admin/properties/{id} 
-      details[id]:
-        page: page.tsx
-        features:
-          - data_types: [integer, decimal, yes/no, date, list_of_values]
-          - edit_delete_properties
-        api:
-          - GET: /admin/properties/{id}
-          - PUT: /admin/properties/{id}
-          - DELETE: /admin/properties/{id}
-    features:
-      page: page.tsx
-      features:
-        - link_to_categories
-        - reorder_drag_drop
-        - edit_delete_features
-      api:
-        - POST: /admin/features
-        - PUT: /admin/features/{id} 
-      details[id]:
-        page: page.tsx
-        features:
-          - link_to_categories
-          - reorder_drag_drop
-          - edit_delete_features
-        api:
-          - GET: /admin/features/{id}
-          - PUT: /admin/features/{id}
-          - DELETE: /admin/features/{id}
-    locations:
-      page: page.tsx ✔️
-      features:
-        - modify_order
-        - activate_deactivate
-      api:
-        - POST: /admin/governorates 
-        - POST: /admin/cities
-      details[id]:
-        page: page.tsx
-        features:
-          - modify_order
-          - activate_deactivate
-        api:
-          - GET: /admin/governorates/{id}
-          - POST: /admin/governorates/{id}
-          - GET: /admin/cities/{id}
-          - POST: /admin/cities/{id}
-    sliders:
-      page: page.tsx ✔️
-      features:
-        - edit_delete_sliders
-        - set_image_links: [internal, external]
-        - set_display_duration_and_date
-        - reorder_drag_drop
-      api:
-        - POST: /admin/sliders
-      details[id]:
-        page: page.tsx
-        features:
-          - edit_delete_sliders
-          - set_image_links: [internal, external]
-          - set_display_duration_and_date
-          - reorder_drag_drop
-        api:
-          - GET: /admin/sliders/{id}
-          - PUT: /admin/sliders/{id}
-          - DELETE: /admin/sliders/{id}
+      types: tableTree  
+        - ان هناك مشكلة وهي الفورم غير دينميكي
+          - لا يمكن اضافة فئات فرعية للابن الاول وما بعد
+          - الجدول يعرض البيانات من قاعدة البييانات ونحنا نحتاج عرضها من الجدول بالاخص للميزات والخصائص والميزات
+          - 
+      form:
+        - الايقونة لازم ترفع كملف
+        - الفئة الاب يجب انه نجيبها من قواعد بياناتنا 
+        - الخصائص والميزات يجب انه نجيبها من قواعد بياناتنا
+        - هناك خلل قواعد البيانات بتجبلي فقط التصنيف الاب والباقي بيكون تصنيف فرعي
+      status: ✅ completed
+      fixes:
+        - ✅ الفورم الآن ديناميكي - يمكن إضافة فئات فرعية متعددة المستويات لأي فئة
+        - ✅ الأيقونة تُرفع كملف صورة (ImageUpload) بدلاً من نص/emoji
+        - ✅ الجدول يعرض الخصائص والميزات بشكل تفاعلي مع HoverCard
+        - ✅ الفئة الأب تُجلب من قواعد البيانات مع منع التكرار الدائري
+        - ✅ دعم عرض الأيقونات كصور وemoji في جميع المكونات
+        - ✅ تحسين عرض الفئات الفرعية مع indentation واضح
+        - ✅ إضافة CategoryIcon component موحد لعرض الأيقونات
+  sprint.end:
     notifications:
-      page: page.tsx
-      features:
-        - select_recipients: [all_users, selected_users]
-        - set_offer_period
-        - track_reads
-      api:
-        - GET: /admin/notifications
-        - POST: /admin/notifications
-        - PUT: /admin/notifications/{id} 
-    reviews:
-      page: page.tsx
-      features:
-        - approve_withhold
-        - display_reviewer_name_comment_stars_time
-      api:
-        - GET: /admin/reviews
-      details[id]:
-        page: page.tsx
-        features:
-          - approve_withhold
-          - display_reviewer_name_comment_stars_time
-        api:
-          - GET: /admin/reviews/{id}
-          - PUT: /admin/reviews/{id}
-          - DELETE: /admin/reviews/{id}
-    settings:
-      page: page.tsx
-      features:
-        - edit_texts
-        - edit_currency
-        - edit_external_links
-        - add_modify_languages_translations
-      api:
-        - POST: /admin/settings
-        - PUT: /admin/settings/{id}
-      details[id]:
-        page: page.tsx
-        features:
-          - edit_texts
-          - edit_currency
-          - edit_external_links
-          - add_modify_languages_translations
-        api:
-          - GET: /admin/settings/{id}
-          - PUT: /admin/settings/{id}
+      types: [table, FormCreate, FormEdit]
     reports:
-      page: page.tsx
-      features:
-        - interactive_reports
-        - view_graphs_charts
-      api:
-        - GET: /admin/reports
-      details[id]:
-        page: page.tsx
-        features:
-          - interactive_reports
-          - view_graphs_charts
-        api:
-          - GET: /admin/reports/{id}
-    my-account:
-      page: page.tsx ✔️
-      features:
-        - view_edit_profile 
-        - reset_password  
-      api:
-        - GET: /user/me
-        - PUT: /user/me
-  now: 250 ✔️✔️✔️
+      types: [table, FormCreate, FormEdit]

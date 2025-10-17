@@ -45,6 +45,22 @@ export interface ApiConfig {
   fetch?: typeof fetch
 }
 
+export interface UploadImageOptions {
+  onProgress?: (progress: number) => void
+  showSuccessToast?: boolean
+  showErrorToast?: boolean
+}
+
+export interface UploadResponse {
+  url?: string               // Standard field
+  image_url?: string         // Alternative field (Ajar backend uses this)
+  imageUrl?: string          // camelCase alternative
+  path?: string
+  image_name?: string
+  filename?: string
+  [key: string]: any
+}
+
 export interface ApiInstance {
   get: <T = any>(endpoint: string, options?: ApiOptions) => Promise<ApiResponse<T>>
   post: <T = any>(endpoint: string, data?: any, options?: ApiOptions) => Promise<ApiResponse<T>>
@@ -52,6 +68,8 @@ export interface ApiInstance {
   delete: <T = any>(endpoint: string, options?: ApiOptions) => Promise<ApiResponse<T>>
   patch: <T = any>(endpoint: string, data?: any, options?: ApiOptions) => Promise<ApiResponse<T>>
   request: <T = any>(method: HttpMethod, endpoint: string, data?: any, options?: ApiOptions) => Promise<ApiResponse<T>>
+  uploadImage: (file: File, folder: string, options?: UploadImageOptions) => Promise<ApiResponse<UploadResponse>>
+  uploadFile: (file: File, options?: UploadImageOptions) => Promise<ApiResponse<UploadResponse>>
   updateConfig: (newConfig: Partial<ApiConfig>) => void
 }
 
@@ -88,6 +106,169 @@ class ApiCore implements ApiInstance {
 
   async patch<T = any>(endpoint: string, data?: any, options?: ApiOptions): Promise<ApiResponse<T>> {
     return this.request<T>("PATCH", endpoint, data, options)
+  }
+
+  async uploadImage(
+    file: File,
+    folder: string,
+    options?: UploadImageOptions,
+  ): Promise<ApiResponse<UploadResponse>> {
+    try {
+      this.config.onRequestStart?.()
+
+      const formData = new FormData()
+      formData.append("image", file)
+      formData.append("folder", folder)
+
+      const headers = this.prepareHeaders({})
+      delete headers["Content-Type"] // Let browser set it with boundary
+
+      const xhr = new XMLHttpRequest()
+
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable && options?.onProgress) {
+            const progress = Math.round((event.loaded / event.total) * 100)
+            options.onProgress(progress)
+          }
+        })
+
+        xhr.addEventListener("load", async () => {
+          try {
+            const response = JSON.parse(xhr.responseText)
+            const isError = xhr.status < 200 || xhr.status >= 300
+
+            // Handle different response structures
+            // Case 1: { data: { url: "..." }, message: "..." }
+            // Case 2: { url: "...", path: "...", message: "..." }
+            const responseData = response.data || response
+            
+            const apiResponse: ApiResponse<UploadResponse> = {
+              isError,
+              data: responseData,
+              message: response.message,
+              status: xhr.status,
+            }
+
+            if (!isError) {
+              if (options?.showSuccessToast && this.config.showToast && response.message) {
+                this.config.showToast(response.message, "success")
+              }
+              this.config.onSuccess?.(apiResponse)
+              resolve(apiResponse)
+            } else {
+              if (options?.showErrorToast !== false && this.config.showToast) {
+                this.config.showToast(response.message || "فشل رفع الصورة", "error")
+              }
+              reject(apiResponse)
+            }
+          } catch (error) {
+            reject(this.handleError(error, { showErrorToast: options?.showErrorToast }))
+          }
+        })
+
+        xhr.addEventListener("error", () => {
+          reject(this.handleError(new Error("فشل رفع الصورة"), { showErrorToast: options?.showErrorToast }))
+        })
+
+        xhr.addEventListener("abort", () => {
+          reject(this.handleError(new Error("تم إلغاء رفع الصورة"), { showErrorToast: options?.showErrorToast }))
+        })
+
+        const fullUrl = `${this.config.baseUrl}/general/upload-image`
+        xhr.open("POST", fullUrl)
+
+        // Set headers
+        Object.entries(headers).forEach(([key, value]) => {
+          if (key !== "Content-Type") {
+            xhr.setRequestHeader(key, value)
+          }
+        })
+
+        xhr.send(formData)
+      })
+    } finally {
+      this.config.onRequestEnd?.()
+    }
+  }
+
+  async uploadFile(file: File, options?: UploadImageOptions): Promise<ApiResponse<UploadResponse>> {
+    try {
+      this.config.onRequestStart?.()
+
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const headers = this.prepareHeaders({})
+      delete headers["Content-Type"] // Let browser set it with boundary
+
+      const xhr = new XMLHttpRequest()
+
+      return new Promise((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable && options?.onProgress) {
+            const progress = Math.round((event.loaded / event.total) * 100)
+            options.onProgress(progress)
+          }
+        })
+
+        xhr.addEventListener("load", async () => {
+          try {
+            const response = JSON.parse(xhr.responseText)
+            const isError = xhr.status < 200 || xhr.status >= 300
+
+            // Handle different response structures
+            // Case 1: { data: { url: "..." }, message: "..." }
+            // Case 2: { url: "...", path: "...", message: "..." }
+            const responseData = response.data || response
+            
+            const apiResponse: ApiResponse<UploadResponse> = {
+              isError,
+              data: responseData,
+              message: response.message,
+              status: xhr.status,
+            }
+
+            if (!isError) {
+              if (options?.showSuccessToast && this.config.showToast && response.message) {
+                this.config.showToast(response.message, "success")
+              }
+              this.config.onSuccess?.(apiResponse)
+              resolve(apiResponse)
+            } else {
+              if (options?.showErrorToast !== false && this.config.showToast) {
+                this.config.showToast(response.message || "فشل رفع الملف", "error")
+              }
+              reject(apiResponse)
+            }
+          } catch (error) {
+            reject(this.handleError(error, { showErrorToast: options?.showErrorToast }))
+          }
+        })
+
+        xhr.addEventListener("error", () => {
+          reject(this.handleError(new Error("فشل رفع الملف"), { showErrorToast: options?.showErrorToast }))
+        })
+
+        xhr.addEventListener("abort", () => {
+          reject(this.handleError(new Error("تم إلغاء رفع الملف"), { showErrorToast: options?.showErrorToast }))
+        })
+
+        const fullUrl = `${this.config.baseUrl}/general/upload-file`
+        xhr.open("POST", fullUrl)
+
+        // Set headers
+        Object.entries(headers).forEach(([key, value]) => {
+          if (key !== "Content-Type") {
+            xhr.setRequestHeader(key, value)
+          }
+        })
+
+        xhr.send(formData)
+      })
+    } finally {
+      this.config.onRequestEnd?.()
+    }
   }
 
   async request<T = any>(
@@ -245,7 +426,8 @@ class ApiCore implements ApiInstance {
 
     this.config.onError?.(error)
 
-    if (error.status === 401) {
+    // Handle unauthorized (expired token or invalid credentials)
+    if (error.status === 401 || error.status === 403) {
       this.config.onUnauthorized?.()
     }
 
@@ -305,6 +487,10 @@ export function createApi(config: ApiConfig): ApiInstance {
     request: <T = any>(method: HttpMethod, endpoint: string, data?: any, options?: ApiOptions) =>
       api.request<T>(method, endpoint, data, options),
 
+    uploadImage: (file: File, folder: string, options?: UploadImageOptions) => api.uploadImage(file, folder, options),
+
+    uploadFile: (file: File, options?: UploadImageOptions) => api.uploadFile(file, options),
+
     updateConfig: (newConfig: Partial<ApiConfig>) => api.updateConfig(newConfig),
   }
 }
@@ -314,21 +500,25 @@ export const api = createApi({
   baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://ajar-backend.mystore.social/api/v1",
   getLang: () => "ar",
   getToken: () => {
-    console.log("getToken");
-
     // Get token from cookies (managed by tokenManager) 
-    console.log(Cookies.get("ajar_admin_token"))
     return Cookies.get("ajar_admin_token") || null
-    return null
   },
   onUnauthorized: () => {
     if (typeof window !== "undefined") {
-      // Clear auth data
-      const Cookies = require("js-cookie").default
-      Cookies.remove("ajar_admin_token")
-      Cookies.remove("ajar_admin_user")
-      // Redirect to login
+      // Clear all auth data
+      Cookies.remove("ajar_admin_token", { path: "/" })
+      Cookies.remove("ajar_admin_user", { path: "/" })
+      
+      // Clear any other auth-related data from localStorage
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem("ajar_admin_token")
+        localStorage.removeItem("ajar_admin_user")
+      }
+      
+      // Redirect to login page
       window.location.href = "/login"
+      
+      console.info("🔒 تم تسجيل الخروج تلقائياً - انتهت صلاحية الجلسة")
     }
   },
   defaultTimeout: 10000,

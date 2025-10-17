@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-end gap-4 border-b border-border bg-background px-6">
       {/* Search */}
       {/* <div className="flex flex-1 items-center gap-4">
         <div className="relative w-full max-w-md">

@@ -17,11 +17,25 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
 
   try {
     // Fetch listing data for SEO
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/listings/${id}`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
+    const response = await fetch(`${apiUrl}/user/listings/${id}`, {
       headers: {
         'Accept-Language': locale,
+        'Accept': 'application/json',
       }
     })
+    
+    if (!response.ok) {
+      console.error(`API Error: ${response.status} ${response.statusText}`)
+      throw new Error(`API returned ${response.status}`)
+    }
+    
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('API returned non-JSON response:', contentType)
+      throw new Error('API returned non-JSON response')
+    }
+    
     const data = await response.json()
     const listing = data?.data
 

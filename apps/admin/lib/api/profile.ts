@@ -4,17 +4,17 @@ import type { AdminUser, UpdateProfileData, ResetPasswordData } from "@/lib/type
 export const profileApi = {
   // Get current user profile
   getMe: () => {
-    return api.get("/user/me")
+    return api.get("/admin/me")
   },
 
   // Update profile
   updateProfile: (data: UpdateProfileData) => {
-    return api.put("/user/me", data)
+    return api.put("/admin/me", data)
   },
 
   // Reset password
   resetPassword: (data: ResetPasswordData) => {
-    return api.put("/user/me/password", data)
+    return api.post("/auth/reset-password", data)
   },
 
   // Upload avatar

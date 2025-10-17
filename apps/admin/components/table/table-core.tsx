@@ -356,10 +356,18 @@ export function TableCore<T extends Record<string, any>>({
   const [selectedRow, setSelectedRow] = React.useState<T | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
 
-  // Initialize date range from URL params on mount
+  // Initialize sort and date range from URL params on mount
   React.useEffect(() => {
+    const sortField = searchParams.get("sort_field")
+    const sortOrder = searchParams.get("sort_order")
     const dateFrom = searchParams.get("dateFrom")
     const dateTo = searchParams.get("dateTo")
+
+    // Set sort from URL
+    if (sortField && sortOrder) {
+      setSortColumn(sortField)
+      setSortDirection(sortOrder as "asc" | "desc")
+    }
 
     if (dateFrom || dateTo) {
       setDateRange({
@@ -416,9 +424,9 @@ export function TableCore<T extends Record<string, any>>({
 
     if (newDirection === null) {
       // Clear sorting
-      updateParams({ sort: null, order: null })
+      updateParams({ sort_field: null, sort_order: null })
     } else {
-      updateParams({ sort: columnKey, order: newDirection })
+      updateParams({ sort_field: columnKey, sort_order: newDirection })
     }
   }
 
@@ -488,8 +496,8 @@ export function TableCore<T extends Record<string, any>>({
     setSortDirection(null)
     updateParams({
       search: null,
-      sort: null,
-      order: null,
+      sort_field: null,
+      sort_order: null,
       dateFrom: null,
       dateTo: null,
       ...Object.fromEntries(filters.map((f) => [f.key, null])),
@@ -548,15 +556,15 @@ export function TableCore<T extends Record<string, any>>({
         </div>
       ),
     },
-    {
-      key: "sort_order",
-      label: "الترتيب",
-      sortable: true,
-      width: "w-12",
-      render: (value) => (
-        <span className="font-mono text-sm font-medium">{value}</span>
-      ),
-    },
+    // {
+    //   key: "sort_order",
+    //   label: "الترتيب",
+    //   sortable: true,
+    //   width: "w-12",
+    //   render: (value) => (
+    //     <span className="font-mono text-sm font-medium">{value}</span>
+    //   ),
+    // },
   ]
   let initColumns: TableColumn<T>[] = enableSortOrder ? defaultColumns : [defaultColumns[0]]
   initColumns = [...initColumns, ...columns]

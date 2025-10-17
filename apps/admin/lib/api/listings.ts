@@ -29,8 +29,24 @@ export const listingsApi = {
     return response.data
   },
 
+  create: async (data: Partial<Listing>) => {
+    return api.post("/admin/listings", data)
+  },
+
+  update: async (id: number, data: Partial<Listing>) => {
+    return api.put(`/admin/listings/${id}`, data)
+  },
+
   updateStatus: async (id: number, status: Listing["status"], reason?: string): Promise<Listing> => {
     const response = await api.put(`/admin/listings/${id}/status`, { status, reason })
+    return response.data
+  },
+
+  quickUpdateStatus: async (id: number, status: Listing["status"]): Promise<Listing> => {
+    const response = await api.put(`/admin/listings/${id}`, { status }, { 
+      showSuccessToast: true,
+      successMessage: "تم تحديث الحالة بنجاح" 
+    })
     return response.data
   },
 

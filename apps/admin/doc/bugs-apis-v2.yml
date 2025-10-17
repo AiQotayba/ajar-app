@@ -1,0 +1,42 @@
+ajar-admin:
+  ref:
+    apiDoc: doc/api-docx.json
+    db: doc/db.sql
+    techRoadmap: doc/tech-roadmap-admin.md
+    uxRules: doc/ux-rules-admin.md
+    How: How we carry out tasks
+      - if Solution write Solution
+      - If there is no solution, let us define the problem 
+  bugs:
+    reviews: 
+      - reply_to_review:
+        api: POST /admin/reviews/:id/replay
+        body: { "reply": "الرد على التقييم" }
+        json: { "success": false, "message": "Route not found", "key": "Route not found" }
+      - approve_withhold:
+        api: PUT /admin/reviews/{id}
+        body: { "is_approved": true }
+        json: { "success": false, "message": "ليس لديك صلاحية للقيام بهذا الإجراء", "key": "messages.permission.error" }
+      - delete_messages: messages.permission.error
+        api: DELETE /admin/reviews/{id}
+        json: { "success": false, "message": "ليس لديك صلاحية للقيام بهذا الإجراء", "key": "messages.permission.error" } 
+    sliders: 
+      - delete_sliders: 
+        note: Update deletion message from backend
+        json: { message: "messages.slider.deleted" } 
+      - reorder_drag_drop:
+        note: find body in api
+        api: POST /admin/sliders/reorder 
+    locations: 
+      - reorder_drag_drop:
+        api:
+          - POST: /admin/governorates/reorder
+          - POST: /admin/cities/reorder
+    listings:
+      - reorder_drag_drop:
+        api: PUT /admin/listings/reorder
+    users:
+      - create_user:
+        api: POST /admin/users
+        body: { "first_name": "Qotayba", "last_name": "Mohammad", "phone": "+96170723177", "email": "admin@admin.com", "password": "$2y$12$XyJfvYq0VuPq0ML1q5rf2.dt/2Kc5alU.u5qlQVAkC8WRSIaHacXK", "role": "user", "status": "active", "avatar": "users/68ee50c02aa89.webp" }
+        json: "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '+96170723177' for key 'users.users_phone_unique' (Connection: mysql, SQL: insert into `users` (`first_name`, `last_name`, `phone`, `email`, `password`, `role`, `status`, `avatar`, `updated_at`, `created_at`) values (Qotayba, Mohammad, +96170723177, admin@admin.com, $2y$12$XyJfvYq0VuPq0ML1q5rf2.dt/2Kc5alU.u5qlQVAkC8WRSIaHacXK, user, active, users/68ee50c02aa89.webp, 2025-10-14 13:32:39, 2025-10-14 13:32:39))"

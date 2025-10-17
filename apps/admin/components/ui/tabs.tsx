@@ -12,16 +12,14 @@ function Tabs({
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
+      dir="rtl"
       className={cn('flex flex-col gap-2', className)}
       {...props}
     />
   )
 }
 
-function TabsList({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"

@@ -292,10 +292,8 @@ export class ApiCore implements ApiInstance {
 
         try {
             const contentType = response.headers.get('content-type');
-            
-            console.log(data)
             return {
-                isError,  
+                isError,
                 ...data,
             };
         } catch (parseError) {
@@ -303,7 +301,7 @@ export class ApiCore implements ApiInstance {
             data = undefined;
             return {
                 isError,
-                ...data, 
+                ...data,
             };
         }
 

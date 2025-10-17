@@ -1,0 +1,467 @@
+api:
+  Authentication:
+    - POST: /auth/register ✔️
+    - POST: /auth/verify-otp ✔️
+    - POST: /auth/login ✔️
+    - POST: /auth/forgot-password ✔️
+    - POST: /auth/reset-password ✔️
+    - POST: /auth/logout ✔️
+  Public:
+    Home:
+      - GET: /user/home ✔️
+        json:
+          {
+            'success': true,
+            'data':
+              {
+                'sliders':
+                  [
+                    {
+                      'id': 5,
+                      'title':
+                        {
+                          'ar': 'أراضي استثمارية للبيع',
+                          'en': 'أراضي استثمارية للبيع',
+                        },
+                      'description':
+                        {
+                          'ar': 'قطع أراضي مميزة صالحة للبناء والاستثمار',
+                          'en': 'قطع أراضي مميزة صالحة للبناء والاستثمار',
+                        },
+                      'image_url': 'https://ajar-backend.mystore.social/storage/sliders/68e3aab8d3ed5.webp',
+                      'target_url': 'https://google.com',
+                      'start_at': '2025-10-05 12:00:00',
+                      'end_at': '2025-10-31 23:59:59',
+                      'active': true,
+                      'clicks': 0,
+                      'sort_order': 5,
+                      'created_at': '2025-10-06 11:41:23',
+                      'updated_at': '2025-10-06 11:41:23',
+                    },
+                  ],
+                'categories':
+                  [
+                    {
+                      'id': 365,
+                      'name': { 'ar': 'عقار', 'en': 'Real Estate' },
+                      'description': { 'ar': null, 'en': null },
+                      'parent_id': null,
+                      'icon': null,
+                      'properties_source': 'custom',
+                      'sort_order': 1,
+                      'is_visible': true,
+                      'listings_count': 0,
+                      'created_at': '2025-10-06 16:53:40',
+                      'updated_at': '2025-10-06 16:53:40',
+                      'children':
+                        [
+                          {
+                            'id': 366,
+                            'name': { 'ar': 'أراضي', 'en': 'Land' },
+                            'description': { 'ar': null, 'en': null },
+                            'parent_id': 365,
+                            'icon': 'https://ajar-backend.mystore.social/storage/properties/68ece671d3b4d.webp',
+                            'properties_source': 'parent_and_custom',
+                            'sort_order': 1,
+                            'is_visible': true,
+                            'listings_count': 8,
+                            'children': [],
+                            'properties': [],
+                            'features': [],
+                            'created_at': '2025-10-06 16:53:40',
+                            'updated_at': '2025-10-13 11:45:55',
+                          },
+                        ],
+                    },
+                  ],
+                'governorates':
+                  [
+                    {
+                      'id': 2,
+                      'name': { 'ar': 'دمشق', 'en': 'Damascus' },
+                      'code': 'ChIJp8Y8QdzmGBURe4Gw1Yq45Wk',
+                      'sort_order': 1,
+                      'cities': [],
+                      'created_at': '2025-05-14 23:25:21',
+                      'updated_at': '2025-10-11 14:46:09',
+                    },
+                  ],
+                'listings':
+                  [
+                    {
+                      'id': 2993,
+                      'title': { 'ar': '1212', 'en': '616954' },
+                      'ribon_text': { 'ar': null, 'en': null },
+                      'ribon_color': null,
+                      'description': { 'ar': null, 'en': null },
+                      'price': 50,
+                      'currency': 'USD',
+                      'latitude': '33.51380006154925',
+                      'longitude': '36.27650007605553',
+                      'status': 'approved',
+                      'availability_status': 'available',
+                      'available_from': null,
+                      'available_until': null,
+                      'type': 'rent',
+                      'pay_every': null,
+                      'insurance': null,
+                      'is_featured': false,
+                      'views_count': 5,
+                      'is_favorite': false,
+                      'favorites_count': 1,
+                      'average_rating': 0,
+                      'reviews_count': 0,
+                      'cover_image': 'listings/68ed14e3b5379.webp',
+                      'whatsapp_url': 'https://wa.me/352681532331?text=Hi%2C+I%27m+interested+in+the+property%3A+616954+in+.%0AListing+code%3A+2993%0AListing+URL%3A+https%3A%2F%2Fajar-backend.mystore.social%2Flistings%2F2993%0AIs+it+still+available%3F',
+                      'owner':
+                        {
+                          'id': 1,
+                          'first_name': 'ahmed',
+                          'last_name': 'albakor',
+                          'full_name': 'ahmed albakor',
+                          'phone': '352681532331',
+                          'email': '',
+                          'role': 'user',
+                          'status': 'active',
+                          'phone_verified': true,
+                          'avatar': null,
+                          'avatar_url': null,
+                          'language': 'ar',
+                          'wallet_balance': 0,
+                          'notifications_unread_count': 0,
+                          'listings_count': 7,
+                          'created_at': '2025-10-05 19:35:30',
+                          'updated_at': '2025-10-15 11:04:03',
+                        },
+                      'category':
+                        {
+                          'id': 385,
+                          'name': { 'ar': 'النترا', 'en': 'Elantra' },
+                          'description': { 'ar': null, 'en': null },
+                          'parent_id': 383,
+                          'icon': null,
+                          'properties_source': 'parent_and_custom',
+                          'sort_order': 2,
+                          'is_visible': true,
+                          'listings_count': 12,
+                          'created_at': '2025-10-06 16:53:40',
+                          'updated_at': '2025-10-06 16:53:40',
+                        },
+                      'governorate':
+                        {
+                          'id': 2,
+                          'name': { 'ar': 'دمشق', 'en': 'Damascus' },
+                          'code': 'ChIJp8Y8QdzmGBURe4Gw1Yq45Wk',
+                          'sort_order': 1,
+                          'cities': [],
+                          'created_at': '2025-05-14 23:25:21',
+                          'updated_at': '2025-10-11 14:46:09',
+                        },
+                      'images':
+                        [
+                          {
+                            'id': 5152,
+                            'type': 'image',
+                            'url': 'listings/68ed14e3b5379.webp',
+                            'full_url': 'https://ajar-backend.mystore.social/storage/listings/68ed14e3b5379.webp',
+                            'iframely': null,
+                            'source': 'file',
+                            'sort_order': 40,
+                            'created_at': '2025-10-13 15:04:05',
+                          },
+                        ],
+                      'media':
+                        [
+                          {
+                            'id': 5154,
+                            'type': 'image',
+                            'url': 'listings/68ed14e49da8c.webp',
+                            'full_url': 'https://ajar-backend.mystore.social/storage/listings/68ed14e49da8c.webp',
+                            'iframely': null,
+                            'source': 'file',
+                            'sort_order': 42,
+                            'created_at': '2025-10-13 15:04:05',
+                          },
+                        ],
+                      'city': null,
+                      'features': [],
+                      'properties': [],
+                      'created_at': '2025-10-13 15:04:04',
+                      'updated_at': '2025-10-13 20:14:30',
+                    },
+                  ],
+              },
+          }
+    Categories & Properties:
+      - GET: /user/categories
+        json:
+          {
+            'success': true,
+            'data':
+              [
+                {
+                  'id': 365,
+                  'name': { 'ar': 'عقار', 'en': 'Real Estate' },
+                  'description': { 'ar': null, 'en': null },
+                  'parent_id': null,
+                  'icon': null,
+                  'properties_source': 'custom',
+                  'sort_order': 1,
+                  'is_visible': true,
+                  'listings_count': 0,
+                  'created_at': '2025-10-06 16:53:40',
+                  'updated_at': '2025-10-06 16:53:40',
+                  'children':
+                    [
+                      {
+                        'id': 366,
+                        'name': { 'ar': 'أراضي', 'en': 'Land' },
+                        'description': { 'ar': null, 'en': null },
+                        'parent_id': 365,
+                        'icon': 'https://ajar-backend.mystore.social/storage/properties/68ece671d3b4d.webp',
+                        'properties_source': 'parent_and_custom',
+                        'sort_order': 1,
+                        'is_visible': true,
+                        'listings_count': 8,
+                        'children': [],
+                        'properties': [],
+                        'features': [],
+                        'created_at': '2025-10-06 16:53:40',
+                        'updated_at': '2025-10-13 11:45:55',
+                      },
+                    ],
+                  'properties':
+                    [
+                      {
+                        'id': 1,
+                        'category_id': 365,
+                        'name': { 'ar': 'المساحة', 'en': 'Area' },
+                        'description':
+                          {
+                            'ar': 'مساحة العقار بالمتر المربع',
+                            'en': 'Property area in square meters',
+                          },
+                        'icon': null,
+                        'type': 'float',
+                        'is_filter': true,
+                        'options': null,
+                        'sort_order': 1,
+                        'created_at': '2025-10-06 16:53:41',
+                        'updated_at': '2025-10-06 16:53:41',
+                      },
+                    ],
+                  'features':
+                    [
+                      {
+                        'id': 1,
+                        'category_id': 365,
+                        'name': { 'ar': 'واي فاي', 'en': 'WiFi' },
+                        'description': { 'ar': null, 'en': null },
+                        'icon': 'https://static.vecteezy.com/system/resources/previews/009/664/685/non_2x/wifi-hotsport-icon-transparent-free-png.png',
+                        'sort_order': 1,
+                        'created_at': '2025-10-06 16:53:41',
+                        'updated_at': '2025-10-06 16:53:41',
+                      },
+                    ],
+                },
+              ],
+            'meta':
+              {
+                'current_page': 1,
+                'last_page': 1,
+                'per_page': 500,
+                'total': 5,
+              },
+          }
+      - GET: /user/categories/{id}
+        json:
+          {
+            'success': true,
+            'data':
+              {
+                'id': 365,
+                'name': { 'ar': 'عقار', 'en': 'Real Estate' },
+                'description': { 'ar': null, 'en': null },
+                'parent_id': null,
+                'icon': null,
+                'properties_source': 'custom',
+                'sort_order': 1,
+                'is_visible': true,
+                'listings_count': 0,
+                'children':
+                  [
+                    {
+                      'id': 366,
+                      'name': { 'ar': 'أراضي', 'en': 'Land' },
+                      'description': { 'ar': null, 'en': null },
+                      'parent_id': 365,
+                      'icon': 'https://ajar-backend.mystore.social/storage/properties/68ece671d3b4d.webp',
+                      'properties_source': 'parent_and_custom',
+                      'sort_order': 1,
+                      'is_visible': true,
+                      'listings_count': 8,
+                      'created_at': '2025-10-06 16:53:40',
+                      'updated_at': '2025-10-13 11:45:55',
+                      'children': [],
+                      'properties':
+                        [
+                          {
+                            'id': 1,
+                            'category_id': 365,
+                            'name': { 'ar': 'المساحة', 'en': 'Area' },
+                            'description':
+                              {
+                                'ar': 'مساحة العقار بالمتر المربع',
+                                'en': 'Property area in square meters',
+                              },
+                            'icon': null,
+                            'type': 'float',
+                            'is_filter': true,
+                            'options': null,
+                            'sort_order': 1,
+                            'created_at': '2025-10-06 16:53:41',
+                            'updated_at': '2025-10-06 16:53:41',
+                          },
+                        ],
+                      'features': [],
+                    },
+                  ],
+                'properties':
+                  [
+                    {
+                      'id': 1,
+                      'category_id': 365,
+                      'name': { 'ar': 'المساحة', 'en': 'Area' },
+                      'description':
+                        {
+                          'ar': 'مساحة العقار بالمتر المربع',
+                          'en': 'Property area in square meters',
+                        },
+                      'icon': null,
+                      'type': 'float',
+                      'is_filter': true,
+                      'options': null,
+                      'sort_order': 1,
+                      'created_at': '2025-10-06 16:53:41',
+                      'updated_at': '2025-10-06 16:53:41',
+                    },
+                  ],
+                'features':
+                  [
+                    {
+                      'id': 1,
+                      'category_id': 365,
+                      'name': { 'ar': 'واي فاي', 'en': 'WiFi' },
+                      'description': { 'ar': null, 'en': null },
+                      'icon': 'https://static.vecteezy.com/system/resources/previews/009/664/685/non_2x/wifi-hotsport-icon-transparent-free-png.png',
+                      'sort_order': 1,
+                      'created_at': '2025-10-06 16:53:41',
+                      'updated_at': '2025-10-06 16:53:41',
+                    },
+                  ],
+                'created_at': '2025-10-06 16:53:40',
+                'updated_at': '2025-10-06 16:53:40',
+              },
+          }
+      - GET: /user/properties
+        json:
+          {
+            'success': true,
+            'data':
+              [
+                {
+                  'id': 26,
+                  'category_id': 539,
+                  'name': { 'ar': 'العمر', 'en': 'Age' },
+                  'description':
+                    { 'ar': 'العمر بالأشهر', 'en': 'Age in months' },
+                  'icon': null,
+                  'type': 'int',
+                  'is_filter': true,
+                  'options': null,
+                  'sort_order': 1,
+                  'created_at': '2025-10-06 16:53:41',
+                  'updated_at': '2025-10-10 03:44:28',
+                  'category':
+                    {
+                      'id': 539,
+                      'name': { 'ar': 'حيوانات', 'en': 'Animals' },
+                      'description': { 'ar': null, 'en': null },
+                      'parent_id': null,
+                      'icon': null,
+                      'properties_source': 'custom',
+                      'sort_order': 5,
+                      'is_visible': true,
+                      'listings_count': 0,
+                      'created_at': '2025-10-06 16:53:41',
+                      'updated_at': '2025-10-10 03:44:28',
+                    },
+                },
+              ],
+            'meta':
+              {
+                'current_page': 1,
+                'last_page': 1,
+                'per_page': 50,
+                'total': 30,
+              },
+          }
+      - GET: /user/features
+        json:
+          {
+            'success': true,
+            'data':
+              [
+                {
+                  'id': 34,
+                  'category_id': 474,
+                  'name': { 'ar': 'دعم 5G', 'en': '5G Support' },
+                  'description': { 'ar': null, 'en': null },
+                  'icon': null,
+                  'sort_order': 1,
+                  'created_at': '2025-10-06 16:53:41',
+                  'updated_at': '2025-10-06 16:53:41',
+                  'category':
+                    {
+                      'id': 474,
+                      'name': { 'ar': 'أجهزة إلكترونية', 'en': 'Electronics' },
+                      'description': { 'ar': null, 'en': null },
+                      'parent_id': null,
+                      'icon': null,
+                      'properties_source': 'custom',
+                      'sort_order': 3,
+                      'is_visible': true,
+                      'listings_count': 0,
+                      'created_at': '2025-10-06 16:53:41',
+                      'updated_at': '2025-10-06 16:53:41',
+                    },
+                },
+              ],
+          }
+    Listings:
+      - GET: /user/listings
+      - GET: /user/listings/{id}
+      - GET: /user/listings/{id}/reviews
+    Location:
+      - GET: /user/governorates
+      - GET: /user/governorates/{id}
+      - GET: /user/cities
+      - GET: /user/cities/{id}
+    Sliders:
+      - GET: /user/sliders/active
+      - POST: /user/sliders/{id}/click
+    Settings:
+      - GET: /user/settings/public
+  User Authenticated:
+    Listings:
+      - POST: /user/listings
+      - PUT: /user/listings/{id}
+      - DELETE: /user/listings/{id}
+      - POST: /user/listings/{id}/toggle-favorite
+    Notifications:
+      - GET: /user/notifications
+      - POST: /user/notifications/{id}/read
+    Reviews:
+      - POST: /user/reviews
+      - PUT: /user/reviews/{id}
+      - DELETE: /user/reviews/{id}

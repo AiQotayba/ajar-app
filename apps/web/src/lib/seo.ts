@@ -33,6 +33,7 @@ export function generateMetadata(config: SEOConfig) {
   const direction = isArabic ? 'rtl' : 'ltr';
   
   return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com'),
     title: `${config.title} | أجار`,
     description: config.description,
     keywords: config.keywords.join(', '),
@@ -115,7 +116,7 @@ export function generateListingStructuredData(listing: any, locale: string = 'ar
     '@type': 'RealEstateListing',
     name: name,
     description: description,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}/${locale}/listings/${listing.id}`,
+    url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com'}/${locale}/listings/${listing.id}`,
     image: listing.cover_image || listing.images?.[0]?.full_url,
     offers: {
       '@type': 'Offer',
@@ -148,7 +149,7 @@ export function generateListingStructuredData(listing: any, locale: string = 'ar
     publisher: {
       '@type': 'Organization',
       name: 'أجار',
-      url: process.env.NEXT_PUBLIC_SITE_URL,
+      url: process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com',
       logo: {
         '@type': 'ImageObject',
         url: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
@@ -166,7 +167,7 @@ export function generateOrganizationStructuredData(): StructuredData {
     '@type': 'Organization',
     name: 'أجار',
     alternateName: 'Ajar',
-    url: process.env.NEXT_PUBLIC_SITE_URL,
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com',
     logo: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
     description: 'منصة شاملة للعقارات في سوريا',
     foundingDate: '2024',
@@ -234,7 +235,7 @@ export function generateLocalBusinessStructuredData(): StructuredData {
     '@type': 'RealEstateAgent',
     name: 'أجار',
     description: 'وكيل عقاري في سوريا',
-    url: process.env.NEXT_PUBLIC_SITE_URL,
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com',
     telephone: '+963-XXX-XXXXXX',
     address: {
       '@type': 'PostalAddress',

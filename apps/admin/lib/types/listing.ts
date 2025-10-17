@@ -2,10 +2,19 @@ export interface Listing {
   id: number
   owner_id: number | null
   category_id: number
-  title: string
-  ribon_text: string | null
+  title: {
+    ar: string | null
+    en: string | null
+  }
+  ribon_text: {
+    ar: string | null
+    en: string | null
+  }
   ribon_color: string
-  description: string | null
+  description: {
+    ar: string | null
+    en: string | null
+  }
   price: number
   currency: string
   governorate_id: number
@@ -21,7 +30,12 @@ export interface Listing {
   insurance: number | null
   is_featured: boolean
   views_count: number
+  is_favorite: boolean
   favorites_count: number
+  average_rating: number
+  reviews_count: number
+  cover_image: string
+  whatsapp_url: string
   created_at: string
   updated_at: string
   // Relations
@@ -52,12 +66,27 @@ export interface Listing {
       en: string
     }
   }
+  images?: Array<{
+    id: number
+    type: "image" | "video"
+    url: string
+    full_url: string
+    source: "file" | "link"
+    sort_order: number
+    created_at: string
+  }>
   media?: Array<{
     id: number
     type: "image" | "video"
     url: string
+    full_url: string
+    source: "file" | "link"
     sort_order: number
+    created_at: string
   }>
+  features?: Array<any>
+  properties?: Array<any>
+  reviews?: Array<any>
 }
 
 export interface ListingsResponse {

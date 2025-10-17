@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "next dev -p 3000 --experimental-https ", 
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
