@@ -50,6 +50,9 @@ export function PropertyGallery({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [showFullscreen, setShowFullscreen] = useState(false)
+  const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
 
   // Prepare images array - use cover image as first if available, then add other images
   const allImages = coverImage
@@ -72,10 +75,76 @@ export function PropertyGallery({
     }
   }, [carouselApi])
 
+  // Auto-play effect
+  useEffect(() => {
+    if (!isAutoPlaying || sortedImages.length <= 1) return
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % sortedImages.length
+        if (carouselApi) {
+          carouselApi.scrollTo(nextIndex)
+        }
+        return nextIndex
+      })
+    }, 5000) // 5 seconds
+
+    return () => clearInterval(interval)
+  }, [isAutoPlaying, sortedImages.length, carouselApi])
+
   const scrollToIndex = (index: number) => {
     if (carouselApi) {
       carouselApi.scrollTo(index)
     }
+  }
+
+  const calculateMousePosition = (event: React.MouseEvent) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    
+    // Get precise mouse coordinates relative to the thumbnail
+    const mouseX = event.clientX - rect.left
+    const mouseY = event.clientY - rect.top
+    
+    // Calculate percentage position with high precision (0-100)
+    const xPercent = Math.max(0, Math.min(100, (mouseX / rect.width) * 100))
+    const yPercent = Math.max(0, Math.min(100, (mouseY / rect.height) * 100))
+    
+    // Round to 2 decimal places for precision
+    return { 
+      x: Math.round(xPercent * 100) / 100, 
+      y: Math.round(yPercent * 100) / 100 
+    }
+  }
+
+  const handleImageHover = (index: number, event: React.MouseEvent) => {
+    setHoveredImageIndex(index)
+    setIsAutoPlaying(false) // Stop auto-play when hovering
+    
+    // Calculate precise mouse position
+    const position = calculateMousePosition(event)
+    setMousePosition(position)
+    
+    // Change the main view image
+    if (carouselApi) {
+      carouselApi.scrollTo(index)
+    }
+  }
+
+  const handleImageMouseMove = (event: React.MouseEvent) => {
+    if (hoveredImageIndex === null) return
+    
+    // Throttle mouse move events for better performance
+    requestAnimationFrame(() => {
+      const position = calculateMousePosition(event)
+      console.log('Mouse position:', position) // Debug log
+      setMousePosition(position)
+    })
+  }
+
+  const handleImageLeave = () => {
+    setHoveredImageIndex(null)
+    setMousePosition(null)
+    setIsAutoPlaying(true) // Resume auto-play when leaving
   }
 
   const handleShare = async () => {
@@ -167,22 +236,36 @@ export function PropertyGallery({
             setApi={setCarouselApi}
             className="w-full"
           >
-            <CarouselContent className="w-full" dir="ltr">
-              {sortedImages.map((image, index) => (
-                <CarouselItem key={image.id || index}>
-                  <div className="relative h-80 w-full">
-                    <Image
-                      src={image.full_url || image.url || "/images/images/placeholder.svg"}
-                      alt={`Property image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      priority={index === 0}
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
+             <CarouselContent className="w-full" dir="ltr">
+               {sortedImages.map((image, index) => (
+                 <CarouselItem key={image.id || index}>
+                   <div className="relative h-80 w-full overflow-hidden rounded-lg">
+                     <div 
+                       className={cn(
+                         "relative w-full h-full transition-all duration-150 ease-out",
+                         hoveredImageIndex === index && mousePosition ? "scale-150" : "scale-100"
+                       )}
+                       style={hoveredImageIndex === index && mousePosition ? {
+                         transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
+                       } : undefined}
+                     >
+                       <Image
+                         src={image.full_url || image.url || "/images/images/placeholder.svg"}
+                         alt={`Property image ${index + 1}`}
+                         fill
+                         className="object-cover"
+                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                         priority={index === 0}
+                       />
+                     </div>
+                     {/* Overlay effect for hovered image */}
+                     {hoveredImageIndex === index && (
+                       <div className="absolute inset-0 bg-black/10 transition-opacity duration-300" />
+                     )}
+                   </div>
+                 </CarouselItem>
+               ))}
+             </CarouselContent>
 
             {/* Navigation Arrows */}
             {sortedImages.length > 1 && (
@@ -279,26 +362,29 @@ export function PropertyGallery({
         {sortedImages.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide flex-row ">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide   rtl:justify-end">
-              {sortedImages.slice(0, 4).map((image, index) => (
-                <button
-                  key={image.id || index}
-                  onClick={() => scrollToIndex(index)}
-                  className={cn(
-                    "flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all",
-                    currentIndex === index
-                      ? "border-primary ring-2 ring-primary/20"
-                      : "border-transparent opacity-60 hover:opacity-100",
-                  )}
-                >
-                  <Image
-                    src={image.full_url || image.url || "/images/placeholder.svg"}
-                    alt={`Thumbnail ${index + 1}`}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+               {sortedImages.slice(0, 4).map((image, index) => (
+                 <button
+                   key={image.id || index}
+                   onClick={() => scrollToIndex(index)}
+                  //  onMouseEnter={(e) => handleImageHover(index, e)}
+                  //  onMouseMove={handleImageMouseMove}
+                  //  onMouseLeave={handleImageLeave}
+                   className={cn(
+                     "flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer",
+                     currentIndex === index
+                       ? "border-primary ring-2 ring-primary/20"
+                       : "border-transparent opacity-60 hover:opacity-100",
+                   )}
+                 >
+                   <Image
+                     src={image.full_url || image.url || "/images/placeholder.svg"}
+                     alt={`Thumbnail ${index + 1}`}
+                     width={80}
+                     height={80}
+                     className="w-full h-full object-cover"
+                   />
+                 </button>
+               ))}
             </div>
             {sortedImages.length > 4 && (
               <button className="flex-shrink-0 w-20 h-20 rounded-2xl bg-foreground/90 text-background flex items-center justify-center text-sm font-bold">

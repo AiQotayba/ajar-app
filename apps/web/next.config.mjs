@@ -20,6 +20,20 @@ const nextConfig = {
       'www.ajar.com',
     ],
     formats: ['image/webp', 'image/avif'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'maps.googleapis.com',
+        port: '',
+        pathname: '/maps/api/staticmap**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/api/map-image**',
+      },
+    ],
   },
   basePath: '',
   // SEO and Performance optimizations

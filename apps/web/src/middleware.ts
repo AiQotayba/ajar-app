@@ -45,8 +45,10 @@ function getPreferredLocale(req: NextRequest): string {
 }
 
 export const middleware = async (req: NextRequest) => {
-  // استثناء طلب ملف الـ Service Worker
-  if (req.nextUrl.pathname === '/firebase-messaging-sw.js' || req.nextUrl.pathname === '/manifest.json') {
+  // استثناء طلب ملف الـ Service Worker والخطوط
+  if (req.nextUrl.pathname === '/firebase-messaging-sw.js' || 
+      req.nextUrl.pathname === '/manifest.json' ||
+      req.nextUrl.pathname.startsWith('/fonts/')) {
     return NextResponse.next();
   }
 

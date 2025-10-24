@@ -3,6 +3,57 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Arabic Fonts */
+@font-face {
+  font-family: "ITF Qomra Arabic";
+  src: url('/fonts/itfQomraArabic-Light.woff2') format('woff2'),
+       url('/fonts/itfQomraArabic-Light.woff') format('woff'),
+       url('/fonts/itfQomraArabic-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ITF Qomra Arabic";
+  src: url('/fonts/itfQomraArabic-Regular.woff2') format('woff2'),
+       url('/fonts/itfQomraArabic-Regular.woff') format('woff'),
+       url('/fonts/itfQomraArabic-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ITF Qomra Arabic";
+  src: url('/fonts/itfQomraArabic-Medium.woff2') format('woff2'),
+       url('/fonts/itfQomraArabic-Medium.woff') format('woff'),
+       url('/fonts/itfQomraArabic-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ITF Qomra Arabic";
+  src: url('/fonts/itfQomraArabic-Bold.woff2') format('woff2'),
+       url('/fonts/itfQomraArabic-Bold.woff') format('woff'),
+       url('/fonts/itfQomraArabic-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ITF Qomra Arabic";
+  src: url('/fonts/itfQomraArabic-Black.woff2') format('woff2'),
+       url('/fonts/itfQomraArabic-Black.woff') format('woff'),
+       url('/fonts/itfQomraArabic-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #fafafa;
   --foreground: #1a1a1a;
@@ -60,7 +111,7 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-cairo);
+  --font-sans: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -176,4 +227,91 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
   /* Chrome, Safari, Opera */
+}
+
+/* Arabic Font Classes */
+.font-arabic {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+}
+
+.font-arabic-light {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 300;
+}
+
+.font-arabic-regular {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+}
+
+.font-arabic-medium {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+}
+
+.font-arabic-bold {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+}
+
+.font-arabic-black {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 900;
+}
+
+/* RTL Text Rendering */
+[dir="rtl"] {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Arabic Typography */
+.arabic-text {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.6;
+}
+
+.arabic-heading {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.arabic-body {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.6;
+}
+
+/* Additional Font Utility Classes */
+.font-qomra {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+}
+
+.font-qomra-light {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 300;
+}
+
+.font-qomra-medium {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+}
+
+.font-qomra-bold {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+}
+
+.font-qomra-black {
+  font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
+  font-weight: 900;
 }

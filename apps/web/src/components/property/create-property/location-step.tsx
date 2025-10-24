@@ -6,16 +6,33 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { PropertyFormData } from "../create-property-form"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { PropertyFormData } from "./property-form-engine"
+
+interface Governorate {
+  id: number
+  name_ar: string
+  name_en: string
+  cities: City[]
+}
+
+interface City {
+  id: number
+  name_ar: string
+  name_en: string
+  governorate_id: number
+}
 
 interface LocationStepProps {
   data: PropertyFormData
   updateData: (data: Partial<PropertyFormData>) => void
   onNext: () => void
   onPrevious: () => void
+  governorates?: Governorate[]
+  cities?: City[]
 }
 
-export function LocationStep({ data, updateData, onNext, onPrevious }: LocationStepProps) {
+export function LocationStep({ data, updateData, onNext, onPrevious, governorates = [], cities = [] }: LocationStepProps) {
   const [mapError, setMapError] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,32 +62,40 @@ export function LocationStep({ data, updateData, onNext, onPrevious }: LocationS
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Governorate */}
       <div className="space-y-2">
-        <Label htmlFor="governorate" className="text-right block">
+        <Label htmlFor="governorate_id" className="text-right block">
           المحافظة <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="governorate"
-          value={data.governorate}
-          onChange={(e) => updateData({ governorate: e.target.value })}
-          placeholder="أدخل اسم المحافظة"
-          className="text-right"
-          required
-        />
+        <Select value={data.governorate_id} onValueChange={(value) => updateData({ governorate_id: value, city_id: "" })}>
+          <SelectTrigger id="governorate_id" className="text-right">
+            <SelectValue placeholder="اختر المحافظة" />
+          </SelectTrigger>
+          <SelectContent>
+            {governorates.map((governorate) => (
+              <SelectItem key={governorate.id} value={governorate.id.toString()}>
+                {governorate.name_ar}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* City */}
       <div className="space-y-2">
-        <Label htmlFor="city" className="text-right block">
+        <Label htmlFor="city_id" className="text-right block">
           المدينة <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="city"
-          value={data.city}
-          onChange={(e) => updateData({ city: e.target.value })}
-          placeholder="أدخل اسم المدينة"
-          className="text-right"
-          required
-        />
+        <Select value={data.city_id} onValueChange={(value) => updateData({ city_id: value })} disabled={!data.governorate_id}>
+          <SelectTrigger id="city_id" className="text-right">
+            <SelectValue placeholder="اختر المدينة" />
+          </SelectTrigger>
+          <SelectContent>
+            {cities.map((city) => (
+              <SelectItem key={city.id} value={city.id.toString()}>
+                {city.name_ar}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Map */}

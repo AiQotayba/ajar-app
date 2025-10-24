@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { PropertyFormData } from "../create-property-form"
+import type { PropertyFormData } from "./property-form-engine"
 
 interface PriceStepProps {
   data: PropertyFormData
@@ -40,38 +40,59 @@ export function PriceStep({ data, updateData, onNext, onPrevious }: PriceStepPro
         <p className="text-xs text-destructive text-right">هذا الحقل مطلوب / يجب أن تكون القيمة رقماً</p>
       </div>
 
-      {/* Payment Frequency */}
+      {/* Currency */}
       <div className="space-y-2">
-        <Label htmlFor="paymentFrequency" className="text-right block">
-          دورية الدفع <span className="text-destructive">*</span>
+        <Label htmlFor="currency" className="text-right block">
+          العملة <span className="text-destructive">*</span>
         </Label>
-        <Select value={data.paymentFrequency} onValueChange={(value) => updateData({ paymentFrequency: value })}>
-          <SelectTrigger id="paymentFrequency" className="text-right">
-            <SelectValue placeholder="اختر كل كم تدفع الأجرة" />
+        <Select value={data.currency} onValueChange={(value) => updateData({ currency: value })}>
+          <SelectTrigger id="currency" className="text-right">
+            <SelectValue placeholder="اختر العملة" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="daily">يومي</SelectItem>
-            <SelectItem value="weekly">أسبوعي</SelectItem>
-            <SelectItem value="monthly">شهري</SelectItem>
-            <SelectItem value="quarterly">ربع سنوي</SelectItem>
-            <SelectItem value="yearly">سنوي</SelectItem>
+            <SelectItem value="USD">دولار أمريكي</SelectItem>
+            <SelectItem value="EUR">يورو</SelectItem>
+            <SelectItem value="GBP">جنيه إسترليني</SelectItem>
+            <SelectItem value="SAR">ريال سعودي</SelectItem>
+            <SelectItem value="AED">درهم إماراتي</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Insurance (Optional) */}
+      {/* Availability Status */}
       <div className="space-y-2">
-        <Label htmlFor="insurance" className="text-right block">
-          التأمين (اختياري)
+        <Label htmlFor="availability_status" className="text-right block">
+          حالة التوفر <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="insurance"
-          type="number"
-          value={data.insurance}
-          onChange={(e) => updateData({ insurance: e.target.value })}
-          placeholder="أدخل القيمة بالدولار"
-          className="text-right"
-        />
+        <Select value={data.availability_status} onValueChange={(value) => updateData({ availability_status: value })}>
+          <SelectTrigger id="availability_status" className="text-right">
+            <SelectValue placeholder="اختر حالة التوفر" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="available">متاح</SelectItem>
+            <SelectItem value="rented">مؤجر</SelectItem>
+            <SelectItem value="sold">مباع</SelectItem>
+            <SelectItem value="reserved">محجوز</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Status */}
+      <div className="space-y-2">
+        <Label htmlFor="status" className="text-right block">
+          حالة الإعلان <span className="text-destructive">*</span>
+        </Label>
+        <Select value={data.status} onValueChange={(value) => updateData({ status: value })}>
+          <SelectTrigger id="status" className="text-right">
+            <SelectValue placeholder="اختر حالة الإعلان" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">نشط</SelectItem>
+            <SelectItem value="inactive">غير نشط</SelectItem>
+            <SelectItem value="pending">في الانتظار</SelectItem>
+            <SelectItem value="rejected">مرفوض</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Navigation Buttons */}

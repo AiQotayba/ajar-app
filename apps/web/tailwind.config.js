@@ -34,7 +34,9 @@ module.exports = {
         background: "#FFFFFF",
       },
       fontFamily: {
-        sans: ["Cairo", "Tajawal", "system-ui", "sans-serif"],
+        sans: ["ITF Qomra Arabic", "Tajawal", "system-ui", "sans-serif"],
+        arabic: ["ITF Qomra Arabic", "Tajawal", "system-ui", "sans-serif"],
+        qomra: ["ITF Qomra Arabic", "system-ui", "sans-serif"],
       },
       borderRadius: {
         sm: "6px",

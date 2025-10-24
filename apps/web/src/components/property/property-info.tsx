@@ -130,19 +130,19 @@ export function PropertyInfo({
           {condition && (
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">الحالة:</span>
-              <span className="font-medium">{condition}</span>
+              <span className="font-medium">{typeof condition === 'object' ? JSON.stringify(condition) : condition}</span>
             </div>
           )}
           {material && (
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">المادة:</span>
-              <span className="font-medium">{material}</span>
+              <span className="font-medium">{typeof material === 'object' ? JSON.stringify(material) : material}</span>
             </div>
           )}
           {color && (
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">اللون:</span>
-              <span className="font-medium">{color}</span>
+              <span className="font-medium">{typeof color === 'object' ? JSON.stringify(color) : color}</span>
             </div>
           )}
           {width && width > 0 && (
@@ -177,10 +177,23 @@ export function PropertyInfo({
 
 function Row({ value, label, Icon }: { value: number | string | undefined, label: string, Icon: any }) {
   if (!value) return <></>;
-  else if (value && typeof value === 'number' && value > 0) return (
+  
+  // Convert object to string if needed
+  const displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
+  
+  if (value && typeof value === 'number' && value > 0) return (
     <div className="flex items-center gap-2">
       <Icon className="h-4 w-4 text-muted-foreground" />
       <span className="font-medium">{value} {label}</span>
     </div>
   )
+  
+  if (value && typeof value === 'string' && value.trim()) return (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-muted-foreground" />
+      <span className="font-medium">{displayValue}</span>
+    </div>
+  )
+  
+  return <></>;
 }

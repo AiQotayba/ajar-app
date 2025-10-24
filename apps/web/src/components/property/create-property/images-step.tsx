@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ImagePlus, Star, X } from "lucide-react"
 import { useRef, useState } from "react"
-import type { PropertyFormData } from "../create-property-form"
+import type { PropertyFormData } from "./property-form-engine"
 
 interface ImagesStepProps {
   data: PropertyFormData
@@ -23,8 +23,8 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
 
-    const newImages = [...data.images, ...files].slice(0, 20)
-    updateData({ images: newImages })
+    const newImages = [...data.media, ...files].slice(0, 20)
+    updateData({ media: newImages })
 
     // Create preview URLs
     const newUrls = files.map((file) => URL.createObjectURL(file))
@@ -32,28 +32,28 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
   }
 
   const handleRemoveImage = (index: number) => {
-    const newImages = data.images.filter((_, i) => i !== index)
+    const newImages = data.media.filter((_, i) => i !== index)
     const newUrls = previewUrls.filter((_, i) => i !== index)
 
     updateData({
-      images: newImages,
-      coverImageIndex:
-        data.coverImageIndex === index
+      media: newImages,
+      cover_image_index:
+        data.cover_image_index === index
           ? 0
-          : data.coverImageIndex > index
-            ? data.coverImageIndex - 1
-            : data.coverImageIndex,
+          : data.cover_image_index > index
+            ? data.cover_image_index - 1
+            : data.cover_image_index,
     })
     setPreviewUrls(newUrls)
   }
 
   const handleSetCover = (index: number) => {
-    updateData({ coverImageIndex: index })
+    updateData({ cover_image_index: index })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (data.images.length === 0) return
+    if (data.media.length === 0) return
     onNext()
   }
 
@@ -72,7 +72,7 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
         </div>
 
         {/* Images Grid */}
-        {data.images.length > 0 && (
+        {data.media.length > 0 && (
           <div className="grid grid-cols-2 gap-3">
             {previewUrls.map((url, index) => (
               <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted">
@@ -102,7 +102,7 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
                   <Star
                     className={cn(
                       "h-4 w-4",
-                      data.coverImageIndex === index ? "fill-yellow-500 text-yellow-500" : "text-gray-400",
+                      data.cover_image_index === index ? "fill-yellow-500 text-yellow-500" : "text-gray-400",
                     )}
                   />
                 </button>
@@ -112,13 +112,13 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
         )}
 
         {/* Upload Button */}
-        {data.images.length < 20 && (
+        {data.media.length < 20 && (
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className={cn(
               "w-full rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all flex flex-col items-center justify-center gap-3 text-primary",
-              data.images.length === 0 ? "h-48" : "h-32 py-6",
+              data.media.length === 0 ? "h-48" : "h-32 py-6",
             )}
           >
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -137,7 +137,7 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
           className="hidden"
         />
 
-        {data.images.length > 0 && (
+        {data.media.length > 0 && (
           <p className="text-xs text-destructive text-center">
             الحد الأدنى لعدد الصور هو 5. قم بإضافة صورة واحدة على الأقل للمتابعة.
           </p>
@@ -156,7 +156,7 @@ export function ImagesStep({ data, updateData, onNext, onPrevious }: ImagesStepP
         </Button>
         <Button
           type="submit"
-          disabled={data.images.length === 0}
+          disabled={data.media.length === 0}
           className="flex-1 h-12 text-base font-bold rounded-xl"
         >
           التالي

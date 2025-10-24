@@ -115,6 +115,13 @@ function useTableData<T>(apiEndpoint: string) {
   // Fetch function using API client
   const fetchData = React.useCallback(async () => {
     const params = Object.fromEntries(searchParams.entries())
+    
+    // Add default sort values if not present
+    if (!params.sort_field && !params.sort_order) {
+      params.sort_field = "sort_order"
+      params.sort_order = "asc"
+    }
+    
     const response = await api.get(apiEndpoint, { params }) // Removed showErrorToast: true
 
     if (response.isError) throw new Error(response.message || "فشل في تحميل البيانات") // Changed error message to Arabic
@@ -356,27 +363,6 @@ export function TableCore<T extends Record<string, any>>({
   const [selectedRow, setSelectedRow] = React.useState<T | null>(null)
   const [isDeleting, setIsDeleting] = React.useState(false)
 
-  // Initialize sort and date range from URL params on mount
-  React.useEffect(() => {
-    const sortField = searchParams.get("sort_field")
-    const sortOrder = searchParams.get("sort_order")
-    const dateFrom = searchParams.get("dateFrom")
-    const dateTo = searchParams.get("dateTo")
-
-    // Set sort from URL
-    if (sortField && sortOrder) {
-      setSortColumn(sortField)
-      setSortDirection(sortOrder as "asc" | "desc")
-    }
-
-    if (dateFrom || dateTo) {
-      setDateRange({
-        from: dateFrom ? new Date(dateFrom) : undefined,
-        to: dateTo ? new Date(dateTo) : undefined,
-      })
-    }
-  }, [])
-
   // Update URL params
   const updateParams = React.useCallback(
     (updates: Record<string, string | null>) => {
@@ -394,6 +380,31 @@ export function TableCore<T extends Record<string, any>>({
     },
     [pathname, router, searchParams],
   )
+
+  // Initialize sort and date range from URL params on mount
+  React.useEffect(() => {
+    const sortField = searchParams.get("sort_field")
+    const sortOrder = searchParams.get("sort_order")
+    const dateFrom = searchParams.get("dateFrom")
+    const dateTo = searchParams.get("dateTo")
+
+    // Set default sort values if not present (without updating URL)
+    if (!sortField && !sortOrder) {
+      setSortColumn("sort_order")
+      setSortDirection("asc")
+    } else if (sortField && sortOrder) {
+      // Set sort from URL
+      setSortColumn(sortField)
+      setSortDirection(sortOrder as "asc" | "desc")
+    }
+
+    if (dateFrom || dateTo) {
+      setDateRange({
+        from: dateFrom ? new Date(dateFrom) : undefined,
+        to: dateTo ? new Date(dateTo) : undefined,
+      })
+    }
+  }, [])
 
   // Handle search
   const handleSearch = (value: string) => updateParams({ search: value || null, page: "1" })
@@ -472,7 +483,7 @@ export function TableCore<T extends Record<string, any>>({
 
   const handleDragOver = (e: React.DragEvent, index: number) => e.preventDefault()
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
 
     if (draggedIndex === null || draggedIndex === dropIndex) return
@@ -481,9 +492,36 @@ export function TableCore<T extends Record<string, any>>({
     const [reorderedItem] = items.splice(draggedIndex, 1)
     items.splice(dropIndex, 0, reorderedItem)
 
+    // Get the target item (the one we dropped on)
+    const targetItem = data[dropIndex]
+
+    // Update local state immediately for better UX
     setData(items)
     setDraggedIndex(null)
-    toast.success("تم تحديث الترتيب بنجاح") // Changed toast message to Arabic
+
+    try {
+      // Call API to update sort order on server using the target item's ID
+      console.info(`Updating sort order for item ${reorderedItem.id} to position of item ${targetItem.id}`)
+      
+      const response = await api.put(`${apiEndpoint}/${reorderedItem.id}/reorder?sort_field=sort_order&sort_order=asc`, {
+        sort_order: targetItem.sort_order
+      })
+      
+      console.info("Sort order update response:", response)
+      toast.success("تم تحديث الترتيب بنجاح")
+      
+      // Refetch data to ensure consistency
+      refetch()
+    } catch (error: any) {
+      console.error("Error updating sort order:", error)
+      
+      // Show more specific error message
+      const errorMessage = error?.response?.data?.message || error?.message || "فشل في تحديث الترتيب"
+      toast.error(errorMessage)
+      
+      // Revert local changes on error
+      refetch()
+    }
   }
 
   const handleDragEnd = () => setDraggedIndex(null)

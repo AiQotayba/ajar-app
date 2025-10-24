@@ -9,9 +9,10 @@ interface SuccessModalProps {
   open: boolean
   onClose: () => void
   onCreateAnother: () => void
+  isEditing?: boolean
 }
 
-export function SuccessModal({ open, onClose, onCreateAnother }: SuccessModalProps) {
+export function SuccessModal({ open, onClose, onCreateAnother, isEditing = false }: SuccessModalProps) {
   const router = useRouter()
 
   const handleClose = () => {
@@ -31,24 +32,30 @@ export function SuccessModal({ open, onClose, onCreateAnother }: SuccessModalPro
 
           {/* Success Message */}
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold">تم إرسال طلبك بنجاح</h2>
+            <h2 className="text-2xl font-bold">
+              {isEditing ? "تم تحديث الإعلان بنجاح" : "تم إرسال طلبك بنجاح"}
+            </h2>
             <p className="text-sm text-muted-foreground leading-relaxed px-4">
-              تم إرسال طلبك بنجاح، وسيقوم فريقنا بمراجعته والتأكد من مطابقته للمعايير. ستتلقى إشعاراً فور اعتماد الطلب
-              ليظهر ضمن الإعلانات المتاحة للمستخدمين.
+              {isEditing 
+                ? "تم تحديث الإعلان بنجاح. يمكنك الآن رؤية التعديلات في قائمة إعلاناتك."
+                : "تم إرسال طلبك بنجاح، وسيقوم فريقنا بمراجعته والتأكد من مطابقته للمعايير. ستتلقى إشعاراً فور اعتماد الطلب ليظهر ضمن الإعلانات المتاحة للمستخدمين."
+              }
             </p>
           </div>
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 w-full">
-            <Button onClick={onCreateAnother} className="w-full h-12 text-base font-bold rounded-xl">
-              إرسال إعلان آخر
-            </Button>
+            {!isEditing && (
+              <Button onClick={onCreateAnother} className="w-full h-12 text-base font-bold rounded-xl">
+                إرسال إعلان آخر
+              </Button>
+            )}
             <Button
               onClick={handleClose}
               variant="outline"
               className="w-full h-12 text-base font-bold rounded-xl bg-transparent"
             >
-              إغلاق
+              {isEditing ? "العودة للإعلانات" : "إغلاق"}
             </Button>
           </div>
         </div>

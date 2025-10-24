@@ -57,4 +57,8 @@ export const listingsApi = {
   reorder: async (listings: Array<{ id: number; sort_order: number }>): Promise<void> => {
     await api.put("/admin/listings/reorder", { listings })
   },
+
+  reorderSingle: async (id: number, sort_order: number): Promise<void> => {
+    await api.put(`/admin/listings/${id}/reorder`, { sort_order })
+  },
 }

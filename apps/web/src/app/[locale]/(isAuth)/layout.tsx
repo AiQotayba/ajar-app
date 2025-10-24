@@ -7,16 +7,9 @@ import { generateLocalBusinessStructuredData, generateOrganizationStructuredData
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { Cairo } from "next/font/google";
 import type React from "react";
 import { Toaster } from "sonner";
 import "../globals.css";
-
-const cairo = Cairo({
-    subsets: ["arabic", "latin"],
-    variable: "--font-cairo",
-    display: "swap",
-})
 
 export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
@@ -62,7 +55,7 @@ export default async function LocaleLayout({
     const lang = locale;
 
     return (
-        <html lang={lang} dir={dir} className={cairo.variable}>
+        <html lang={lang} dir={dir}>
             <head>
                 {/* Structured Data */}
                 <JsonLd data={generateOrganizationStructuredData()} />
@@ -81,9 +74,6 @@ export default async function LocaleLayout({
                 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
                 <link rel="manifest" href="/manifest.json" />
                 
-                {/* Preconnect */}
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
             </head>
             <body className="antialiased">
                 <QueryProvider>

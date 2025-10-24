@@ -26,14 +26,33 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
     })
     
     if (!response.ok) {
-      console.error(`API Error: ${response.status} ${response.statusText}`)
-      throw new Error(`API returned ${response.status}`)
+      // Handle 404 (not found) without throwing to avoid noisy dev errors
+      if (response.status === 404) {
+        console.warn(`Listing ${id} not found (404)`)
+        return {
+          title: isArabic ? 'صفحة غير موجودة' : 'Page Not Found',
+          description: isArabic ? 'الصفحة المطلوبة غير موجودة' : 'The requested page was not found',
+          robots: { index: false, follow: false },
+        }
+      }
+
+      // For other non-OK statuses, return safe fallback metadata
+      console.warn(`API Error: ${response.status} ${response.statusText}`)
+      return {
+        title: isArabic ? 'حدث خطأ' : 'Something went wrong',
+        description: isArabic ? 'تعذر تحميل البيانات' : 'Failed to load data',
+        robots: { index: false, follow: false },
+      }
     }
     
     const contentType = response.headers.get('content-type')
     if (!contentType || !contentType.includes('application/json')) {
-      console.error('API returned non-JSON response:', contentType)
-      throw new Error('API returned non-JSON response')
+      console.warn('API returned non-JSON response:', contentType)
+      return {
+        title: isArabic ? 'حدث خطأ' : 'Something went wrong',
+        description: isArabic ? 'تعذر تحميل البيانات' : 'Failed to load data',
+        robots: { index: false, follow: false },
+      }
     }
     
     const data = await response.json()
@@ -71,10 +90,11 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
       modifiedTime: listing.updated_at,
     })
   } catch (error) {
-    console.error('Error generating metadata:', error)
+    console.warn('Error generating metadata:', error)
     return {
-      title: isArabic ? 'صفحة غير موجودة' : 'Page Not Found',
-      description: isArabic ? 'الصفحة المطلوبة غير موجودة' : 'The requested page was not found',
+      title: isArabic ? 'حدث خطأ' : 'Something went wrong',
+      description: isArabic ? 'تعذر تحميل البيانات' : 'Failed to load data',
+      robots: { index: false, follow: false },
     }
   }
 }

@@ -3,22 +3,26 @@
 import { Button } from "@/components/ui/button"
 import { Edit2, MapPin, Star } from "lucide-react"
 import Image from "next/image"
-import type { PropertyFormData } from "../create-property-form"
+import type { PropertyFormData } from "./property-form-engine"
 
 interface ReviewStepProps {
   data: PropertyFormData
   onSubmit: () => void
   onPrevious: () => void
   onEditStep?: (step: number) => void
+  isEditing?: boolean
+  isLoading?: boolean
 }
 
-export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewStepProps) {
+export function ReviewStep({ data, onSubmit, onPrevious, onEditStep, isEditing = false, isLoading = false }: ReviewStepProps) {
   return (
     <div className="space-y-6 pb-6">
       <div className="bg-primary-light/30 border border-primary/20 rounded-2xl p-4 text-right">
         <p className="text-sm text-foreground/80 leading-relaxed">
-          خطوة أخيرة! راجع بياناتك بعناية قبل الإرسال. سيقوم فريقنا بمراجعته والتأكد من مطابقته للمعايير. ستتلقى إشعاراً
-          فور اعتماد الطلب ليظهر ضمن الإعلانات المتاحة للمستخدمين.
+          {isEditing 
+            ? "راجع التعديلات بعناية قبل الحفظ. سيتم تحديث الإعلان فوراً."
+            : "خطوة أخيرة! راجع بياناتك بعناية قبل الإرسال. سيقوم فريقنا بمراجعته والتأكد من مطابقته للمعايير. ستتلقى إشعاراً فور اعتماد الطلب ليظهر ضمن الإعلانات المتاحة للمستخدمين."
+          }
         </p>
       </div>
 
@@ -39,19 +43,29 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
           )}
         </div>
 
-        {/* Title */}
+        {/* Title Arabic */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">العنوان</label>
+          <label className="text-sm font-medium text-foreground">العنوان بالعربية</label>
           <div className="bg-background border border-border rounded-xl p-4">
-            <p className="text-foreground">{data.title || "غير محدد"}</p>
+            <p className="text-foreground">{data.title_ar || "غير محدد"}</p>
           </div>
         </div>
+
+        {/* Title English */}
+        {data.title_en && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">العنوان بالإنجليزية</label>
+            <div className="bg-background border border-border rounded-xl p-4">
+              <p className="text-foreground">{data.title_en}</p>
+            </div>
+          </div>
+        )}
 
         {/* Property Type */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">نوع العقار</label>
           <div className="bg-background border border-border rounded-xl p-4">
-            <p className="text-foreground">{data.propertyType || "غير محدد"}</p>
+            <p className="text-foreground">{data.type || "غير محدد"}</p>
           </div>
         </div>
 
@@ -59,7 +73,7 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">التصنيف</label>
           <div className="bg-background border border-border rounded-xl p-4">
-            <p className="text-foreground">{data.category || "غير محدد"}</p>
+            <p className="text-foreground">{data.category_id || "غير محدد"}</p>
           </div>
         </div>
 
@@ -136,7 +150,7 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">المحافظة</label>
           <div className="bg-background border border-border rounded-xl p-4">
-            <p className="text-foreground">{data.governorate || "غير محدد"}</p>
+            <p className="text-foreground">{data.governorate_id || "غير محدد"}</p>
           </div>
         </div>
 
@@ -144,7 +158,7 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">المدينة</label>
           <div className="bg-background border border-border rounded-xl p-4">
-            <p className="text-foreground">{data.city || "غير محدد"}</p>
+            <p className="text-foreground">{data.city_id || "غير محدد"}</p>
           </div>
         </div>
 
@@ -175,15 +189,15 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
         {/* Property Images */}
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-3">
-            {data.images.map((image, index) => (
+            {data.media.map((file, index) => (
               <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted">
                 <Image
-                  src={image.url || "/images/placeholder.svg"}
+                  src={file instanceof File ? URL.createObjectURL(file) : "/images/placeholder.svg"}
                   alt={`Property image ${index + 1}`}
                   fill
                   className="object-cover"
                 />
-                {image.isCover && (
+                {data.cover_image_index === index && (
                   <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm rounded-full p-1.5">
                     <Star className="w-4 h-4 text-white fill-white" />
                   </div>
@@ -215,29 +229,33 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
             السعر <span className="text-red-500">*</span>
           </label>
           <div className="bg-background border border-border rounded-xl p-4">
-            <p className="text-foreground">{data.price ? `${data.price} (دولار/الشهر)` : "غير محدد"}</p>
+            <p className="text-foreground">{data.price ? `${data.price} ${data.currency}` : "غير محدد"}</p>
           </div>
         </div>
 
-        {/* Payment Frequency */}
+        {/* Currency */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">
-            دورية الدفع <span className="text-red-500">*</span>
-          </label>
+          <label className="text-sm font-medium text-foreground">العملة</label>
           <div className="bg-background border border-border rounded-xl p-4">
-            <p className="text-foreground">{data.paymentFrequency || "غير محدد"}</p>
+            <p className="text-foreground">{data.currency || "غير محدد"}</p>
           </div>
         </div>
 
-        {/* Insurance (Optional) */}
-        {data.insurance && (
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">التأمين (اختياري)</label>
-            <div className="bg-background border border-border rounded-xl p-4">
-              <p className="text-foreground">{data.insurance} دولار</p>
-            </div>
+        {/* Availability Status */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">حالة التوفر</label>
+          <div className="bg-background border border-border rounded-xl p-4">
+            <p className="text-foreground">{data.availability_status || "غير محدد"}</p>
           </div>
-        )}
+        </div>
+
+        {/* Status */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">حالة الإعلان</label>
+          <div className="bg-background border border-border rounded-xl p-4">
+            <p className="text-foreground">{data.status || "غير محدد"}</p>
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-3 pt-4">
@@ -249,8 +267,12 @@ export function ReviewStep({ data, onSubmit, onPrevious, onEditStep }: ReviewSte
         >
           السابق
         </Button>
-        <Button onClick={onSubmit} className="flex-1 h-14 text-base font-bold rounded-xl">
-          إرسال للمراجعة
+        <Button 
+          onClick={onSubmit} 
+          disabled={isLoading}
+          className="flex-1 h-14 text-base font-bold rounded-xl"
+        >
+          {isLoading ? "جاري الحفظ..." : isEditing ? "حفظ التعديلات" : "إرسال للمراجعة"}
         </Button>
       </div>
     </div>

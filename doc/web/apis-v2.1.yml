@@ -1,0 +1,17 @@
+bugs:
+  - map:
+      api: GET /user/listings?map=true
+      bug: find in api
+  - home:
+    - api: /user/home?sort_field=sort_order&sort_order=asc
+    - bug: [جلب البيانات مرتبة]
+  - my-listings:
+      api:
+        - GET: /user/listings?owner_id=1
+  - Change Password:
+      api: POST /profile/change-password
+      note: مطلوب api جديد لتغيير كلمة المرور لانه هيك اي واحد بيغير كلمة المرور بدون حماية
+  - delete review:
+      api: DELETE /user/reviews/{id}
+      note: لحذف التقييم
+      json: { "success": false, "message": "ليس لديك صلاحية للقيام بهذا الإجراء", "key": "messages.permission.error" }

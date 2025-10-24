@@ -4,13 +4,14 @@ import { PropertyDetailsSkeleton } from "@/components/property/property-details-
 import { PropertyFeatures } from "@/components/property/property-features"
 import { PropertyGallery } from "@/components/property/property-gallery"
 import { PropertyInfo } from "@/components/property/property-info"
-import { PropertyLocation } from "@/components/property/property-location"
+import { PropertyMapV2 } from "@/components/property/map/property-map-v2"
 import { PropertyReviews } from "@/components/property/property-reviews"
 import { Button } from "@/components/ui/button"
 import { useTranslationsHook } from "@/hooks/use-translations"
 import { api } from "@/lib/api"
-import { useQuery } from "@tanstack/react-query"
-import { Eye, Heart } from "lucide-react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useAuth } from "@/hooks/use-auth"
+import { Eye, Heart, MapPin, Navigation } from "lucide-react"
 import { notFound } from "next/navigation"
 import { useState } from "react"
 
@@ -24,8 +25,8 @@ interface ListingData {
   is_favorite: boolean
   ribon_text?: { ar: string; en: string }
   ribon_color?: string
-  title: { ar: string; en: string }
-  description: { ar: string; en: string }
+  title?: { ar: string; en: string }
+  description?: { ar: string; en: string }
   price: number
   currency: string
   type: 'rent' | 'sale'
@@ -84,6 +85,13 @@ interface ListingData {
 export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
   const t = useTranslationsHook()
   const [isFavorite, setIsFavorite] = useState(false)
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+
+  // Function to refresh property data
+  const refreshPropertyData = () => {
+    queryClient.invalidateQueries({ queryKey: ['property', id, locale] })
+  }
 
   const { data: response, isLoading, error } = useQuery({
     queryKey: ['property', id, locale],
@@ -114,16 +122,18 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
 
   if (response.isError) return notFound()
   // Helper function to get localized text
-  const getLocalizedText = (text: { ar: string; en: string }) => {
-    return text[locale as keyof typeof text] || text.ar
+  const getLocalizedText = (text: { ar: string; en: string } | undefined | null) => {
+    if (!text) return ''
+    const currentLocale = locale || 'ar'
+    return text[currentLocale as keyof typeof text] || text.ar || ''
   }
 
   // Get property details
   const title = getLocalizedText(property.title)
   const description = getLocalizedText(property.description)
   const location = property.city
-    ? `${getLocalizedText(property.city.name)}, ${getLocalizedText(property.governorate?.name || { ar: '', en: '' })}`
-    : getLocalizedText(property.governorate?.name || { ar: '', en: '' })
+    ? `${getLocalizedText(property.city.name)}, ${getLocalizedText(property.governorate?.name)}`
+    : getLocalizedText(property.governorate?.name)
 
   // Get category name
   const categoryName = property.category ? getLocalizedText(property.category.name) : ''
@@ -159,7 +169,10 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
     if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
       return value.slice(1, -1)
     }
-    return value
+    if (typeof value === 'object' && value !== null) {
+      return JSON.stringify(value)
+    }
+    return value || ''
   }
 
   // Format price
@@ -237,12 +250,45 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
         )}
 
         {/* Location */}
-        <PropertyLocation
-          location={location}
-          latitude={property.latitude}
-          longitude={property.longitude}
-          locale={locale}
-        />
+        <div className="space-y-4">
+          <h2 className="text-lg font-bold text-foreground">
+            {isArabic ? 'الموقع' : 'Location'}
+          </h2>
+
+          {/* Location Text */}
+          {location && (
+            <div className="flex items-start gap-3 text-sm text-muted-foreground">
+              <div className="bg-primary/10 h-10 w-10 rounded-full flex justify-center items-center">
+                <MapPin className="h-5 w-5 flex-shrink-0 text-primary" />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium text-foreground">{location}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {isArabic ? 'موقع العقار' : 'Property location'}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Map */}
+          {property.latitude && property.longitude && property.latitude !== '0' && property.longitude !== '0' ? (
+            <div className="space-y-3">
+              <PropertyMapV2
+                lat={parseFloat(property.latitude)}
+                lng={parseFloat(property.longitude)}
+              />
+            </div>
+          ) : (
+            <div className="relative h-64 rounded-3xl overflow-hidden border border-border bg-muted/30 flex items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <MapPin className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">
+                  {isArabic ? 'لا توجد إحداثيات متاحة' : 'No coordinates available'}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Reviews */}
         <PropertyReviews
@@ -251,6 +297,8 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
           reviewsCount={property.reviews_count}
           propertyId={property.id.toString()}
           locale={locale}
+          currentUserId={user?.id}
+          onReviewAdded={refreshPropertyData}
         />
 
         {/* WhatsApp Contact Button */}

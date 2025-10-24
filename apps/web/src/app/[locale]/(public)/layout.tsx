@@ -7,16 +7,9 @@ import { generateLocalBusinessStructuredData, generateOrganizationStructuredData
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { Cairo } from "next/font/google";
 import type React from "react";
 import { Toaster } from "sonner";
 import "../globals.css";
-
-const cairo = Cairo({
-    subsets: ["arabic", "latin"],
-    variable: "--font-cairo",
-    display: "swap",
-})
 
 export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
@@ -62,7 +55,7 @@ export default async function LocaleLayout({
     const lang = locale;
 
     return (
-        <html lang={lang} dir={dir} className={cairo.variable}>
+        <html lang={lang} dir={dir}>
             <head>
                 {/* Structured Data */}
                 <JsonLd data={generateOrganizationStructuredData()} />
@@ -72,6 +65,7 @@ export default async function LocaleLayout({
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="format-detection" content="telephone=no" />
                 <meta name="theme-color" content="#2563eb" />
+                <meta name="mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
                 <meta name="apple-mobile-web-app-title" content="أجار" />
@@ -81,9 +75,24 @@ export default async function LocaleLayout({
                 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
                 <link rel="manifest" href="/manifest.json" />
                 
-                {/* Preconnect */}
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                {/* Font Preloading for Better Performance */}
+                <link rel="preload" href="/fonts/itfQomraArabic-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+                <link rel="preload" href="/fonts/itfQomraArabic-Medium.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+                <link rel="preload" href="/fonts/itfQomraArabic-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+                
+                {/* Font Loading Optimization */}
+                <style dangerouslySetInnerHTML={{
+                  __html: `
+                    @font-face {
+                      font-family: "ITF Qomra Arabic";
+                      src: url('/fonts/itfQomraArabic-Regular.woff2') format('woff2');
+                      font-weight: 400;
+                      font-style: normal;
+                      font-display: swap;
+                    }
+                  `
+                }} />
+                
             </head>
             <body className="antialiased">
                 <QueryProvider>

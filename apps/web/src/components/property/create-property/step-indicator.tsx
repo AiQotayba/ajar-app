@@ -21,28 +21,26 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
 
         return (
           <div key={step.id} className="flex items-center flex-1">
-            <div className="flex flex-col items-center flex-1 gap-2">
+            <div className={`flex flex-col items-center flex-1 gap-2`}>
               <div
                 className={cn(
-                  "rounded-full flex items-center justify-center transition-all relative",
-                  isCompleted && "w-12 h-12 bg-primary",
-                  isCurrent && "w-14 h-14 bg-primary ring-4 ring-primary/20",
-                  isUpcoming && "w-10 h-10 bg-muted",
+                  "rounded-full flex items-center justify-center transition-all relative border-2",
+                  isCompleted && "w-6 h-6 bg-[#01805F] border-1 border-white",
+                  isCurrent && "w-6 h-6 bg-[#01805F] border-1 border-white",
+                  isUpcoming && "w-6 h-6 bg-gray-300 border-gray-300",
                 )}
               >
-                {isCompleted && (
-                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-                {isCurrent && <div className="w-4 h-4 bg-white rounded-full" />}
+                {isCompleted && <div className="w-4.5 h-4.5 bg-[#01805F] border-3 border-white rounded-full" />}
+                {isCurrent && <div className="w-4.5 h-4.5 bg-[#01805F] border-3 border-white rounded-full" />}
+                {isUpcoming && <div className="w-4.5 h-4.5 bg-gray-500 rounded-full" />}
               </div>
 
               <span
                 className={cn(
-                  "text-[10px] leading-tight text-center font-medium max-w-[60px]",
-                  (isCompleted || isCurrent) && "text-foreground",
-                  isUpcoming && "text-muted-foreground",
+                  "text-[10px] leading-tight text-center font-medium max-w-[60px] text-nowrap",
+                  isCompleted && "text-[#01805F]",
+                  isCurrent && "text-[#01805F]",
+                  isUpcoming && "text-gray-500",
                 )}
               >
                 {step.label}
@@ -50,7 +48,12 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
             </div>
 
             {index < steps.length - 1 && (
-              <div className={cn("h-1 flex-1 -mt-12 rounded-full", isCompleted ? "bg-primary" : "bg-muted")} />
+              <div
+                className={cn(
+                  "h-1 flex-1 -mt-6.5 rounded-full",
+                  isCompleted ? "bg-[#01805F]" : "bg-[#E5E7EB]"
+                )}
+              />
             )}
           </div>
         )

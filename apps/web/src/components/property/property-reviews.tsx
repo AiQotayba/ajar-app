@@ -3,15 +3,44 @@
 import { AddReviewModal } from "@/components/property/add-review-modal"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Star } from "lucide-react"
+import { Star, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { api } from "@/lib/api"
+import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 interface Review {
   id: number
-  author?: string
   rating: number
   comment?: string
-  date?: string
+  is_approved: boolean
+  user: {
+    id: number
+    first_name: string
+    last_name: string
+    full_name: string
+    phone: string
+    email?: string
+    role: string
+    status: string
+    phone_verified: boolean
+    avatar?: string
+    avatar_url?: string
+    language?: string
+    wallet_balance: number
+    notifications_unread_count: number
+    listings_count: number
+    created_at: string
+    updated_at: string
+  }
+  listing: {
+    id: number
+    title: {
+      ar: string
+      en: string
+    }
+  }
+  created_at: string
 }
 
 interface PropertyReviewsProps {
@@ -20,12 +49,42 @@ interface PropertyReviewsProps {
   reviewsCount: number
   propertyId: string
   locale?: string
+  currentUserId?: number
+  onReviewAdded?: () => void
 }
 
-export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, locale = 'ar' }: PropertyReviewsProps) {
+export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, locale = 'ar', currentUserId, onReviewAdded }: PropertyReviewsProps) {
   const [showAddReview, setShowAddReview] = useState(false)
+  const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null)
 
-  const formatDate = (dateString?: string) => {
+  // Function to delete a review
+  const handleDeleteReview = async (reviewId: number) => {
+    if (!confirm(locale === 'ar' ? 'هل أنت متأكد من حذف هذا التقييم؟' : 'Are you sure you want to delete this review?')) {
+      return
+    }
+
+    setDeletingReviewId(reviewId)
+    try {
+      const response = await api.delete(`/user/reviews/${reviewId}`)
+
+      if (!response.isError) {
+        toast.success(response.message || (locale === 'ar' ? 'تم حذف التقييم بنجاح' : 'Review deleted successfully'))
+        // Call parent callback to refresh property data
+        if (onReviewAdded) {
+          onReviewAdded()
+        }
+      } else {
+        toast.error(response.message || (locale === 'ar' ? 'حدث خطأ في حذف التقييم' : 'Error deleting review'))
+      }
+    } catch (error) {
+      console.error('Error deleting review:', error)
+      toast.error(locale === 'ar' ? 'حدث خطأ في حذف التقييم' : 'Error deleting review')
+    } finally {
+      setDeletingReviewId(null)
+    }
+  }
+
+  const formatDate = (dateString: string) => {
     if (!dateString) return ''
     try {
       const date = new Date(dateString)
@@ -51,6 +110,7 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
     ))
   }
 
+
   return (
     <>
       <div className="space-y-4">
@@ -69,7 +129,7 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
               <Star className="h-5 w-5 fill-[#FFC32C] stroke-0" />
             </div>
           )}
-        </div>  
+        </div>
 
         {/* Rating Summary - Only show if there are reviews */}
         {reviewsCount > 0 ? (
@@ -105,28 +165,28 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
         {/* Reviews List */}
         {reviews.length > 0 && (
           <div className="space-y-3">
-            {reviews.map((review) => (
+            {reviews.map((review: Review) => (
               <div key={review.id} className="p-4 rounded-xl border border-border bg-card space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                       <span className="text-sm font-bold text-primary">
-                        {(review.author || 'مجهول')[0].toUpperCase()}
+                        {review.user.full_name[0].toUpperCase()}
                       </span>
                     </div>
                     <div>
                       <span className="font-medium text-foreground block">
-                        {review.author || (locale === 'ar' ? 'مجهول' : 'Anonymous')}
+                        {review.user.full_name}
                       </span>
-                      {review.date && (
-                        <span className="text-xs text-muted-foreground">
-                          {formatDate(review.date)}
-                        </span>
-                      )}
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(review.created_at)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex gap-0.5">
-                    {renderStars(review.rating)}
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-0.5">
+                      {renderStars(review.rating)}
+                    </div>
                   </div>
                 </div>
                 {review.comment && (
@@ -134,18 +194,40 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
                     {review.comment}
                   </p>
                 )}
+
+                {/* Delete button for current user's reviews */}
+                {currentUserId && review.user.id === currentUserId && (
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteReview(review.id)}
+                      disabled={deletingReviewId === review.id}
+                      className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                      title={locale === 'ar' ? 'حذف التقييم' : 'Delete review'}
+                    >
+                      {deletingReviewId === review.id ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
 
-        {/* Add Review Button */}
-        <Button
-          onClick={() => setShowAddReview(true)}
-          className="w-full h-12 text-base font-bold rounded-xl bg-primary hover:bg-primary/90"
-        >
-          {locale === 'ar' ? 'إضافة تقييم' : 'Add Review'}
-        </Button>
+        {/* Add Review Button - Only show if user hasn't reviewed yet */}
+        {currentUserId && !reviews.some(review => review.user.id === currentUserId) && (
+          <Button
+            onClick={() => setShowAddReview(true)}
+            className="w-full h-12 text-base font-bold rounded-xl bg-primary hover:bg-primary/90"
+          >
+            {locale === 'ar' ? 'إضافة تقييم' : 'Add Review'}
+          </Button>
+        )}
       </div>
 
       <AddReviewModal
@@ -153,6 +235,13 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
         onClose={() => setShowAddReview(false)}
         propertyId={propertyId}
         locale={locale}
+        onReviewAdded={() => {
+          // Call parent callback to refresh property data
+          if (onReviewAdded) {
+            onReviewAdded()
+          }
+          setShowAddReview(false)
+        }}
       />
     </>
   )

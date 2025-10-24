@@ -35,7 +35,6 @@ api:
     - POST: /admin/cities/reorder
   sliders:
     - POST: /admin/sliders/reorder
-  reviews: 
-    - POST: /users/reviews/{id}/replay {{message: string}} 
+  reviews:  
     - POST: /admin/reviews/{id}/status {{status: approved, rejected}}
     - DELETE: /users/reviews/{id} 

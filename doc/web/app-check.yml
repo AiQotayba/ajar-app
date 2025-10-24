@@ -2,40 +2,45 @@ references:
   api[../API-docx.json]:
 app:
   (public):
-    - map:
-        api: GET /user/listings?map=true
-    - pages/[slug]:
-        api: GET /user/settings/{slug}
+    - copy files and embed in the web app:
+      - /apps/admin/lib/api-client.ts
+      - /apps/admin/components/ui/image-upload.tsx
+
     - listings:
-        - create:
-            @FormSteps{5}:
-              api:
-                - GET: /user/categories
-                - GET: /user/features
-                - GET: /user/governorates
-                - GET: /user/cities/{governorate_id}
-                - POST: /user/listings
+      - Form:
+        - اجعل الفورم قابل للتعديل اذا ارسلت له بيانات وتعرض كل الاقسام الموجودة في الفورم
+        - اجعل الفورم يعمل باستخدام react-hook-form  + zod + tanstack react-query  + shadcn/ui
+        @FormSteps{5}:
+          - Step1:
+            tasks:
+            fields: ["title_ar", "title_en", "description_ar", "description_en", "type", "availability_status", "category_id", "properties", "features" ]
+          - Step2:
+            tasks:
+              - find in map
+            api: GET /user/governorates
+            fields: ["governorate_id", "city_id", "latitude", "longitude"] 
+          - Step3:
+            fields: ["media"]
+            ref(image-upload): [apps/admin/components/ui/image-upload.tsx]
+          - Step4:
+            fields: ["price", "currency", "status"]
+          - Step5:
+            api: POST /user/listings
   (authenticated): 
-    - listings[id]: 
-          @Location:
-              api: GET /user/listings/{id}
+    - listings[id]:
           @Reviews:
             api: 
               - POST: /user/reviews 
 [All Tasks {{75}}]
+
 next:
+  - pages/[slug]:
+      api: GET /user/settings/{slug}
   - my-listings:
       api:
         - POST: /user/listings
         - GET: /user/listings/{id}
         - PUT: /user/listings/{id} 
-bugs:
   - notifications:
-      - GET: /user/notifications
-      - POST: /user/notifications/{id}/read 
-  - my-listings:
-      api:
-        - GET: /user/listings?owner_id=1
-  - Change Password:
-      api: POST /profile/change-password
-      note: مطلوب api جديد لتغيير كلمة المرور لانه هيك اي واحد بيغير كلمة المرور بدون حماية
+    - GET: /user/notifications
+    - POST: /user/notifications/{id}/read 
