@@ -1,11 +1,7 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { Bell, ChevronLeft, FileText, Lock, Pencil, Settings, LogOut } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
-import { Header } from "../layout/header"
-import { OfficeCard } from "./office-card"
 import { logout } from "@/lib/logout"
 import { toast } from "sonner"
 import { api } from "@/lib/api"
@@ -123,7 +119,6 @@ export function ProfileContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <Header title="حسابي" showBack />
         <div className="p-6 space-y-6">
           <div className="flex flex-col items-center gap-4 max-w-lg mx-auto">
             <div className="w-48 h-48 rounded-full bg-muted animate-pulse" />
@@ -144,7 +139,6 @@ export function ProfileContent() {
   if (error) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <Header title="حسابي" showBack />
         <div className="p-6 space-y-6">
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <p className="text-muted-foreground mb-4">
@@ -164,9 +158,6 @@ export function ProfileContent() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <Header title="حسابي" showBack />
-
       <div className="p-6 space-y-6">
         {/* Profile Section */}
         <div className="flex flex-col items-center gap-4 max-w-lg mx-auto">

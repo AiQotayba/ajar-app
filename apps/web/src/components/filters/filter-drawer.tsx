@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { X } from "lucide-react"
+import { X, Search } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { useAdvancedFilters } from "@/hooks/use-advanced-filters"
@@ -73,12 +73,27 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
     handleReset
   } = useAdvancedFilters()
   const locale = useLocale() as 'ar' | 'en'
+  
+  // Search state for mobile/tablet - sync with filters
+  const [searchQuery, setSearchQuery] = useState(filters.searchQuery)
+
+  // Sync searchQuery with filters
+  useEffect(() => {
+    setSearchQuery(filters.searchQuery)
+  }, [filters.searchQuery])
 
   // Get selected category data
   const selectedMainCategoryData = categories.find(cat => cat.id.toString() === filters.propertyCategory)
   const selectedSubCategoryData = availableSubCategories.find(cat => cat.id.toString() === filters.selectedSubCategory?.id.toString())
 
   const handleApplyFilters = () => {
+    handleApply()
+    onOpenChange(false)
+  }
+
+  const handleSearch = () => {
+    // Update search query in filters
+    handleFilterChange('searchQuery', searchQuery)
     handleApply()
     onOpenChange(false)
   }
@@ -101,6 +116,35 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               </Button>
             </div>
             <div className="w-16 h-1 bg-border rounded-full mx-auto mt-2" />
+            
+            {/* Search Bar for Mobile/Tablet */}
+            <div className="mt-4">
+              <div className="flex items-center gap-3 bg-primary/20 rounded-2xl">
+                <div className="flex flex-row w-full relative">
+                  <div className="absolute right-5 top-1/2 -translate-y-1/2 text-primary">
+                    <Search className="w-5 h-5" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder={locale === 'ar' ? "ابحث عن عقار، موقع، أو مدينة..." : "Search for property, location, or city..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="focus:border-primary focus:outline-none h-12 pr-14 placeholder:text-primary/80 px-5 transition-all w-full rounded-2xl"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSearch()
+                      }
+                    }}
+                  />
+                </div>
+                <Button
+                  onClick={handleSearch}
+                  className="h-12 px-6 rounded-2xl text-base font-semibold bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {locale === 'ar' ? 'بحث' : 'Search'}
+                </Button>
+              </div>
+            </div>
           </SheetHeader>
 
           {/* Filters Content */}

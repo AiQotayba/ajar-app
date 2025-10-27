@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Lock } from "lucide-react"
 import { useState } from "react"
-import { Header } from "../layout/header"
 import { api } from "@/lib/api"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -94,9 +93,6 @@ export function ChangePasswordForm() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <Header title="تغيير كلمة المرور" showBack />
-
       <form onSubmit={handleSubmit} className="p-6 space-y-6"> 
         {/* New Password */}
         <div className="space-y-2">

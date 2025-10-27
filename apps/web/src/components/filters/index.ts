@@ -4,6 +4,7 @@
  */
 
 export { FilterDrawer } from './filter-drawer'
+export { FilterDrawerWrapper } from './filter-drawer-wrapper'
 export { FilterBadge } from './filter-badge'
 export { ActiveFilters } from './active-filters'
 export { CategoryFilter } from './category-filter'

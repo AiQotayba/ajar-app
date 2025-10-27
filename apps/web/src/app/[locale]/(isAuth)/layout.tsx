@@ -10,6 +10,7 @@ import { getMessages } from 'next-intl/server';
 import type React from "react";
 import { Toaster } from "sonner";
 import "../globals.css";
+import { MainLayout } from "@/components/layout";
 
 export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
@@ -18,7 +19,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     const isArabic = locale === 'ar';
-    
+
     return generateSEOMetadata({
         title: isArabic ? 'أجار - منصة العقارات في سوريا' : 'Ajar - Syrian Real Estate Platform',
         description: isArabic ? SEO_CONSTANTS.DEFAULT_DESCRIPTION_AR : SEO_CONSTANTS.DEFAULT_DESCRIPTION_EN,
@@ -60,7 +61,7 @@ export default async function LocaleLayout({
                 {/* Structured Data */}
                 <JsonLd data={generateOrganizationStructuredData()} />
                 <JsonLd data={generateLocalBusinessStructuredData()} />
-                
+
                 {/* Additional SEO Meta Tags */}
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="format-detection" content="telephone=no" />
@@ -68,19 +69,21 @@ export default async function LocaleLayout({
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
                 <meta name="apple-mobile-web-app-title" content="أجار" />
-                
+
                 {/* Favicon */}
                 <link rel="icon" href="/favicon.ico" />
                 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
                 <link rel="manifest" href="/manifest.json" />
-                
+
             </head>
             <body className="antialiased">
                 <QueryProvider>
                     <NextIntlClientProvider locale={locale} messages={messages}>
                         <LocaleSaver />
-                        <main className="min-h-screen">{children}</main>
-                        <BottomNav />
+                        <MainLayout>
+                            <main className="min-h-screen">{children}</main>
+                        </MainLayout>
+                        {/* <BottomNav /> */}
                         <Toaster position="top-center" richColors />
                     </NextIntlClientProvider>
                 </QueryProvider>

@@ -10,6 +10,7 @@ import { getMessages } from 'next-intl/server';
 import type React from "react";
 import { Toaster } from "sonner";
 import "../globals.css";
+import { MainLayout } from "@/components/layout";
 
 export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
@@ -98,8 +99,10 @@ export default async function LocaleLayout({
                 <QueryProvider>
                     <NextIntlClientProvider locale={locale} messages={messages}>
                         <LocaleSaver />
-                        <main className="min-h-screen mb-16">{children}</main>
-                        <BottomNav />
+                        <MainLayout>
+                            <main className="min-h-screen">{children}</main>
+                        </MainLayout>
+                        {/* <BottomNav /> */}
                         <Toaster position="top-center" richColors />
                     </NextIntlClientProvider>
                 </QueryProvider>

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Header } from "../layout/header"
 import { api } from "@/lib/api"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -157,7 +156,6 @@ export function EditProfileForm() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header title="تعديل بيانات الحساب" showBack />
         <div className="p-6 space-y-6">
           <div className="space-y-4">
             <div className="h-4 w-20 bg-muted animate-pulse rounded" />
@@ -180,7 +178,6 @@ export function EditProfileForm() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <Header title="تعديل بيانات الحساب" showBack />
         <div className="p-6">
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <p className="text-muted-foreground mb-4">
@@ -197,9 +194,6 @@ export function EditProfileForm() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <Header title="تعديل بيانات الحساب" showBack />
-      
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         {/* First Name */}
         <div className="space-y-2">

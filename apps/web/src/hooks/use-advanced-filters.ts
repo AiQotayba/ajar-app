@@ -68,6 +68,7 @@ interface AdvancedFilterState {
   areaTo: string
   rooms: string
   furnished: string
+  searchQuery: string
   
   // Advanced filters
   selectedCategory: Category | null
@@ -108,6 +109,7 @@ export function useAdvancedFilters() {
       areaTo: searchParams.get('area_to') || '',
       rooms: searchParams.get('rooms') || '',
       furnished: searchParams.get('furnished') || 'furnished',
+      searchQuery: searchParams.get('search') || '',
       selectedCategory: null,
       selectedSubCategory: null,
       selectedSubSubCategory: null,
@@ -212,6 +214,7 @@ export function useAdvancedFilters() {
     if (urlParams.get('area_to')) newFilters.areaTo = urlParams.get('area_to')!
     if (urlParams.get('rooms')) newFilters.rooms = urlParams.get('rooms')!
     if (urlParams.get('furnished')) newFilters.furnished = urlParams.get('furnished')!
+    if (urlParams.get('search')) newFilters.searchQuery = urlParams.get('search')!
 
     // Parse properties and features
     const selectedProperties: Record<number, string> = {}
@@ -404,6 +407,9 @@ export function useAdvancedFilters() {
     if (newFilters.furnished && newFilters.furnished !== 'furnished') {
       params.set('furnished', newFilters.furnished)
     }
+    if (newFilters.searchQuery) {
+      params.set('search', newFilters.searchQuery)
+    }
     
     // Add selected properties
     Object.entries(newFilters.selectedProperties).forEach(([propertyId, value]) => {
@@ -450,6 +456,7 @@ export function useAdvancedFilters() {
       areaTo: '',
       rooms: '',
       furnished: 'furnished',
+      searchQuery: '',
       selectedCategory: null,
       selectedSubCategory: null,
       selectedSubSubCategory: null,

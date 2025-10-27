@@ -1,6 +1,7 @@
 import { ResetPasswordForm } from "@/components/auth/pages/reset-password-form"
 import { getTranslations } from "next-intl/server"
 import { Metadata } from "next"
+import { Suspense } from "react"
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -23,5 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default function ResetPasswordPage() {
-  return <ResetPasswordForm />
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
+  )
 }

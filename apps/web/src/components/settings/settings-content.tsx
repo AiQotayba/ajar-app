@@ -4,15 +4,12 @@ import { Switch } from "@/components/ui/switch"
 import { ChevronDown, ChevronLeft } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
-import { Header } from "../layout/header"
 
 export function SettingsContent() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      {/* Header */}
-      <Header title="الإعدادات" showBack />
 
       <div className="p-6 space-y-4">
         {/* Notifications Toggle */}

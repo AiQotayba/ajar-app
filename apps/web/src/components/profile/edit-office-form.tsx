@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ChevronLeft, Phone } from "lucide-react"
-import Link from "next/link"
+import { Phone } from "lucide-react"
 import { useState } from "react"
 
 export function EditOfficeForm() {
@@ -26,17 +25,6 @@ export function EditOfficeForm() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b">
-        <Link href="/profile">
-          <Button variant="outline" size="icon" className="rounded-2xl bg-transparent">
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-        </Link>
-        <h1 className="text-xl font-semibold">تعديل بيانات المكتب</h1>
-        <div className="w-10" />
-      </header>
-
       <div className="p-6 space-y-6">
         {/* Image Upload */}
         <div className="flex justify-center">

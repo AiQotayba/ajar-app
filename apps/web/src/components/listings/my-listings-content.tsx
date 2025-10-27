@@ -2,15 +2,11 @@
 
 import { ListingGrid } from "@/components/listings/listing-grid"
 import { api } from "@/lib/api"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Header } from "../layout/header"
-import { SearchBar } from "../search/search-bar"
-import { toast } from "sonner"
+import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
-import { useRouter } from "next/navigation"
 
 interface Listing {
     id: number
@@ -60,11 +56,7 @@ interface Listing {
 }
 
 export function MyListingsContent() {
-    const queryClient = useQueryClient()
-    const router = useRouter()
     const { user } = useAuth()
-    console.log(user);
-
 
     // Fetch user's listings using React Query
     const {
@@ -90,69 +82,12 @@ export function MyListingsContent() {
         gcTime: 10 * 60 * 1000, // 10 minutes
     })
 
-    // Delete listing mutation
-    const deleteListingMutation = useMutation({
-        mutationFn: async (listingId: number) => {
-            const response = await api.delete(`/user/listings/${listingId}`)
-
-            if (response.isError) {
-                throw new Error(response.message || 'Failed to delete listing')
-            }
-
-            return response.data
-        },
-        onSuccess: () => {
-            // Invalidate and refetch listings
-            queryClient.invalidateQueries({ queryKey: ['my-listings'] })
-            toast.success('تم حذف الإعلان بنجاح')
-        },
-        onError: (error: Error) => {
-            toast.error(error.message || 'حدث خطأ في حذف الإعلان')
-        }
-    })
-
     const listings = listingsData || []
-
-    // Helper function to get status badge color
-    const getStatusBadgeColor = (status: string) => {
-        switch (status) {
-            case 'approved':
-                return 'bg-green-100 text-green-800'
-            case 'in_review':
-                return 'bg-yellow-100 text-yellow-800'
-            case 'rejected':
-                return 'bg-red-100 text-red-800'
-            case 'draft':
-                return 'bg-gray-100 text-gray-800'
-            default:
-                return 'bg-gray-100 text-gray-800'
-        }
-    }
-
-    // Helper function to get status text
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'approved':
-                return 'معتمد'
-            case 'in_review':
-                return 'قيد المراجعة'
-            case 'rejected':
-                return 'مرفوض'
-            case 'draft':
-                return 'مسودة'
-            default:
-                return status
-        }
-    }
 
     // Show loading state
     if (isLoading) {
         return (
             <div className="min-h-screen bg-background pb-24">
-                <Header title="إعلاناتي" showNotification showBack />
-                <div className="p-4 pt-4">
-                    <SearchBar />
-                </div>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
@@ -164,10 +99,6 @@ export function MyListingsContent() {
     if (isError) {
         return (
             <div className="min-h-screen bg-background pb-24">
-                <Header title="إعلاناتي" showNotification showBack />
-                <div className="p-4 pt-4">
-                    <SearchBar />
-                </div>
                 <div className="flex flex-col items-center justify-center h-64 text-center">
                     <p className="text-muted-foreground mb-4">
                         {error?.message || 'حدث خطأ في تحميل إعلاناتك'}
@@ -187,15 +118,9 @@ export function MyListingsContent() {
     if (listings.length === 0) {
         return (
             <div className="min-h-screen bg-background pb-24">
-                <Header title="إعلاناتي" showNotification showBack />
-
-                <div className="p-4 pt-4">
-                    <SearchBar />
-                </div>
-
                 {/* Add new listing button */}
                 <div className="p-4">
-                    <Link href="/listings/create">
+                    <Link href="/listings/create" className="max-w-[300px] ">
                         <Button className="w-full" size="lg">
                             <Plus className="w-5 h-5 mr-2" />
                             إضافة إعلان جديد
@@ -238,15 +163,10 @@ export function MyListingsContent() {
     return (
         <div className="min-h-screen bg-background pb-24">
             {/* Header */}
-            <Header title="إعلاناتي" showNotification showBack />
-
-            <div className="p-4 pt-4">
-                <SearchBar />
-            </div>
-
             {/* Add new listing button */}
-            <div className="p-4">
-                <Link href="/listings/create">
+            <div className="p-4 flex justify-between">
+                <h1 className="text-2xl font-bold">إعلاناتي</h1>
+                <Link href="/listings/create" className="max-w-[300px] ">
                     <Button className="w-full" size="lg">
                         <Plus className="w-5 h-5 mr-2" />
                         إضافة إعلان جديد
@@ -264,7 +184,7 @@ export function MyListingsContent() {
             <main className="space-y-6 px-4">
                 <ListingGrid
                     data={listings.map((listing: Listing) => ({
-                        ...listing, 
+                        ...listing,
                     }))}
                     openEdit={true}
                     deleteListing={true}

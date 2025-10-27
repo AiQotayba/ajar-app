@@ -125,3 +125,6 @@ export {
   PaginationNext,
   PaginationEllipsis,
 }
+
+// Export the wrapper component
+export { PaginationWrapper } from './pagination-wrapper'

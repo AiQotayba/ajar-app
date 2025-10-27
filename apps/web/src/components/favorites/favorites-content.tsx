@@ -3,9 +3,8 @@
 import { ListingGrid } from "@/components/listings/listing-grid"
 import { api } from "@/lib/api"
 import { useTranslations } from "next-intl"
-import { useQuery } from "@tanstack/react-query"
-import { Header } from "../layout/header"
-import { SearchBar } from "../search/search-bar"
+import { useQuery } from "@tanstack/react-query"  
+import { SearchBarWrapper } from "../search/search-bar-wrapper"
 import { EmptyFavorites } from "./empty-favorites"
 
 interface Listing {
@@ -90,9 +89,8 @@ export function FavoritesContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <Header title="المفضلة" showNotification showBack />
         <div className="p-4 pt-4">
-          <SearchBar />
+          <SearchBarWrapper />
         </div>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -105,9 +103,8 @@ export function FavoritesContent() {
   if (isError) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <Header title="المفضلة" showNotification showBack />
         <div className="p-4 pt-4">
-          <SearchBar />
+          <SearchBarWrapper />
         </div>
         <div className="flex flex-col items-center justify-center h-64 text-center">
           <p className="text-muted-foreground mb-4">
@@ -138,13 +135,6 @@ export function FavoritesContent() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
-      <Header title="المفضلة" showNotification showBack />
-
-      <div className="p-4 pt-4">
-        <SearchBar />
-      </div>
-
       {/* Results count */}
       <div className="px-4 pb-2">
         <p className="text-sm text-muted-foreground">

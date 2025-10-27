@@ -2,45 +2,42 @@ references:
   api[../API-docx.json]:
 app:
   (public):
-    - copy files and embed in the web app:
-      - /apps/admin/lib/api-client.ts
-      - /apps/admin/components/ui/image-upload.tsx
-
+    - home: 
+      - slidrs:
+        - تحسين التصميم والمظهر والتجاوب 
+        - add click count to slider
+        - api: POST /user/sliders/{id}/click
+      - listingsGrid: 
+        - add loading skeleton
+        - if not images or error this image will be shown, show placeholder image
+      - map:
+        - add skeleton loading
+      - my-listings:
+        - layout authenticated
+  (authenticated):
     - listings:
-      - Form:
-        - اجعل الفورم قابل للتعديل اذا ارسلت له بيانات وتعرض كل الاقسام الموجودة في الفورم
-        - اجعل الفورم يعمل باستخدام react-hook-form  + zod + tanstack react-query  + shadcn/ui
+      - Form: 
+        - layout authenticated
+        - create Api- POST /user/listings
+        - edit Api- PUT /user/listings/{id}
+        - delete Api- DELETE /user/listings/{id}
+        - validation for input fields for all forms steps or fields optional or required
+        - center map in syria
         @FormSteps{5}:
           - Step1:
-            tasks:
-            fields: ["title_ar", "title_en", "description_ar", "description_en", "type", "availability_status", "category_id", "properties", "features" ]
-          - Step2:
-            tasks:
-              - find in map
-            api: GET /user/governorates
-            fields: ["governorate_id", "city_id", "latitude", "longitude"] 
+          - Step2: 
           - Step3:
             fields: ["media"]
             ref(image-upload): [apps/admin/components/ui/image-upload.tsx]
-          - Step4:
-            fields: ["price", "currency", "status"]
+            - upload images to server directly to storage/listings folder
+          - Step4: 
           - Step5:
-            api: POST /user/listings
-  (authenticated): 
+            api: POST /user/listings 
     - listings[id]:
-          @Reviews:
-            api: 
-              - POST: /user/reviews 
+      @Reviews:
+        api:
+          - POST: /user/reviews 
+    - my-listings:
+        api: 
+          - PUT: /user/listings/{id}  
 [All Tasks {{75}}]
-
-next:
-  - pages/[slug]:
-      api: GET /user/settings/{slug}
-  - my-listings:
-      api:
-        - POST: /user/listings
-        - GET: /user/listings/{id}
-        - PUT: /user/listings/{id} 
-  - notifications:
-    - GET: /user/notifications
-    - POST: /user/notifications/{id}/read 

@@ -120,6 +120,74 @@
     "officeEmail": "Office Email",
     "officeDescription": "Office Description"
   },
+  "about": {
+    "title": "About Us - Ajar",
+    "description": "Syria's leading real estate platform, helping you find the perfect property or sell your property at the best prices",
+    "hero": {
+      "title": "Ajar",
+      "subtitle": "Syria's leading real estate platform, helping you find the perfect property or sell your property at the best prices"
+    },
+    "stats": {
+      "properties": "Properties Available",
+      "clients": "Satisfied Clients",
+      "rating": "Customer Rating",
+      "experience": "Years Experience"
+    },
+    "vision": {
+      "title": "Our Vision",
+      "description": "To be Syria's leading real estate platform, providing the best services to our clients while ensuring transparency and reliability in every transaction."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "Facilitate the process of searching, selling, and renting properties through an advanced technological platform, while providing excellent technical support and top-tier customer service."
+    },
+    "features": {
+      "title": "Why Choose Ajar?",
+      "subtitle": "We provide you with the best services and tools to find the perfect property",
+      "security": {
+        "title": "Security & Reliability",
+        "description": "We guarantee the security of your transactions and data reliability"
+      },
+      "search": {
+        "title": "Precise Search",
+        "description": "Advanced search tools to find the right property"
+      },
+      "innovation": {
+        "title": "Continuous Innovation",
+        "description": "We continuously develop our platform for the best experience"
+      },
+      "coverage": {
+        "title": "Comprehensive Coverage",
+        "description": "We cover all Syrian governorates and cities"
+      }
+    },
+    "team": {
+      "title": "Our Team",
+      "subtitle": "A team of experts and specialists in real estate and technology"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "subtitle": "We're here to help you every step of your real estate journey"
+    }
+  },
+  "map": {
+    "title": "Map",
+    "loading": "Loading properties...",
+    "permission": {
+      "title": "Enable Location",
+      "description": "We need location permission to show properties near you on the map",
+      "allow": "Allow",
+      "deny": "Later"
+    },
+    "filters": {
+      "all": "All",
+      "rent": "Rent",
+      "sell": "Sell"
+    },
+    "clusters": {
+      "properties": "properties"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",

@@ -1,17 +1,10 @@
-import { BottomNav } from "@/components/layout/bottom-nav"
-import { Header } from "@/components/layout/header"
+
 import { Skeleton } from "@/components/ui/skeleton"
-import { SearchBar } from "@/components/search/search-bar"
 
 export default function Loading() {
   return (
     <div className="min-h-screen bg-background pb-24" dir="rtl">
-      <Header title="الرئيسية" showNotification />
-
       <main className="space-y-6">
-        {/* Search Section - تطابق SearchBar */}
-        <SearchBar />
-
         {/* Hero Slider - تطابق HeroSlider */}
         <div className="px-4">
           <div className="relative w-full">
@@ -94,7 +87,7 @@ export default function Loading() {
         </div>
       </main>
 
-      <BottomNav />
+      {/* <BottomNav /> */}
     </div>
   )
 }

@@ -105,7 +105,6 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
   if (error || !response?.data) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        <Header title={locale === 'ar' ? 'تفاصيل العقار' : 'Property Details'} showBack />
         <div className="container max-w-2xl mx-auto px-4 py-6">
           <div className="text-center">
             <p className="text-muted-foreground">
@@ -194,8 +193,6 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
   })) || []
   return (
     <div className="min-h-screen bg-background pb-24">
-      <Header title={isArabic ? 'تفاصيل العقار' : 'Property Details'} showBack />
-
       <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Gallery */}
         <PropertyGallery

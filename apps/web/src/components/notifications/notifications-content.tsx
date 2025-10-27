@@ -131,18 +131,7 @@ export function NotificationsContent() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pb-24">
-        {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b">
-          <Link href="/">
-            <Button variant="outline" size="icon" className="rounded-2xl bg-transparent">
-              <ChevronLeft className={cn("h-5 w-5", "rotate-180")} />
-            </Button>
-          </Link>
-          <h1 className="text-xl font-semibold">الإشعارات</h1>
-          <div className="w-10" />
-        </header>
-
+      <div className="min-h-screen bg-background pb-24">  
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
@@ -154,17 +143,6 @@ export function NotificationsContent() {
   if (isError) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b">
-          <Link href="/">
-            <Button variant="outline" size="icon" className="rounded-2xl bg-transparent">
-              <ChevronLeft className={cn("h-5 w-5", "rotate-180")} />
-            </Button>
-          </Link>
-          <h1 className="text-xl font-semibold">الإشعارات</h1>
-          <div className="w-10" />
-        </header>
-
         <div className="flex flex-col items-center justify-center h-64 text-center">
           <p className="text-muted-foreground mb-4">
             {error?.message || 'حدث خطأ في تحميل الإشعارات'}
@@ -183,17 +161,6 @@ export function NotificationsContent() {
   if (notifications.length === 0) {
     return (
       <div className="min-h-screen bg-background pb-24">
-        {/* Header */}
-        <header className="flex items-center justify-between p-4 border-b">
-          <Link href="/">
-            <Button variant="outline" size="icon" className="rounded-2xl bg-transparent">
-              <ChevronLeft className={cn("h-5 w-5", "rotate-0")} />
-            </Button>
-          </Link>
-          <h1 className="text-xl font-semibold">الإشعارات</h1>
-          <div className="w-10" />
-        </header>
-
         {/* Empty State */}
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
           <div className="relative w-80 h-80 mb-8">

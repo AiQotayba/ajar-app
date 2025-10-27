@@ -484,22 +484,7 @@ export function ListingForm({
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-xl font-bold">
               {isEditing ? "تعديل الإعلان" : "إنشاء إعلان"}
-            </h1>
-            <div className="flex items-center gap-2">
-              {onCancel && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancel}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  إلغاء
-                </Button>
-              )}
-              <Button variant="ghost" size="icon" className="rounded-xl">
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            </div>
+            </h1> 
           </div>
 
           <StepIndicator steps={STEPS} currentStep={currentStep} />

@@ -1,6 +1,7 @@
 import { OTPVerificationForm } from "@/components/auth/pages/otp-verification-form"
 import { getTranslations } from "next-intl/server"
 import { Metadata } from "next"
+import { Suspense } from "react"
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -23,5 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 export default function VerifyOTPPage() {
-  return <OTPVerificationForm />
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OTPVerificationForm />
+    </Suspense>
+  )
 }

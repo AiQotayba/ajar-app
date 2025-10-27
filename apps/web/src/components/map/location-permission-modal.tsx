@@ -1,8 +1,9 @@
 "use client"
 
-import { X, MapPin } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { MapPin, Shield } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface LocationPermissionModalProps {
   open: boolean
@@ -11,59 +12,54 @@ interface LocationPermissionModalProps {
 }
 
 export function LocationPermissionModal({ open, onAllow, onDeny }: LocationPermissionModalProps) {
+  const t = useTranslations('map.permission')
+  
+  if (!open) return null
+
   return (
-    <Dialog open={open} onOpenChange={(open) => !open && onDeny()}>
-      <DialogContent className="max-w-md p-0 gap-0 bg-white rounded-3xl">
-        {/* Close Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onDeny}
-          className="absolute top-4 left-4 h-10 w-10 rounded-full bg-muted hover:bg-muted/80 z-10"
-        >
-          <X className="h-5 w-5" />
-        </Button>
-
-        {/* Content */}
-        <div className="flex flex-col items-center px-8 py-12">
-          {/* Location Icon Illustration */}
-          <div className="relative w-32 h-32 mb-8">
-            <div className="absolute inset-0 flex items-center justify-center">
-              {/* Decorative elements */}
-              <div className="absolute top-2 right-8 w-2 h-2 bg-primary rounded-full animate-pulse" />
-              <div className="absolute top-4 left-12 w-1.5 h-4 bg-primary/60 rounded-full" />
-
-              {/* Main Location Pin */}
-              <div className="relative">
-                <div className="w-20 h-20 rounded-full border-4 border-muted flex items-center justify-center">
-                  <MapPin className="h-12 w-12 text-primary fill-primary" />
-                </div>
-                {/* Shadow/Platform */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-16 h-2 bg-primary/20 rounded-full blur-sm" />
-              </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MapPin className="w-8 h-8 text-emerald-600" />
+          </div>
+          <CardTitle className="text-xl font-bold text-gray-900">
+            {t('title')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-gray-600 text-center leading-relaxed">
+            {t('description')}
+          </p>
+          
+          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div className="flex items-center gap-3">
+              <Shield className="w-5 h-5 text-emerald-600" />
+              <span className="text-sm text-gray-700">بياناتك آمنة ومحمية</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <MapPin className="w-5 h-5 text-emerald-600" />
+              <span className="text-sm text-gray-700">نستخدم الموقع لعرض العقارات القريبة</span>
             </div>
           </div>
 
-          {/* Text Content */}
-          <p className="text-base text-foreground text-center text-balance leading-relaxed mb-8">
-            للحصول على نتائج دقيقة بالقرب منك، يحتاج التطبيق للوصول إلى موقعك الحالي.
-          </p>
-
-          {/* Action Buttons */}
-          <div className="w-full space-y-3">
-            <Button onClick={onAllow} className="w-full h-14 rounded-2xl text-base font-semibold">
-              السماح بالوصول إلى الموقع
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={onDeny}
+              className="flex-1"
+            >
+              {t('deny')}
             </Button>
             <Button
-              variant="ghost"
-              onClick={onDeny}
-              className="w-full text-base font-medium text-muted-foreground hover:text-foreground"
+              onClick={onAllow}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
             >
-              عدم السماح بالوصول
+              {t('allow')}
             </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

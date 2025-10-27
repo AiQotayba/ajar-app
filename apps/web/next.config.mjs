@@ -11,6 +11,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  env: {
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyBvOkBw3cL1Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ajar-backend.mystore.social/api/v1',
+  },
   images: {
     unoptimized: true,
     domains: [
