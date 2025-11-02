@@ -17,7 +17,7 @@ export default function DashboardLayout({
       <div className={cn("flex flex-1 flex-col", isOpen ? "md:mr-64" : "mr-16")}>
         <Header />
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="mx-auto max-w-7xl rounded-3xl bg-card/80 backdrop-blur-sm p-8 shadow-xl border border-border/50">
+          <div className="mx-auto">
             {children}
           </div>
         </main>

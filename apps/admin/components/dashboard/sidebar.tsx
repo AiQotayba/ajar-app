@@ -36,7 +36,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "لوحة التحكم", href: "/dashboard" },
   { icon: Building2, label: "الإعلانات", href: "/listings" },
-  { icon: FolderTree, label: "الفئات", href: "/categories" },
+  { icon: FolderTree, label: "الفئات", href: "/test" },
   // { icon: Database, label: "الخصائص", href: "/properties" },
   // { icon: Sparkles, label: "المميزات", href: "/features" },
   { icon: MapPin, label: "المواقع", href: "/locations" },
@@ -45,7 +45,7 @@ const menuItems: MenuItem[] = [
   { icon: Users, label: "المستخدمين", href: "/users" },
   { icon: User, label: "حسابي", href: "/profile", isSpecial: true },
   { icon: Settings, label: "الإعدادات", href: "/settings", isSpecial: true },
-  { icon: TestTube2Icon, label: "test", href: "/table", },
+  // { icon: TestTube2Icon, label: "test", href: "/table", },
 ]
 
 export function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (isOpen: boolean) => void }) {
@@ -129,7 +129,7 @@ export function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (is
           <nav className="flex-1 space-y-1 overflow-y-auto p-2">
             {menuItems
               .filter(item => !item.isSpecial)
-              .map(item => <Item item={item} />)
+              .map(item => <Item key={item.href} item={item} />)
             }
           </nav>
 

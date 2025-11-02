@@ -11,7 +11,7 @@ import { toast } from "sonner"
 interface ImageUploadProps {
     value?: string
     onChange: (url: string) => void
-    folder: "sliders" | "listings" | "users" | "properties" | "features"
+    folder: "sliders" | "listings" | "users" | "properties" | "features" | "categories"
     className?: string
     disabled?: boolean
     aspectRatio?: "square" | "video" | "portrait" | "landscape"

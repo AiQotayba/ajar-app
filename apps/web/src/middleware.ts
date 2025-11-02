@@ -14,11 +14,17 @@ export const authRoutes = [
 
 // Protected routes that require authentication
 export const protectedRoutes = [
-  "/profile",
   "/favorites",
   "/my-listings",
+  "/my-listings/:id",
+  "/my-listings/create",
   "/notifications",
   "/settings",
+  "notifications",
+  "/office/add",
+  "/profile",
+  "/profile/edit",
+  "/profile/change-password",
 ];
 
 const intlMiddleware = createMiddleware(routing);
@@ -75,8 +81,22 @@ export const middleware = async (req: NextRequest) => {
     return NextResponse.redirect(new URL(`/${locale}`, req.nextUrl.origin));
   }
 
+  // Function to check if path matches any protected route pattern
+  const isProtectedRoute = (path: string): boolean => {
+    return protectedRoutes.some(route => {
+      // Handle dynamic routes with parameters
+      if (route.includes(':')) {
+        const routePattern = route.replace(/:[^/]+/g, '[^/]+');
+        const regex = new RegExp(`^${routePattern}$`);
+        return regex.test(path);
+      }
+      // Handle exact matches
+      return route === path;
+    });
+  };
+
   // Redirect unauthenticated users to login for protected routes
-  if (!isAuthenticated && protectedRoutes.includes(pathnameWithoutLocale)) {
+  if (!isAuthenticated && isProtectedRoute(pathnameWithoutLocale)) {
     const locale = pathname.match(/^\/(en|ar)/)?.[1] || 'ar';
     return NextResponse.redirect(new URL(`/${locale}/login`, req.nextUrl.origin));
   }

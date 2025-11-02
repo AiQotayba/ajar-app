@@ -60,8 +60,8 @@ interface AdvancedFilterState {
   // Basic filters
   propertyType: string
   propertyCategory: string
-  governorate: string
-  city: string
+  governorate_id: string
+  city_id: string
   priceFrom: string
   priceTo: string
   areaFrom: string
@@ -101,8 +101,8 @@ export function useAdvancedFilters() {
     return {
       propertyType: searchParams.get('property_type') || 'بيع',
       propertyCategory: searchParams.get('category') || '',
-      governorate: searchParams.get('governorate') || '',
-      city: searchParams.get('city') || '',
+      governorate_id: searchParams.get('governorate_id') || '',
+      city_id: searchParams.get('city_id') || '',
       priceFrom: searchParams.get('price_from') || '',
       priceTo: searchParams.get('price_to') || '',
       areaFrom: searchParams.get('area_from') || '',
@@ -140,12 +140,12 @@ export function useAdvancedFilters() {
 
   // Fetch cities
   const { data: cities = [] } = useQuery({
-    queryKey: ['cities', filters.governorate],
+    queryKey: ['cities', filters.governorate_id],
     queryFn: async () => {
       const response = await api.get('/user/cities')
       return response.data || []
     },
-    enabled: !!filters.governorate
+    enabled: !!filters.governorate_id
   })
 
   const organizeCategories = useCallback((categories: Category[]) => {
@@ -163,7 +163,7 @@ export function useAdvancedFilters() {
   const availableSubCategories = selectedMainCategoryData?.children || []
 
   const filteredCities = cities.filter((city: any) => 
-    !filters.governorate || city.governorate_id.toString() === filters.governorate
+    !filters.governorate_id || city.governorate_id.toString() === filters.governorate_id
   )
 
   // Sync filters with URL params when data changes
@@ -206,8 +206,8 @@ export function useAdvancedFilters() {
     
     if (urlParams.get('property_type')) newFilters.propertyType = urlParams.get('property_type')!
     if (urlParams.get('category')) newFilters.propertyCategory = urlParams.get('category')!
-    if (urlParams.get('governorate')) newFilters.governorate = urlParams.get('governorate')!
-    if (urlParams.get('city')) newFilters.city = urlParams.get('city')!
+    if (urlParams.get('governorate_id')) newFilters.governorate_id = urlParams.get('governorate_id')!
+    if (urlParams.get('city_id')) newFilters.city_id = urlParams.get('city_id')!
     if (urlParams.get('price_from')) newFilters.priceFrom = urlParams.get('price_from')!
     if (urlParams.get('price_to')) newFilters.priceTo = urlParams.get('price_to')!
     if (urlParams.get('area_from')) newFilters.areaFrom = urlParams.get('area_from')!
@@ -383,11 +383,11 @@ export function useAdvancedFilters() {
     if (newFilters.propertyCategory) {
       params.set('category', newFilters.propertyCategory)
     }
-    if (newFilters.governorate) {
-      params.set('governorate', newFilters.governorate)
+    if (newFilters.governorate_id) {
+      params.set('governorate_id', newFilters.governorate_id)
     }
-    if (newFilters.city) {
-      params.set('city', newFilters.city)
+    if (newFilters.city_id) {
+      params.set('city_id', newFilters.city_id)
     }
     if (newFilters.priceFrom) {
       params.set('price_from', newFilters.priceFrom)
@@ -448,8 +448,8 @@ export function useAdvancedFilters() {
     const resetFilters: AdvancedFilterState = {
       propertyType: 'بيع',
       propertyCategory: '',
-      governorate: '',
-      city: '',
+      governorate_id: '',
+      city_id: '',
       priceFrom: '',
       priceTo: '',
       areaFrom: '',

@@ -137,6 +137,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-gradient-to-br from-primary/5 via-background to-accent/10 text-foreground;
   }
@@ -147,6 +148,7 @@
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(100%);
   }
@@ -154,4 +156,8 @@
 
 .animate-shimmer {
   animation: shimmer 2s infinite;
+}
+
+html {
+  overflow: hidden;
 }

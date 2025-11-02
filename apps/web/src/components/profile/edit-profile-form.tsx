@@ -8,6 +8,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations, useLocale } from "next-intl"
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
+import 'react-phone-number-input/style.css'
+import '@/styles/phone-input.css'
+import { Phone } from "lucide-react"
 
 interface User {
   id: number
@@ -32,6 +37,9 @@ interface User {
 export function EditProfileForm() {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const t = useTranslations('profile')
+  const locale = useLocale()
+  const direction = locale === 'ar' ? 'rtl' : 'ltr'
   
   // Form state
   const [formData, setFormData] = useState({
@@ -86,18 +94,18 @@ export function EditProfileForm() {
     mutationFn: async (data: typeof formData) => {
       const response = await api.put('/user/me', data)
       if (response.isError) {
-        throw new Error(response.message || 'حدث خطأ في تحديث البيانات')
+        throw new Error(response.message || t('updateError'))
       }
       return response.data
     },
     onSuccess: () => {
       // Invalidate and refetch user profile
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
-      toast.success('تم تحديث البيانات بنجاح')
+      toast.success(t('updateSuccess'))
       router.back()
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'حدث خطأ في تحديث البيانات')
+      toast.error(error.message || t('updateError'))
     }
   })
 
@@ -111,21 +119,21 @@ export function EditProfileForm() {
     }
 
     if (!formData.first_name.trim()) {
-      newErrors.first_name = 'الاسم الأول مطلوب'
+      newErrors.first_name = t('firstNameRequired')
     }
 
     if (!formData.last_name.trim()) {
-      newErrors.last_name = 'الاسم الأخير مطلوب'
+      newErrors.last_name = t('lastNameRequired')
     }
 
     if (!formData.phone.trim()) {
-      newErrors.phone = 'رقم الهاتف مطلوب'
-    } else if (!/^\+?[0-9\s-]+$/.test(formData.phone)) {
-      newErrors.phone = 'رقم الهاتف غير صحيح'
+      newErrors.phone = t('phoneRequired')
+    } else if (!isValidPhoneNumber(formData.phone)) {
+      newErrors.phone = t('invalidPhone')
     }
 
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'البريد الإلكتروني غير صحيح'
+      newErrors.email = t('invalidEmail')
     }
 
     setErrors(newErrors)
@@ -155,7 +163,7 @@ export function EditProfileForm() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background" dir={direction}>
         <div className="p-6 space-y-6">
           <div className="space-y-4">
             <div className="h-4 w-20 bg-muted animate-pulse rounded" />
@@ -177,14 +185,14 @@ export function EditProfileForm() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background" dir={direction}>
         <div className="p-6">
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <p className="text-muted-foreground mb-4">
-              {error?.message || 'حدث خطأ في تحميل البيانات'}
+              {error?.message || t('loadError')}
             </p>
             <Button onClick={() => router.back()}>
-              العودة
+              {t('back')}
             </Button>
           </div>
         </div>
@@ -193,75 +201,78 @@ export function EditProfileForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+    <div className="min-h-screen max-w-2xl mx-auto bg-background" dir={direction}>
+      <form onSubmit={handleSubmit} className="p-6 space-y-6" dir={direction}>
         {/* First Name */}
         <div className="space-y-2">
-          <Label htmlFor="first_name" className="text-right block">
-            الاسم الأول
+          <Label htmlFor="first_name" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
+            {t('firstName')}
           </Label>
           <Input 
             id="first_name" 
             value={formData.first_name}
             onChange={(e) => handleInputChange('first_name', e.target.value)}
-            className={`h-14 rounded-2xl text-right ${errors.first_name ? 'border-destructive' : ''}`}
-            placeholder="الاسم الأول"
+            className={`h-14 rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.first_name ? 'border-destructive' : ''}`}
+            placeholder={t('firstNamePlaceholder')}
           />
           {errors.first_name && (
-            <p className="text-sm text-destructive text-right">{errors.first_name}</p>
+            <p className={`text-sm text-destructive ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>{errors.first_name}</p>
           )}
         </div>
 
         {/* Last Name */}
         <div className="space-y-2">
-          <Label htmlFor="last_name" className="text-right block">
-            الاسم الأخير
+          <Label htmlFor="last_name" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
+            {t('lastName')}
           </Label>
           <Input 
             id="last_name" 
             value={formData.last_name}
             onChange={(e) => handleInputChange('last_name', e.target.value)}
-            className={`h-14 rounded-2xl text-right ${errors.last_name ? 'border-destructive' : ''}`}
-            placeholder="الاسم الأخير"
+            className={`h-14 rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.last_name ? 'border-destructive' : ''}`}
+            placeholder={t('lastNamePlaceholder')}
           />
           {errors.last_name && (
-            <p className="text-sm text-destructive text-right">{errors.last_name}</p>
+            <p className={`text-sm text-destructive ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>{errors.last_name}</p>
           )}
         </div>
 
         {/* Phone */}
         <div className="space-y-2">
-          <Label htmlFor="phone" className="text-right block">
-            رقم الهاتف
+          <Label htmlFor="phone" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
+            {t('phone')}
           </Label>
-          <Input 
-            id="phone" 
-            type="tel" 
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            className={`h-14 rounded-2xl text-right ${errors.phone ? 'border-destructive' : ''}`}
-            placeholder="+90 000 000 00 00"
-          />
+          <div className="relative">
+            <Phone className="absolute ltr:right-4 rtl:left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <PhoneInput
+              value={formData.phone}
+              onChange={(value) => handleInputChange('phone', value || '')}
+              international
+              defaultCountry="SY"
+              placeholder={t('phonePlaceholder')}
+              className={`h-14 rtl:pl-10 ltr:pr-10 rounded-2xl border ${errors.phone ? 'border-destructive' : 'border-border'} focus-within:border-primary text-foreground [&_input]:h-14 [&_input]:rounded-2xl [&_input]:border-0 [&_input]:bg-transparent [&_input]:px-4 [&_input]:text-foreground [&_input]:placeholder:text-muted-foreground [&_.PhoneInputCountry]:px-4`}
+            />
+          </div>
           {errors.phone && (
-            <p className="text-sm text-destructive text-right">{errors.phone}</p>
+            <p className={`text-sm text-destructive ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>{errors.phone}</p>
           )}
         </div>
 
         {/* Email */}
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-right block">
-            البريد الإلكتروني (اختياري)
+          <Label htmlFor="email" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
+            {t('email')} ({t('optional')})
           </Label>
           <Input 
             id="email" 
             type="email" 
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
-            className={`h-14 rounded-2xl text-right ${errors.email ? 'border-destructive' : ''}`}
-            placeholder="example@email.com"
+            className={`h-14 rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.email ? 'border-destructive' : ''}`}
+            placeholder={t('emailPlaceholder')}
           />
           {errors.email && (
-            <p className="text-sm text-destructive text-right">{errors.email}</p>
+            <p className={`text-sm text-destructive ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>{errors.email}</p>
           )}
         </div>
 
@@ -271,7 +282,7 @@ export function EditProfileForm() {
           className="w-full h-14 text-lg rounded-2xl mt-8"
           disabled={updateProfileMutation.isPending}
         >
-          {updateProfileMutation.isPending ? 'جاري الحفظ...' : 'حفظ'}
+          {updateProfileMutation.isPending ? t('saving') : t('save')}
         </Button>
       </form>
     </div>

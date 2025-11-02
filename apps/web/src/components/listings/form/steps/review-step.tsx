@@ -16,6 +16,7 @@ interface ReviewStepProps {
   onEditStep: (step: number) => void
   isEditing?: boolean
   isLoading?: boolean
+  showNavigation?: boolean
 }
 
 export function ReviewStep({ 
@@ -23,7 +24,8 @@ export function ReviewStep({
   onPrevious, 
   onEditStep, 
   isEditing = false, 
-  isLoading = false 
+  isLoading = false,
+  showNavigation = true
 }: ReviewStepProps) {
   const { watch, setValue, register, formState: { errors } } = useFormContext<ListingFormData>()
   const formData = watch()
@@ -248,7 +250,7 @@ export function ReviewStep({
                   type="number"
                   step="any"
                   value={watch("latitude") || ""}
-                  onChange={(e) => setValue("latitude", parseFloat(e.target.value) || null)}
+                  onChange={(e) => setValue("latitude", parseFloat(e.target.value) || 0)}
                   placeholder="خط العرض"
                   className="text-right"
                 />
@@ -263,7 +265,7 @@ export function ReviewStep({
                   type="number"
                   step="any"
                   value={watch("longitude") || ""}
-                  onChange={(e) => setValue("longitude", parseFloat(e.target.value) || null)}
+                  onChange={(e) => setValue("longitude", parseFloat(e.target.value) || 0)}
                   placeholder="خط الطول"
                   className="text-right"
                 />
@@ -273,24 +275,26 @@ export function ReviewStep({
 
         </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex gap-3 pt-4">
-        <Button
-          type="button"
-          onClick={onPrevious}
-          variant="outline"
-          className="flex-1 h-14 text-base font-bold rounded-xl bg-transparent"
-        >
-          السابق
-        </Button>
-        <Button
-          onClick={onSubmit}
-          disabled={isLoading}
-          className="flex-1 h-14 text-base font-bold rounded-xl"
-        >
-          {isLoading ? "جاري الحفظ..." : isEditing ? "حفظ التعديلات" : "إرسال للمراجعة"}
-        </Button>
-      </div>
+      {/* Navigation Buttons - Only show if navigation is enabled */}
+      {showNavigation && (
+        <div className="flex gap-3 pt-4">
+          <Button
+            type="button"
+            onClick={onPrevious}
+            variant="outline"
+            className="flex-1 h-14 text-base font-bold rounded-xl bg-transparent"
+          >
+            السابق
+          </Button>
+          <Button
+            onClick={onSubmit}
+            disabled={isLoading}
+            className="flex-1 h-14 text-base font-bold rounded-xl"
+          >
+            {isLoading ? "جاري الحفظ..." : isEditing ? "حفظ التعديلات" : "إرسال للمراجعة"}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

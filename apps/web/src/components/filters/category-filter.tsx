@@ -29,11 +29,12 @@ interface Category {
   updated_at: string;
 }
 
-export function CategoryFilter({ data }: { data: Category[] | undefined }) {
+export function CategoryFilter({ data, isLoading }: { data: Category[] | undefined, isLoading: boolean }) {
   const [activeCategory, setActiveCategory] = useState<Category | undefined>(undefined)
   const locale = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const direction = locale === 'ar' ? 'rtl' : 'ltr'
 
   // Initialize active category from searchParams
   useEffect(() => {
@@ -67,18 +68,23 @@ export function CategoryFilter({ data }: { data: Category[] | undefined }) {
     router.push(`?${params.toString()}`, { scroll: false })
   }
 
+  // Show loading skeleton if loading
+  if (isLoading) {
+    return <CategoryFilterSkeleton direction={direction} />
+  }
+
   // إذا لم تكن هناك بيانات، لا نعرض المكون
   if (!data || data.length === 0) {
     return null;
   }
 
   return (
-    <div dir="rtl" className="w-full">
+    <div dir={direction} className="w-full">
       <Tabs 
         value={activeCategory?.id.toString() || ""} 
         onValueChange={handleCategoryChange} 
         className="w-full !rounded-none" 
-        dir="rtl"
+        dir={direction}
       >
         <TabsList
           className={cn(
@@ -86,7 +92,9 @@ export function CategoryFilter({ data }: { data: Category[] | undefined }) {
             "overflow-x-auto overflow-y-hidden",
             "scrollbar-hide !rounded-none",
             "snap-x snap-mandatory",
-            "scroll-smooth justify-start",
+            "scroll-smooth",
+            "justify-start",
+            // direction === 'rtl' ? "justify-start" : "justify-end",
           )}
         >
           {/* All Categories Button */}
@@ -122,7 +130,29 @@ export function CategoryFilter({ data }: { data: Category[] | undefined }) {
           ))}
         </TabsList>
       </Tabs>
-      <CategoryFilter data={activeCategory?.children} />
+      <CategoryFilter data={activeCategory?.children} isLoading={false} />
+    </div>
+  )
+}
+
+function CategoryFilterSkeleton({ direction }: { direction: 'rtl' | 'ltr' }) {
+  return (
+    <div dir={direction} className="w-full">
+      <div className={cn(
+        "flex w-full h-auto gap-2 p-1 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory scroll-smooth animate-pulse",
+        direction === 'rtl' ? "justify-start" : "justify-end"
+      )}>
+        {/* Generate skeleton tabs */}
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="flex-shrink-0 snap-start w-max px-6 py-2.5 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg whitespace-nowrap relative overflow-hidden"
+          >
+            <div className="absolute inset-0 animate-shimmer opacity-50" />
+            <div className="relative h-6 w-16 bg-transparent" />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

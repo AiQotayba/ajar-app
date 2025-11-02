@@ -57,11 +57,11 @@ interface Property {
 }
 
 export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
-  const { 
-    filters, 
-    categories, 
-    governorates, 
-    cities, 
+  const {
+    filters,
+    categories,
+    governorates,
+    cities,
     availableSubCategories,
     handleCategoryChange,
     handleSubCategoryChange,
@@ -73,7 +73,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
     handleReset
   } = useAdvancedFilters()
   const locale = useLocale() as 'ar' | 'en'
-  
+
   // Search state for mobile/tablet - sync with filters
   const [searchQuery, setSearchQuery] = useState(filters.searchQuery)
 
@@ -81,10 +81,6 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
   useEffect(() => {
     setSearchQuery(filters.searchQuery)
   }, [filters.searchQuery])
-
-  // Get selected category data
-  const selectedMainCategoryData = categories.find(cat => cat.id.toString() === filters.propertyCategory)
-  const selectedSubCategoryData = availableSubCategories.find(cat => cat.id.toString() === filters.selectedSubCategory?.id.toString())
 
   const handleApplyFilters = () => {
     handleApply()
@@ -116,7 +112,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               </Button>
             </div>
             <div className="w-16 h-1 bg-border rounded-full mx-auto mt-2" />
-            
+
             {/* Search Bar for Mobile/Tablet */}
             <div className="mt-4">
               <div className="flex items-center gap-3 bg-primary/20 rounded-2xl">
@@ -151,8 +147,8 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
           <div className="flex-1 overflow-y-auto px-6 py-6">
             <div className="space-y-4">
               {/* Property Type */}
-              <CollapsibleFilterBox 
-                title="نوع العقار" 
+              <CollapsibleFilterBox
+                title="نوع العقار"
                 defaultExpanded={true}
                 badge={filters.propertyType !== 'بيع' ? 1 : 0}
               >
@@ -168,8 +164,8 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               </CollapsibleFilterBox>
 
               {/* Category Selection */}
-              <CollapsibleFilterBox 
-                title="التصنيف" 
+              <CollapsibleFilterBox
+                title="التصنيف"
                 defaultExpanded={true}
                 badge={filters.propertyCategory ? 1 : 0}
               >
@@ -195,8 +191,8 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                   {filters.propertyCategory && availableSubCategories.length > 0 && (
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground">التصنيف الفرعي</Label>
-                      <Select 
-                        value={filters.selectedSubCategory?.id.toString() || ''} 
+                      <Select
+                        value={filters.selectedSubCategory?.id.toString() || ''}
                         onValueChange={handleSubCategoryChange}
                       >
                         <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
@@ -216,17 +212,17 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               </CollapsibleFilterBox>
 
               {/* Location */}
-              <CollapsibleFilterBox 
-                title="الموقع" 
+              <CollapsibleFilterBox
+                title="الموقع"
                 defaultExpanded={true}
-                badge={(filters.governorate ? 1 : 0) + (filters.city ? 1 : 0)}
+                badge={(filters.governorate_id ? 1 : 0) + (filters.city_id ? 1 : 0)}
               >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-muted-foreground">المحافظة</Label>
-                    <Select value={filters.governorate} onValueChange={(value) => {
-                      handleFilterChange('governorate', value)
-                      handleFilterChange('city', '') // Reset city when governorate changes
+                    <Select value={filters.governorate_id} onValueChange={(value) => {
+                      handleFilterChange('governorate_id', value)
+                      handleFilterChange('city_id', '') // Reset city when governorate changes
                     }}>
                       <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
                         <SelectValue placeholder="اختر المحافظة" />
@@ -245,10 +241,10 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                   {cities.length > 0 && (
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-muted-foreground">المدينة</Label>
-                      <Select 
-                        value={filters.city} 
-                        onValueChange={(value) => handleFilterChange('city', value)}
-                        disabled={!filters.governorate}
+                      <Select
+                        value={filters.city_id}
+                        onValueChange={(value) => handleFilterChange('city_id', value)}
+                        disabled={!filters.governorate_id}
                       >
                         <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
                           <SelectValue placeholder="اختر المدينة" />
@@ -267,8 +263,8 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               </CollapsibleFilterBox>
 
               {/* Price Range */}
-              <CollapsibleFilterBox 
-                title="السعر (شهرياً)" 
+              <CollapsibleFilterBox
+                title="السعر (شهرياً)"
                 defaultExpanded={false}
                 badge={(filters.priceFrom ? 1 : 0) + (filters.priceTo ? 1 : 0)}
               >
@@ -297,8 +293,8 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               </CollapsibleFilterBox>
 
               {/* Area Range */}
-              <CollapsibleFilterBox 
-                title="المساحة (م²)" 
+              <CollapsibleFilterBox
+                title="المساحة (م²)"
                 defaultExpanded={false}
                 badge={(filters.areaFrom ? 1 : 0) + (filters.areaTo ? 1 : 0)}
               >
@@ -327,8 +323,8 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               </CollapsibleFilterBox>
 
               {/* Additional Filters */}
-              <CollapsibleFilterBox 
-                title="تفاصيل إضافية" 
+              <CollapsibleFilterBox
+                title="تفاصيل إضافية"
                 defaultExpanded={false}
                 badge={(filters.rooms ? 1 : 0) + (filters.furnished !== 'furnished' ? 1 : 0)}
               >
@@ -363,8 +359,8 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
           {/* Advanced Property Filters - Only show if there are properties or features */}
           {(filters.availableProperties.length > 0 || filters.availableFeatures.length > 0) && (
             <div className="px-6 pb-4">
-              <CollapsibleFilterBox 
-                title="خصائص وميزات العقار" 
+              <CollapsibleFilterBox
+                title="خصائص وميزات العقار"
                 defaultExpanded={false}
                 badge={Object.keys(filters.selectedProperties).length + filters.selectedFeatures.length}
               >

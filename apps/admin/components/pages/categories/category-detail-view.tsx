@@ -10,6 +10,7 @@ import { TableCore } from "@/components/table/table-core"
 import type { Category, CategoryProperty, CategoryFeature } from "@/lib/types/category"
 import { propertiesColumns } from "@/components/pages/properties/columns"
 import { featuresColumns } from "@/components/pages/features/columns"
+import Image from "next/image"
 
 interface CategoryDetailViewProps {
     category: Category
@@ -55,7 +56,7 @@ export function CategoryDetailView({
                         {category.icon && (
                             <div className="h-16 w-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden shrink-0">
                                 {category.icon.includes('/') || category.icon.includes('.') ? (
-                                    <img 
+                                    <img
                                         src={category.icon.startsWith('http') ? category.icon : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${category.icon}`}
                                         alt={category.name.ar}
                                         className="w-full h-full object-cover"
@@ -193,8 +194,8 @@ export function CategoryDetailView({
                                                         <TableCell>
                                                             <div className="flex items-center gap-3">
                                                                 {child.icon && (
-                                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 to-primary/5">
-                                                                        <span className="text-xl">{child.icon}</span>
+                                                                    <div className="flex h-10 w-10 items-center overflow-hidden justify-center rounded-sm bg-gradient-to-br from-primary/20 to-primary/5">
+                                                                        <Image src={child.icon} alt={child.name.ar} width={40} height={40} className="w-full h-full object-cover"  />
                                                                     </div>
                                                                 )}
                                                                 <div>

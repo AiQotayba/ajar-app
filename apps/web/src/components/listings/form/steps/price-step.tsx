@@ -11,9 +11,10 @@ import type { ListingFormData } from "../types"
 interface PriceStepProps {
   onNext: () => void
   onPrevious: () => void
+  showNavigation?: boolean
 }
 
-export function PriceStep({ onNext, onPrevious }: PriceStepProps) {
+export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceStepProps) {
   const { register, watch, setValue, formState: { errors } } = useFormContext<ListingFormData>()
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -109,23 +110,25 @@ export function PriceStep({ onNext, onPrevious }: PriceStepProps) {
         {/* Insurance errors handled by form validation */}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex gap-3 pt-4">
-        <Button
-          type="button"
-          onClick={onPrevious}
-          variant="outline"
-          className="flex-1 h-12 text-base font-bold rounded-xl bg-transparent"
-        >
-          السابق
-        </Button>
-        <Button
-          type="submit"
-          className="flex-1 h-12 text-base font-bold rounded-xl"
-        >
-          التالي
-        </Button>
-      </div>
+      {/* Navigation Buttons - Only show if navigation is enabled */}
+      {showNavigation && (
+        <div className="flex gap-3 pt-4">
+          <Button
+            type="button"
+            onClick={onPrevious}
+            variant="outline"
+            className="flex-1 h-12 text-base font-bold rounded-xl bg-transparent"
+          >
+            السابق
+          </Button>
+          <Button
+            type="submit"
+            className="flex-1 h-12 text-base font-bold rounded-xl"
+          >
+            التالي
+          </Button>
+        </div>
+      )}
     </form>
   )
 }

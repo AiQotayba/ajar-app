@@ -11,6 +11,7 @@ export default function MapPage() {
   const t = useTranslations('map')
   const [showPermissionModal, setShowPermissionModal] = useState(false)
   const [hasPermission, setHasPermission] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Check if location permission was previously granted
   useEffect(() => {
@@ -21,12 +22,14 @@ export default function MapPage() {
       if (permissionStatus === 'granted') {
         setHasPermission(true)
         setShowPermissionModal(false)
+        setIsLoading(false)
         return
       }
       
       if (permissionStatus === 'denied') {
         setHasPermission(false)
         setShowPermissionModal(false)
+        setIsLoading(false)
         return
       }
       
@@ -38,6 +41,7 @@ export default function MapPage() {
             setHasPermission(true)
             setShowPermissionModal(false)
             localStorage.setItem('locationPermission', 'granted')
+            setIsLoading(false)
           },
           (error) => {
             // Permission denied or not available
@@ -47,12 +51,14 @@ export default function MapPage() {
               // Other error, show modal to request permission
               setShowPermissionModal(true)
             }
+            setIsLoading(false)
           },
           { timeout: 1000 }
         )
       } else {
         // Geolocation not supported
         setShowPermissionModal(true)
+        setIsLoading(false)
       }
     }
 
@@ -91,6 +97,17 @@ export default function MapPage() {
     setShowPermissionModal(true)
   }
 
+  // Show loading skeleton while checking permissions
+  if (isLoading) {
+    return (
+      <div className="max-h-[90vh] h-screen bg-background flex flex-col">
+        <main className="flex-1 relative">
+          <MapPageSkeleton />
+        </main>
+      </div>
+    )
+  }
+
   return (
     <div className="max-h-[90vh] h-screen bg-background flex flex-col">
 
@@ -103,6 +120,31 @@ export default function MapPage() {
         onAllow={handleAllowLocation}
         onDeny={handleDenyLocation}
       />
+    </div>
+  )
+}
+
+function MapPageSkeleton() {
+  return (
+    <div className="relative w-full max-h-[90vh] h-screen animate-pulse">
+      {/* Map skeleton */}
+      <div className="w-full h-full bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 relative overflow-hidden">
+        <div className="absolute inset-0 animate-shimmer opacity-50" />
+        
+        {/* Controls skeleton */}
+        <div className="absolute bottom-4 left-2 rounded-full right-2 flex gap-2 justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-1 flex gap-1">
+            <div className="w-16 h-full bg-gray-200 rounded-md" />
+            <div className="w-16 h-full bg-gray-200 rounded-md" />
+            <div className="w-16 h-full bg-gray-200 rounded-md" />
+          </div>
+          <div className="w-10 h-10 bg-white rounded-full shadow-lg" />
+          <div className="flex gap-1 bg-white rounded-full shadow-lg p-1">
+            <div className="w-10 h-10 bg-gray-200 rounded-full" />
+            <div className="w-10 h-10 bg-gray-200 rounded-full" />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -68,17 +68,17 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
       const response = await api.delete(`/user/reviews/${reviewId}`)
 
       if (!response.isError) {
-        toast.success(response.message || (locale === 'ar' ? 'تم حذف التقييم بنجاح' : 'Review deleted successfully'))
+        toast.success(response.message || (locale === 'ar' ? 'تم حذف التقييم' : 'Review deleted'))
         // Call parent callback to refresh property data
         if (onReviewAdded) {
           onReviewAdded()
         }
       } else {
-        toast.error(response.message || (locale === 'ar' ? 'حدث خطأ في حذف التقييم' : 'Error deleting review'))
+        toast.error(response.message || (locale === 'ar' ? 'تعذر حذف التقييم' : 'Unable to delete review'))
       }
     } catch (error) {
       console.error('Error deleting review:', error)
-      toast.error(locale === 'ar' ? 'حدث خطأ في حذف التقييم' : 'Error deleting review')
+      toast.error(locale === 'ar' ? 'تعذر حذف التقييم' : 'Unable to delete review')
     } finally {
       setDeletingReviewId(null)
     }
@@ -104,7 +104,7 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
         key={star}
         className={cn(
           "h-4 w-4",
-          star <= ratingValue ? "fill-yellow-400 text-yellow-400" : "fill-none text-gray-300",
+          star <= ratingValue ? "fill-yellow-400 text-yellow-400" : "fill-none text-gray-300 stroke-0",
         )}
       />
     ))
@@ -113,120 +113,241 @@ export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, loc
 
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-foreground">
-            {locale === 'ar' ? 'التقييمات' : 'Reviews'}
-          </h2>
-          {reviewsCount > 0 ? (
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full font-bold bg-primary text-white">
-              <span>{rating.toFixed(1)}</span>
-              <Star className="h-4 w-4 fill-[#FFC32C]" />
+      <div className="space-y-6">
+        {/* Hero Section - Reviews Header */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 p-6 border border-primary/20">
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  {locale === 'ar' ? 'تقييمات العملاء' : 'Customer Reviews'}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {locale === 'ar' 
+                    ? 'اكتشف آراء العملاء الآخرين حول هذا العقار' 
+                    : 'Discover what other customers think about this property'
+                  }
+                </p>
+              </div>
+              
+              {/* Rating Badge */}
+              <div className="flex flex-col items-center">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-white">
+                        {reviewsCount > 0 ? rating.toFixed(1) : '0.0'}
+                      </div>
+                      <div className="flex justify-center gap-0.5 mt-1">
+                        {renderStars(reviewsCount > 0 ? Math.round(rating) : 0)}
+                      </div>
+                    </div>
+                  </div>
+                  {reviewsCount > 0 && (
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                      <Star className="h-3 w-3 fill-white text-white" />
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2 text-center">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    {reviewsCount > 0 
+                      ? (locale === 'ar' 
+                          ? `${reviewsCount} ${reviewsCount === 1 ? 'تقييم' : 'تقييم'}` 
+                          : `${reviewsCount} ${reviewsCount === 1 ? 'review' : 'reviews'}`
+                        )
+                      : (locale === 'ar' ? 'لا توجد تقييمات' : 'No reviews yet')
+                    }
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full  font-medium bg-primary text-white">
-              <span>{locale === 'ar' ? '0.0' : '0.0'}</span>
-              <Star className="h-5 w-5 fill-[#FFC32C] stroke-0" />
-            </div>
-          )}
-        </div>
 
-        {/* Rating Summary - Only show if there are reviews */}
-        {reviewsCount > 0 ? (
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/50">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">{rating.toFixed(1)}</div>
-              <div className="flex justify-center gap-0.5 mt-1">
-                {renderStars(Math.round(rating))}
+            {/* Rating Breakdown - Only show if there are reviews */}
+            {reviewsCount > 0 ? (
+              <div className="flex lg:flex-row w-full gap-4 mt-4">
+                <div className="space-y-2 w-full">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {locale === 'ar' ? 'التقييم العام' : 'Overall Rating'}
+                    </span>
+                    <span className="font-semibold text-foreground">
+                      {rating.toFixed(1)}/5
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted/30 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${(rating / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2 w-[50vw]">
+                  <div className="flex items-center justify-start gap-2 text-sm">
+                    <span className="text-muted-foreground">
+                      {locale === 'ar' ? 'عدد التقييمات' : 'Total Reviews'}
+                    </span>
+                    <span className="font-semibold text-foreground">
+                      {reviewsCount}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {locale === 'ar' 
+                      ? 'آخر تحديث اليوم' 
+                      : 'Updated today'
+                    }
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex-1">
-              <div className="text-sm text-muted-foreground">
-                {locale === 'ar'
-                  ? `${reviewsCount} ${reviewsCount === 1 ? 'تقييم' : 'تقييم'}`
-                  : `${reviewsCount} ${reviewsCount === 1 ? 'review' : 'reviews'}`
-                }
+            ) : (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
+                  <Star className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {locale === 'ar' ? 'كن أول من يقيم!' : 'Be the first to review!'}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  {locale === 'ar' 
+                    ? 'شاركنا تجربتك مع هذا العقار وساعد الآخرين في اتخاذ قرارهم' 
+                    : 'Share your experience with this property and help others make their decision'
+                  }
+                </p>
               </div>
-            </div>
+            )}
           </div>
-        ) : (
-          <div className="flex items-center justify-center gap-4 p-6 rounded-xl bg-muted/30">
-            <div className="text-center">
-              <div className="text-lg font-medium text-muted-foreground mb-2">
-                {locale === 'ar' ? 'لا توجد تقييمات بعد' : 'No reviews yet'}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {locale === 'ar' ? 'كن أول من يقيم هذا العقار' : 'Be the first to review this property'}
-              </div>
-            </div>
-          </div>
-        )}
+          
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full -translate-y-16 translate-x-16" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/5 to-transparent rounded-full translate-y-12 -translate-x-12" />
+        </div>
 
         {/* Reviews List */}
         {reviews.length > 0 && (
-          <div className="space-y-3">
-            {reviews.map((review: Review) => (
-              <div key={review.id} className="p-4 rounded-xl border border-border bg-card space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-bold text-primary">
-                        {review.user.full_name[0].toUpperCase()}
-                      </span>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-foreground">
+                {locale === 'ar' ? 'آراء العملاء' : 'Customer Feedback'}
+              </h3>
+              <div className="text-sm text-muted-foreground">
+                {locale === 'ar' 
+                  ? `عرض ${reviews.length} من ${reviewsCount} تقييم` 
+                  : `Showing ${reviews.length} of ${reviewsCount} reviews`
+                }
+              </div>
+            </div>
+            
+            <div className="lg:max-h-96 lg:overflow-y-auto lg:pr-2 space-y-4">
+              {reviews.map((review: Review) => (
+                <div key={review.id} className="group relative p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md transition-all duration-200">
+                  {/* Review Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center ring-2 ring-primary/10">
+                          <span className="text-lg font-bold text-primary">
+                            {review.user.full_name[0].toUpperCase()}
+                          </span>
+                        </div>
+                        {review.is_approved && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-foreground">
+                            {review.user.full_name}
+                          </span>
+                          {review.is_approved && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                              {locale === 'ar' ? 'موثق' : 'Verified'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-0.5">
+                            {renderStars(review.rating)}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDate(review.created_at)}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <span className="font-medium text-foreground block">
-                        {review.user.full_name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(review.created_at)}
+                    
+                    {/* Rating Badge */}
+                    <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10">
+                      <Star className="h-4 w-4 fill-primary text-primary" />
+                      <span className="text-sm font-semibold text-primary">
+                        {review.rating}/5
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-0.5">
-                      {renderStars(review.rating)}
+
+                  {/* Review Content */}
+                  {review.comment && (
+                    <div className="mb-4">
+                      <p className="text-sm text-foreground leading-relaxed">
+                        {review.comment}
+                      </p>
                     </div>
+                  )}
+
+                  {/* Review Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-border/30">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <span>
+                        {locale === 'ar' ? 'مفيد' : 'Helpful'}
+                      </span>
+                      <span>
+                        {locale === 'ar' ? 'مشاركة' : 'Share'}
+                      </span>
+                    </div>
+                    
+                    {/* Delete button for current user's reviews */}
+                    {currentUserId && review.user.id === currentUserId && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteReview(review.id)}
+                        disabled={deletingReviewId === review.id}
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title={locale === 'ar' ? 'حذف التقييم' : 'Delete review'}
+                      >
+                        {deletingReviewId === review.id ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </div>
-                {review.comment && (
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {review.comment}
-                  </p>
-                )}
-
-                {/* Delete button for current user's reviews */}
-                {currentUserId && review.user.id === currentUserId && (
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeleteReview(review.id)}
-                      disabled={deletingReviewId === review.id}
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
-                      title={locale === 'ar' ? 'حذف التقييم' : 'Delete review'}
-                    >
-                      {deletingReviewId === review.id ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 
         {/* Add Review Button - Only show if user hasn't reviewed yet */}
         {currentUserId && !reviews.some(review => review.user.id === currentUserId) && (
-          <Button
-            onClick={() => setShowAddReview(true)}
-            className="w-full h-12 text-base font-bold rounded-xl bg-primary hover:bg-primary/90"
-          >
-            {locale === 'ar' ? 'إضافة تقييم' : 'Add Review'}
-          </Button>
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur-sm" />
+            <Button
+              onClick={() => setShowAddReview(true)}
+              className="relative w-full h-14 text-base font-bold rounded-2xl bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-lg hover:shadow-xl transition-all duration-200 group"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                  <Star className="h-4 w-4 fill-white text-white" />
+                </div>
+                <span>
+                  {locale === 'ar' ? 'شارك تجربتك' : 'Share Your Experience'}
+                </span>
+              </div>
+            </Button>
+          </div>
         )}
       </div>
 

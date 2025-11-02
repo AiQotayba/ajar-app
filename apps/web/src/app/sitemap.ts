@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com'
-  
+
   // Static pages
   const staticPages = [
     {
@@ -55,41 +55,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ])
 
-  // Governorates pages
-  const governorates = [
-    { id: 1, slug: 'damascus' },
-    { id: 2, slug: 'aleppo' },
-    { id: 3, slug: 'homs' },
-    { id: 4, slug: 'hama' },
-    { id: 5, slug: 'latakia' },
-    { id: 6, slug: 'deir-ez-zor' },
-    { id: 7, slug: 'raqqa' },
-    { id: 8, slug: 'quneitra' },
-    { id: 9, slug: 'sweida' },
-    { id: 10, slug: 'tartous' },
-    { id: 11, slug: 'idlib' },
-    { id: 12, slug: 'daraa' },
-    { id: 13, slug: 'qamishli' },
-  ]
-
-  const governoratePages = governorates.flatMap(governorate => [
-    {
-      url: `${baseUrl}/ar/governorates/${governorate.id}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/en/governorates/${governorate.id}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    },
-  ])
 
   return [
     ...staticPages,
-    ...categoryPages,
-    ...governoratePages,
   ]
 }

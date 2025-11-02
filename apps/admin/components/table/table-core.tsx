@@ -1171,7 +1171,7 @@ function TablePagination({ meta, isLoading, hasData, onPageChange }: TablePagina
   const endItem = Math.min(current_page * per_page, total)
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card/50 rounded-lg p-4 border">
+    <div className="flex flex-col gap-4 px-4 rounded-lg sm:flex-row sm:items-center sm:justify-between">
       {" "}
       {/* Added background, rounded-lg, padding, and border */}
       {/* Results Info */}

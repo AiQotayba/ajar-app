@@ -2,42 +2,20 @@ references:
   api[../API-docx.json]:
 app:
   (public):
-    - home: 
-      - slidrs:
-        - تحسين التصميم والمظهر والتجاوب 
-        - add click count to slider
-        - api: POST /user/sliders/{id}/click
+    - home:
       - listingsGrid: 
-        - add loading skeleton
-        - if not images or error this image will be shown, show placeholder image
+        - add loading skeleton 
       - map:
-        - add skeleton loading
-      - my-listings:
-        - layout authenticated
+        - add skeleton loading  
   (authenticated):
-    - listings:
-      - Form: 
-        - layout authenticated
-        - create Api- POST /user/listings
-        - edit Api- PUT /user/listings/{id}
-        - delete Api- DELETE /user/listings/{id}
-        - validation for input fields for all forms steps or fields optional or required
-        - center map in syria
-        @FormSteps{5}:
-          - Step1:
-          - Step2: 
-          - Step3:
-            fields: ["media"]
-            ref(image-upload): [apps/admin/components/ui/image-upload.tsx]
-            - upload images to server directly to storage/listings folder
-          - Step4: 
-          - Step5:
-            api: POST /user/listings 
-    - listings[id]:
-      @Reviews:
-        api:
-          - POST: /user/reviews 
+    - favorites:
+      - skeleton loading
     - my-listings:
-        api: 
-          - PUT: /user/listings/{id}  
-[All Tasks {{75}}]
+      - Form: 
+        - امكانية اضافة فديو 
+        - create Api- POST /user/listings
+        - edit Api- PUT /user/listings/{id} 
+          - تعبئة كل المدخلات [category_id, governorate_id, city_id]
+          - تحديث وحذف الصور
+          - ترتيب الصور 
+[All Tasks {{55}}]

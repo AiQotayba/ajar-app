@@ -9,8 +9,6 @@ export function EmptyFavorites() {
 
   return (
     <div className="min-h-screen bg-background pb-24 flex flex-col">
-      {/* Header */} 
-      <Header title="المفضلة" showNotification showBack />
       {/* Empty State */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
         {/* Illustration */}

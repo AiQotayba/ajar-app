@@ -1,0 +1,81 @@
+ajar-admin:
+  ref:
+    apiDoc: doc/API-docx.json
+    db: doc/DB.sql
+    techRoadmap: doc/tech-roadmap-admin.md
+    uxRules: doc/ux-rules-admin.md
+  app:
+    categories:
+      page: page.tsx
+      features:
+        - data_types: [integer, decimal, yes/no, date, list_of_values]
+        - edit_delete_categories
+      api: 
+        - GET: /admin/categories
+        - POST: /admin/categories 
+        - PUT: /admin/categories/{id}
+        - DELETE: /admin/categories/{id}
+        - PUT: /admin/categories/{id}/reorder
+      details[id]:
+        page: page.tsx
+        features:
+          - data_types: [integer, decimal, yes/no, date, list_of_values]
+          - edit_delete_categories
+        api:
+          - GET: /admin/categories/{id}
+          - PUT: /admin/categories/{id} 
+          - DELETE: /admin/categories/{id}
+          - PUT: /admin/categories/{id}/reorder
+    properties:
+      page: page.tsx
+      features:
+        - data_types: [integer, decimal, yes/no, date, list_of_values]
+        - edit_delete_properties
+      api:
+        - GET: /admin/properties
+        - POST: /admin/properties
+        - PUT: /admin/properties/{id}
+        - DELETE: /admin/properties/{id}
+      details[id]:
+        page: page.tsx
+        features:
+          - data_types: [integer, decimal, yes/no, date, list_of_values]
+          - edit_delete_properties
+        api:
+          - GET: /admin/properties/{id}
+          - PUT: /admin/properties/{id}
+          - DELETE: /admin/properties/{id}
+    features:
+      page: page.tsx
+      features:
+        - link_to_categories
+        - reorder_drag_drop
+        - edit_delete_features
+      api:
+        - GET: /admin/features
+        - POST: /admin/features
+        - PUT: /admin/features/{id}
+        - DELETE: /admin/features/{id}
+      details[id]:
+        page: page.tsx
+        features:
+          - link_to_categories
+          - reorder_drag_drop
+          - edit_delete_features
+        api:
+          - GET: /admin/features/{id}
+          - PUT: /admin/features/{id}
+          - DELETE: /admin/features/{id}
+now: 250 ✔️✔️✔️
+
+Test:
+  - reorder
+  - forms Dynamic drawer:
+    - edit
+    - create 
+  - delete 
+  - slider:
+    - expand/collapse
+    - reorder
+    
+ 

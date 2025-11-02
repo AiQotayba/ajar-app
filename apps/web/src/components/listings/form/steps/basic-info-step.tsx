@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { ListingFormData, Category, Property, Feature } from "../types"
-import { useLocale } from "next-intl"
 
 interface BasicInfoStepProps {
   onNext: () => void
@@ -21,6 +20,7 @@ interface BasicInfoStepProps {
   onCategoryChange?: (categoryId: string) => void
   onSubCategoryChange?: (subCategoryId: string) => void
   onSubSubCategoryChange?: (subSubCategoryId: string) => void
+  showNavigation?: boolean
 }
 
 export function BasicInfoStep({
@@ -35,34 +35,10 @@ export function BasicInfoStep({
   availableFeatures = [],
   onCategoryChange,
   onSubCategoryChange,
-  onSubSubCategoryChange
+  onSubSubCategoryChange,
+  showNavigation = true
 }: BasicInfoStepProps) {
   const { register, watch, setValue, formState: { errors } } = useFormContext<ListingFormData>()
-  const locale = useLocale()
-
-  // Debug logging
-  console.log("🔍 BasicInfoStep Props:", {
-    categoriesCount: categories.length,
-    subCategoriesCount: subCategories.length,
-    subSubCategoriesCount: subSubCategories.length,
-    selectedCategory: selectedCategory?.name?.ar,
-    selectedSubCategory: selectedSubCategory?.name?.ar,
-    selectedSubSubCategory: selectedSubSubCategory?.name?.ar,
-    availablePropertiesCount: availableProperties.length,
-    availableFeaturesCount: availableFeatures.length
-  })
-
-  console.log("🔍 Sub Categories Details:", subCategories)
-  console.log("🔍 Sub Sub Categories Details:", subSubCategories)
-
-  // Debug render
-  console.log("🔍 BasicInfoStep RENDER:", {
-    timestamp: new Date().toISOString(),
-    subCategoriesLength: subCategories.length,
-    subCategoriesFirstItem: subCategories[0],
-    shouldShowSubCategory: subCategories.length > 0
-  })
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onNext()
@@ -212,12 +188,6 @@ export function BasicInfoStep({
       {/* Sub Category */}
       {(() => {
         const shouldRender = subCategories.length > 0
-        console.log("🔍 Sub Category Render Check:", {
-          subCategoriesLength: subCategories.length,
-          subCategories: subCategories,
-          shouldRender: shouldRender,
-          firstCategory: subCategories[0]
-        })
         return shouldRender
       })() && (
           <div className="space-y-2">
@@ -229,7 +199,6 @@ export function BasicInfoStep({
             <Select
               value={selectedSubCategory?.id.toString() || ""}
               onValueChange={(value) => {
-                console.log("🔍 Sub Category Selected:", value)
                 onSubCategoryChange?.(value)
               }}
             >
@@ -239,7 +208,6 @@ export function BasicInfoStep({
               <SelectContent>
                 {subCategories.length > 0 ? (
                   subCategories.map((category) => {
-                    console.log("🔍 Rendering sub category:", category)
                     return (
                       <SelectItem key={category.id} value={category.id.toString()}>
                         {category.name.ar}
@@ -376,11 +344,9 @@ export function BasicInfoStep({
             مميزات العقار
           </Label>
           <div className="text-xs text-gray-500 mb-2">
-            Debug: {availableFeatures.length} ميزة متاحة
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {availableFeatures.map((feature) => {
-              console.log("🔍 Rendering feature:", feature)
+            {availableFeatures.map((feature) => { 
               return (
                 <div key={feature.id} className="flex items-center space-x-2 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
                   <input
@@ -418,10 +384,12 @@ export function BasicInfoStep({
         </div>
       )}
 
-      {/* Submit Button */}
-      <Button type="submit" className="w-full h-12 text-base font-bold rounded-xl">
-        التالي
-      </Button>
+      {/* Submit Button - Only show if navigation is enabled */}
+      {showNavigation && (
+        <Button type="submit" className="w-full h-12 text-base font-bold rounded-xl">
+          التالي
+        </Button>
+      )}
     </form>
   )
 }

@@ -3,7 +3,7 @@
 import { ListingGrid } from "@/components/listings/listing-grid"
 import { api } from "@/lib/api"
 import { useTranslations } from "next-intl"
-import { useQuery } from "@tanstack/react-query"  
+import { useQuery } from "@tanstack/react-query"
 import { SearchBarWrapper } from "../search/search-bar-wrapper"
 import { EmptyFavorites } from "./empty-favorites"
 
@@ -85,19 +85,6 @@ export function FavoritesContent() {
 
   const favorites = favoritesData || []
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background pb-24">
-        <div className="p-4 pt-4">
-          <SearchBarWrapper />
-        </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    )
-  }
 
   // Show error state
   if (isError) {
@@ -122,7 +109,7 @@ export function FavoritesContent() {
   }
 
   // Show empty state if no favorites
-  if ((favorites as Listing[]).length === 0) {
+  if (!isLoading && (favorites as Listing[]).length === 0) {
     return <EmptyFavorites />
   }
 
@@ -134,17 +121,21 @@ export function FavoritesContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Results count */}
-      <div className="px-4 pb-2">
+    <div className="min-h-screen max-w-7xl mx-auto bg-background pb-24">
+      {/* Header */}
+      <div className="px-4 py-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          {t('navigation.favorites.title')}
+        </h1>
         <p className="text-sm text-muted-foreground">
-          {favorites.length} {favorites.length === 1 ? 'إعلان' : 'إعلان'} في المفضلة
+          {favorites.length} {favorites.length === 1 ? t('navigation.favorites.single_listing') : t('navigation.favorites.multiple_listings')}
         </p>
       </div>
 
-      <main className="space-y-6 px-4">
+      <main className="space-y-6 px-4 ">
         <ListingGrid
           data={favorites}
+          isLoading={isLoading}
           onFavoriteRemoved={handleFavoriteRemoved}
         />
       </main>

@@ -62,3 +62,78 @@ export const listingsApi = {
     await api.put(`/admin/listings/${id}/reorder`, { sort_order })
   },
 }
+
+/**
+ * Transform form data to API format for admin listings
+ */
+export const transformFormDataToAPI = (formData: any): any => {
+  const transformedData: any = {
+    title: {
+      ar: formData.title.ar,
+      en: formData.title.en || ""
+    },
+    description: {
+      ar: formData.description.ar || "",
+      en: formData.description.en || ""
+    },
+    category_id: parseInt(formData.category_id),
+    governorate_id: parseInt(formData.governorate_id),
+    city_id: formData.city_id ? parseInt(formData.city_id) : null,
+    price: formData.price,
+    currency: "JOD", // Default currency
+    latitude: formData.latitude?.toString() || null,
+    longitude: formData.longitude?.toString() || null,
+    type: formData.type,
+    availability_status: formData.availability_status,
+    status: formData.status || "draft",
+    properties: formData.properties.map((prop: any, index: number) => ({
+      property_id: prop.id,
+      value: prop.value,
+      sort_order: index + 1
+    })),
+    features: formData.features.map((id: string) => parseInt(id)),
+    media: formData.media.map((mediaItem: any, index: number) => ({
+      type: "image",
+      url: typeof mediaItem === 'string' ? mediaItem : mediaItem.url,
+      source: "file",
+      sort_order: index + 1
+    })),
+    is_featured: formData.is_featured || false,
+  }
+
+  return transformedData
+}
+
+/**
+ * Create a new listing (admin)
+ */
+export const createListing = async (data: any): Promise<Listing> => {
+  const transformedData = transformFormDataToAPI(data)
+  const response = await listingsApi.create(transformedData)
+  if (response.isError) {
+    console.error("❌ Create listing error:", response.message)
+    throw new Error(response.message)
+  }
+  return response.data
+}
+
+/**
+ * Update an existing listing (admin)
+ */
+export const updateListing = async (id: number, data: any): Promise<Listing> => {
+  const transformedData = transformFormDataToAPI(data)
+  const response = await listingsApi.update(id, transformedData)
+  if (response.isError) {
+    console.error("❌ Update listing error:", response.message)
+    throw new Error(response.message)
+  }
+  return response.data
+}
+
+/**
+ * Get listing by ID (admin)
+ */
+export const getListing = async (id: number): Promise<Listing> => {
+  const response = await listingsApi.getById(id)
+  return response
+}

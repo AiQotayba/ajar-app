@@ -1,26 +1,13 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronRight, Phone } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useLocale, useTranslations } from "next-intl"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
-import Link from "next/link"
-import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validations/auth"
-import { api } from "@/lib/api"
 import AuthBG from "./AuthBG"
 
 export function AuthLayout({ children, title, subtitle }: { children: React.ReactNode, title: string, subtitle: string }) {
-  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const t = useTranslations()
-  const locale = useLocale()
-  
+
   return (
     <AuthBG>
       <div className="space-y-6">

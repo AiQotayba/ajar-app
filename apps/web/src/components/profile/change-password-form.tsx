@@ -9,9 +9,13 @@ import { api } from "@/lib/api"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useTranslations, useLocale } from "next-intl"
 
 export function ChangePasswordForm() {
   const router = useRouter()
+  const t = useTranslations('profile')
+  const locale = useLocale()
+  const direction = locale === 'ar' ? 'rtl' : 'ltr'
   const [showOldPassword, setShowOldPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -32,16 +36,16 @@ export function ChangePasswordForm() {
     mutationFn: async (data: { password: string; password_confirmation: string }) => {
       const response = await api.post('/auth/reset-password', data)
       if (response.isError) {
-        throw new Error(response.message || 'حدث خطأ في تغيير كلمة المرور')
+        throw new Error(response.message || t('changePasswordError'))
       }
       return response.data
     },
     onSuccess: () => {
-      toast.success('تم تغيير كلمة المرور بنجاح')
+      toast.success(t('changePasswordSuccess'))
       router.push('/profile')
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'حدث خطأ في تغيير كلمة المرور')
+      toast.error(error.message || t('changePasswordError'))
     }
   })
 
@@ -53,15 +57,15 @@ export function ChangePasswordForm() {
     }
 
     if (!formData.newPassword) {
-      newErrors.newPassword = 'كلمة المرور الجديدة مطلوبة'
+      newErrors.newPassword = t('newPasswordRequired')
     } else if (formData.newPassword.length < 8) {
-      newErrors.newPassword = 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'
+      newErrors.newPassword = t('passwordMinLength')
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'تأكيد كلمة المرور مطلوب'
+      newErrors.confirmPassword = t('confirmPasswordRequired')
     } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'كلمة المرور غير متطابقة'
+      newErrors.confirmPassword = t('passwordMismatch')
     }
 
     setErrors(newErrors)
@@ -92,12 +96,12 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <form onSubmit={handleSubmit} className="p-6 space-y-6"> 
+    <div className="min-h-screen max-w-2xl mx-auto bg-background" dir={direction}>
+      <form onSubmit={handleSubmit} className="p-6 space-y-6" dir={direction}> 
         {/* New Password */}
         <div className="space-y-2">
-          <Label htmlFor="new-password" className="text-right block">
-            كلمة المرور الجديدة
+          <Label htmlFor="new-password" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
+            {t('newPassword')}
           </Label>
           <div className="relative">
             <Input
@@ -106,14 +110,13 @@ export function ChangePasswordForm() {
               placeholder="**************"
               value={formData.newPassword}
               onChange={(e) => handleInputChange('newPassword', e.target.value)}
-              className={`h-14 pr-12 pl-12 rounded-2xl text-right ${errors.newPassword ? 'border-destructive' : ''
-                }`}
+              className={`h-14 ${direction === 'rtl' ? 'pr-12 pl-12' : 'pl-12 pr-12'} rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.newPassword ? 'border-destructive' : ''}`}
             />
-            <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Lock className={`absolute ${direction === 'rtl' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
             <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute left-4 top-1/2 -translate-y-1/2"
+              className={`absolute ${direction === 'rtl' ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2`}
             >
               {showNewPassword ? (
                 <EyeOff className="h-5 w-5 text-muted-foreground" />
@@ -123,14 +126,14 @@ export function ChangePasswordForm() {
             </button>
           </div>
           {errors.newPassword && (
-            <p className="text-sm text-destructive text-right">{errors.newPassword}</p>
+            <p className={`text-sm text-destructive ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>{errors.newPassword}</p>
           )}
         </div>
 
         {/* Confirm Password */}
         <div className="space-y-2">
-          <Label htmlFor="confirm-password" className="text-right block">
-            تأكيد كلمة المرور الجديدة
+          <Label htmlFor="confirm-password" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
+            {t('confirmNewPassword')}
           </Label>
           <div className="relative">
             <Input
@@ -139,14 +142,13 @@ export function ChangePasswordForm() {
               placeholder="**************"
               value={formData.confirmPassword}
               onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-              className={`h-14 pr-12 pl-12 rounded-2xl text-right ${errors.confirmPassword ? 'border-destructive' : ''
-                }`}
+              className={`h-14 ${direction === 'rtl' ? 'pr-12 pl-12' : 'pl-12 pr-12'} rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.confirmPassword ? 'border-destructive' : ''}`}
             />
-            <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Lock className={`absolute ${direction === 'rtl' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute left-4 top-1/2 -translate-y-1/2"
+              className={`absolute ${direction === 'rtl' ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2`}
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-5 w-5 text-muted-foreground" />
@@ -156,7 +158,7 @@ export function ChangePasswordForm() {
             </button>
           </div>
           {errors.confirmPassword && (
-            <p className="text-sm text-destructive text-right">{errors.confirmPassword}</p>
+            <p className={`text-sm text-destructive ${direction === 'rtl' ? 'text-right' : 'text-left'}`}>{errors.confirmPassword}</p>
           )}
         </div>
 
@@ -166,7 +168,7 @@ export function ChangePasswordForm() {
           className="w-full h-14 text-lg rounded-2xl mt-8"
           disabled={resetPasswordMutation.isPending}
         >
-          {resetPasswordMutation.isPending ? 'جاري الحفظ...' : 'حفظ'}
+          {resetPasswordMutation.isPending ? t('saving') : t('save')}
         </Button>
       </form>
     </div>

@@ -23,20 +23,42 @@ const containerStyle = {
 
 const GOOGLE_MAPS_LIBRARIES = ["places", "maps"] as any
 
+// Helper function to validate and sanitize coordinates
+const validateCoordinates = (lat: any, lng: any): { lat: number; lng: number } => {
+  const defaultLat = 34.8021 // Homs, Syria
+  const defaultLng = 36.7570
+
+  // Convert to numbers and validate
+  const numLat = typeof lat === 'number' ? lat : parseFloat(lat)
+  const numLng = typeof lng === 'number' ? lng : parseFloat(lng)
+
+  // Check if coordinates are valid numbers and within valid ranges
+  const isValidLat = !isNaN(numLat) && numLat >= -90 && numLat <= 90
+  const isValidLng = !isNaN(numLng) && numLng >= -180 && numLng <= 180
+
+  return {
+    lat: isValidLat ? numLat : defaultLat,
+    lng: isValidLng ? numLng : defaultLng
+  }
+}
+
 export function LocationPickerMap({
-  initialLat = 31.2001,
-  initialLng = 29.9187,
+  initialLat = 34.8021,
+  initialLng = 36.7570,
   onLocationSelect,
   onClose,
   showControls = true
 }: LocationPickerMapProps) {
+  // Validate and sanitize initial coordinates
+  const validatedCoords = validateCoordinates(initialLat, initialLng)
+  
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number
     lng: number
     address?: string
   }>({
-    lat: initialLat,
-    lng: initialLng
+    lat: validatedCoords.lat,
+    lng: validatedCoords.lng
   })
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -167,12 +189,9 @@ export function LocationPickerMap({
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="space-y-2">
-        <Label className="text-right block">
-          البحث عن موقع
-        </Label>
+      <div className="space-y-2"> 
         <div className="flex gap-2">
-          <Input
+          {/* <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ابحث عن عنوان أو مكان..."
@@ -187,15 +206,16 @@ export function LocationPickerMap({
             size="icon"
           >
             <Search className="h-4 w-4" />
-          </Button>
+          </Button> */}
           <Button
             type="button"
             onClick={handleGetCurrentLocation}
             variant="outline"
-            size="icon"
+            // size="icon"
             title="الموقع الحالي"
           >
             <Navigation className="h-4 w-4" />
+            <span className="text-right">الموقع الحالي</span>
           </Button>
         </div>
       </div>

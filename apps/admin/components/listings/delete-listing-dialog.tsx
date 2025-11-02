@@ -37,9 +37,9 @@ export function DeleteListingDialog({ listing, open, onOpenChange, onConfirm }: 
         </AlertDialogHeader>
 
         <div className="rounded-lg border bg-muted/50 p-3">
-          <p className="text-sm font-medium">{listing.title}</p>
+          <p className="text-sm font-medium">{listing.title.ar || listing.title.en}</p>
           <p className="text-xs text-muted-foreground mt-1">
-            {listing.category?.name} • {listing.governorate?.name}
+            {listing.category?.name.ar || listing.category?.name.en} • {listing.governorate?.name.ar || listing.governorate?.name.en}
           </p>
         </div>
 

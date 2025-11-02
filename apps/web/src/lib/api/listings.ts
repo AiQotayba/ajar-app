@@ -78,17 +78,13 @@ export interface ListingResponse {
  * POST /user/listings
  */
 export const createListing = async (data: CreateListingRequest): Promise<ListingResponse> => {
-  console.log("🚀 ===== CREATING LISTING =====")
-  console.log("🚀 API Request Data:", data)
-  
   const response = await api.post("/user/listings", data)
-  
+
   if (response.isError) {
     console.error("❌ Create listing error:", response.message)
     throw new Error(response.message)
   }
-  
-  console.log("✅ Listing created successfully:", response.data)
+
   return response.data
 }
 
@@ -97,18 +93,14 @@ export const createListing = async (data: CreateListingRequest): Promise<Listing
  * PUT /user/listings/:id
  */
 export const updateListing = async (id: number, data: UpdateListingRequest): Promise<ListingResponse> => {
-  console.log("🔄 ===== UPDATING LISTING =====")
-  console.log("🔄 Listing ID:", id)
-  console.log("🔄 API Request Data:", data)
-  
+
   const response = await api.put(`/user/listings/${id}`, data)
-  
+
   if (response.isError) {
     console.error("❌ Update listing error:", response.message)
     throw new Error(response.message)
   }
-  
-  console.log("✅ Listing updated successfully:", response.data)
+
   return response.data
 }
 
@@ -117,17 +109,13 @@ export const updateListing = async (id: number, data: UpdateListingRequest): Pro
  * GET /user/listings/:id
  */
 export const getListing = async (id: number): Promise<ListingResponse> => {
-  console.log("📖 ===== GETTING LISTING =====")
-  console.log("📖 Listing ID:", id)
-  
   const response = await api.get(`/user/listings/${id}`)
-  
+
   if (response.isError) {
     console.error("❌ Get listing error:", response.message)
     throw new Error(response.message)
   }
-  
-  console.log("✅ Listing retrieved successfully:", response.data)
+
   return response.data
 }
 
@@ -136,16 +124,13 @@ export const getListing = async (id: number): Promise<ListingResponse> => {
  * GET /user/listings
  */
 export const getUserListings = async (): Promise<ListingResponse[]> => {
-  console.log("📋 ===== GETTING USER LISTINGS =====")
-  
   const response = await api.get("/user/listings")
-  
+
   if (response.isError) {
     console.error("❌ Get user listings error:", response.message)
     throw new Error(response.message)
   }
-  
-  console.log("✅ User listings retrieved successfully:", response.data)
+
   return response.data
 }
 
@@ -154,26 +139,138 @@ export const getUserListings = async (): Promise<ListingResponse[]> => {
  * DELETE /user/listings/:id
  */
 export const deleteListing = async (id: number): Promise<void> => {
-  console.log("🗑️ ===== DELETING LISTING =====")
-  console.log("🗑️ Listing ID:", id)
-  
   const response = await api.delete(`/user/listings/${id}`)
-  
+
   if (response.isError) {
     console.error("❌ Delete listing error:", response.message)
     throw new Error(response.message)
   }
-  
-  console.log("✅ Listing deleted successfully")
+}
+
+/**
+ * Upload image using direct fetch API
+ * POST /general/upload-image
+ */
+export const uploadImageDirect = async (
+  file: File,
+  retryCount: number = 0
+): Promise<{ url: string }> => {
+  const maxRetries = 3
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ajar-backend.mystore.social/api/v1'
+
+  try {
+    const formData = new FormData()
+    formData.append('image', file)
+    formData.append('folder', 'listings')
+
+    // Get token for authentication
+    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')
+
+    const response = await fetch(`${baseUrl}/general/upload-image`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Accept': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // Return the correct format based on API response
+    return {
+      url: data.data?.image_url || data.image_url || data.url
+    }
+
+  } catch (error: any) {
+    console.error(`❌ Upload attempt ${retryCount + 1} failed:`, error)
+
+    // Retry logic for network errors
+    if (retryCount < maxRetries && (
+      error.message?.includes('timeout') ||
+      error.message?.includes('network') ||
+      error.message?.includes('Failed to fetch')
+    )) {
+      console.log(`🔄 Retrying upload (${retryCount + 1}/${maxRetries})...`)
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
+      return uploadImageDirect(file, retryCount + 1)
+    }
+
+    throw new Error(error.message || 'Failed to upload image')
+  }
+}
+
+/**
+ * Validate file before upload
+ */
+const validateFile = (file: File): void => {
+  // Check file size (max 10MB)
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    throw new Error('حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت')
+  }
+
+  // Check file type
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('نوع الملف غير مدعوم. الأنواع المسموحة: JPG, PNG, GIF, WebP')
+  }
+
+  // Check if file is empty
+  if (file.size === 0) {
+    throw new Error('الملف فارغ')
+  }
+}
+
+/**
+ * Upload image to server
+ * Uses direct fetch API for better reliability
+ */
+export const uploadImage = async (
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<{ url: string }> => {
+  // Validate file before upload
+  validateFile(file)
+
+  // Use direct fetch for better reliability
+  return await uploadImageDirect(file)
+}
+
+/**
+ * Upload multiple images to server
+ */
+export const uploadImages = async (
+  files: File[]
+): Promise<{ urls: string[] }> => {
+  const uploadPromises = files.map(async (file, index) => {
+    try {
+      const result = await uploadImage(file)
+      return result.url
+    } catch (error) {
+      console.error(`❌ Failed to upload file ${file.name}:`, error)
+      throw error
+    }
+  })
+
+  try {
+    const urls = await Promise.all(uploadPromises)
+    return { urls }
+  } catch (error) {
+    console.error("❌ Some images failed to upload:", error)
+    throw error
+  }
 }
 
 /**
  * Transform form data to API format
  */
 export const transformFormDataToAPI = (formData: any): CreateListingRequest => {
-  console.log("🔄 ===== TRANSFORMING FORM DATA =====")
-  console.log("🔄 Raw form data:", formData)
-  
   const transformedData: CreateListingRequest = {
     title: {
       ar: formData.title.ar,
@@ -199,80 +296,14 @@ export const transformFormDataToAPI = (formData: any): CreateListingRequest => {
       sort_order: index + 1
     })),
     features: formData.features.map((id: string) => parseInt(id)),
-    media: formData.media.map((file: any, index: number) => ({
+    media: formData.media.map((mediaItem: any, index: number) => ({
       type: "image",
-      url: `listings/${file.name}`, // This should be handled by file upload
+      url: typeof mediaItem === 'string' ? mediaItem : mediaItem.url, // Use uploaded URL or existing URL
       source: "file",
       sort_order: index + 1
     }))
   }
-  
-  console.log("🔄 Transformed data:", transformedData)
-  console.log("🔄 ===== END TRANSFORMATION =====")
-  
+
   return transformedData
 }
 
-/**
- * Example API request data structure
- */
-export const EXAMPLE_LISTING_DATA: CreateListingRequest = {
-  title: {
-    ar: "فيلا للبيع في عمان",
-    en: "Villa for Sale in Amman"
-  },
-  description: {
-    ar: "فيلا جميلة في منطقة راقية",
-    en: "Beautiful villa in upscale area"
-  },
-  category_id: 1,
-  governorate_id: 1,
-  city_id: 1,
-  price: 150000,
-  currency: "JOD",
-  latitude: "31.9454",
-  longitude: "35.9284",
-  type: "sale",
-  availability_status: "available",
-  status: "draft",
-  properties: [
-    {
-      property_id: 1,
-      value: "4",
-      sort_order: 1
-    }
-  ],
-  features: [1, 2, 3],
-  media: [
-    {
-      type: "image",
-      url: "listings/image1.jpg",
-      source: "file",
-      sort_order: 1
-    },
-    {
-      type: "image",
-      url: "listings/image2.jpg",
-      source: "file",
-      sort_order: 2
-    },
-    {
-      type: "image",
-      url: "listings/image3.jpg",
-      source: "file",
-      sort_order: 3
-    },
-    {
-      type: "image",
-      url: "listings/image4.jpg",
-      source: "file",
-      sort_order: 4
-    },
-    {
-      type: "image",
-      url: "listings/image5.jpg",
-      source: "file",
-      sort_order: 5
-    }
-  ]
-}

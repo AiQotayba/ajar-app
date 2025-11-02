@@ -27,6 +27,7 @@ import { Map } from "../icons/map"
 import { SearchBar } from "../search/search-bar"
 import { FilterDrawerWrapper } from "../filters/filter-drawer-wrapper"
 import { useAuth } from "@/hooks/use-auth"
+import { LanguageSwitcher } from "../language-switcher"
 
 interface NavbarProps {
   className?: string
@@ -95,9 +96,14 @@ export function Navbar({ className }: NavbarProps) {
               <SheetContent side={isRTL ? "right" : "left"} className="w-80">
                 <div className="flex flex-col h-full">
                   {/* Mobile Logo */}
-                  <div className="flex items-center space-x-3 rtl:space-x-reverse px-6 py-3  border-b border-gray-200">
-                    <Logo width={40} height={40} />
-
+                  <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
+                    <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                      <Logo width={40} height={40} />
+                    </div>
+                    {/* Mobile Language Switcher */}
+                    <div className="sm:hidden">
+                      <LanguageSwitcher />
+                    </div>
                   </div>
 
                   {/* Mobile Navigation */}
@@ -123,7 +129,7 @@ export function Navbar({ className }: NavbarProps) {
                         )
                       })}
                       <Link
-                        href={`/${locale}/my-listings/add`}
+                        href={`/${locale}/my-listings/create`}
                         className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center"
                         onClick={() => setIsMenuOpen(false)}
                       >
@@ -196,6 +202,11 @@ export function Navbar({ className }: NavbarProps) {
               <SearchBar />
             </div>
 
+            {/* Language Switcher */}
+            <div className="hidden sm:flex">
+              <LanguageSwitcher />
+            </div>
+
             {/* Notifications */}
             <Button
               variant="ghost"
@@ -214,7 +225,7 @@ export function Navbar({ className }: NavbarProps) {
               asChild
               className="hidden sm:flex bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
             >
-              <Link href={`/${locale}/my-listings/add`}>
+              <Link href={`/${locale}/my-listings/create`}>
                 <Plus className="w-4 h-4 mx-1" />
                 {isRTL ? "إضافة عقار" : "Add Property"}
               </Link>

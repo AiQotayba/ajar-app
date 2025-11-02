@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import { ShareIcon } from "../icons/share"
 import { HeartIcon } from "../icons/heart"
 import { HeartFillIcon } from "../icons/heart-fill"
+import CachedImage from "../CachedImage"
 
 interface GalleryImage {
   id: number
@@ -32,14 +33,14 @@ interface PropertyGalleryProps {
   onFavoriteToggle?: (isFavorite: boolean, favoritesCount: number) => void
 }
 
-export function PropertyGallery({ 
-  images = [], 
-  coverImage, 
-  badge, 
-  locale = 'ar', 
-  isFavorite: initialFavorite = false, 
-  listingId, 
-  ribon_text, 
+export function PropertyGallery({
+  images = [],
+  coverImage,
+  badge,
+  locale = 'ar',
+  isFavorite: initialFavorite = false,
+  listingId,
+  ribon_text,
   ribon_color,
   favoritesCount: initialFavoritesCount = 0,
   onFavoriteToggle
@@ -53,6 +54,7 @@ export function PropertyGallery({
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set())
 
   // Prepare images array - use cover image as first if available, then add other images
   const allImages = coverImage
@@ -100,30 +102,30 @@ export function PropertyGallery({
 
   const calculateMousePosition = (event: React.MouseEvent) => {
     const rect = event.currentTarget.getBoundingClientRect()
-    
+
     // Get precise mouse coordinates relative to the thumbnail
     const mouseX = event.clientX - rect.left
     const mouseY = event.clientY - rect.top
-    
+
     // Calculate percentage position with high precision (0-100)
     const xPercent = Math.max(0, Math.min(100, (mouseX / rect.width) * 100))
     const yPercent = Math.max(0, Math.min(100, (mouseY / rect.height) * 100))
-    
+
     // Round to 2 decimal places for precision
-    return { 
-      x: Math.round(xPercent * 100) / 100, 
-      y: Math.round(yPercent * 100) / 100 
+    return {
+      x: Math.round(xPercent * 100) / 100,
+      y: Math.round(yPercent * 100) / 100
     }
   }
 
   const handleImageHover = (index: number, event: React.MouseEvent) => {
     setHoveredImageIndex(index)
     setIsAutoPlaying(false) // Stop auto-play when hovering
-    
+
     // Calculate precise mouse position
     const position = calculateMousePosition(event)
     setMousePosition(position)
-    
+
     // Change the main view image
     if (carouselApi) {
       carouselApi.scrollTo(index)
@@ -132,7 +134,7 @@ export function PropertyGallery({
 
   const handleImageMouseMove = (event: React.MouseEvent) => {
     if (hoveredImageIndex === null) return
-    
+
     // Throttle mouse move events for better performance
     requestAnimationFrame(() => {
       const position = calculateMousePosition(event)
@@ -213,10 +215,14 @@ export function PropertyGallery({
   // Don't render if no images
   if (sortedImages.length === 0) {
     return (
-      <div className="relative h-80 rounded-3xl overflow-hidden bg-muted/50 flex items-center justify-center">
-        <div className="text-center text-muted-foreground">
-          <p className="text-lg font-medium">
-            {locale === 'ar' ? 'لا توجد صور متاحة' : 'No images available'}
+      <div className="relative h-80 rounded-3xl overflow-hidden flex items-center justify-center">
+        <div className="text-center"></div>
+        <div className="w-20 h-20 flex-col mx-auto mb-2 rounded-lg bg-gray-200 flex items-center justify-center">
+          <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p className="text-xs mt-2 text-muted-foreground">
+            {locale === 'ar' ? 'فشل التحميل' : 'Failed to load'}
           </p>
         </div>
       </div>
@@ -236,36 +242,52 @@ export function PropertyGallery({
             setApi={setCarouselApi}
             className="w-full"
           >
-             <CarouselContent className="w-full" dir="ltr">
-               {sortedImages.map((image, index) => (
-                 <CarouselItem key={image.id || index}>
-                   <div className="relative h-80 w-full overflow-hidden rounded-lg">
-                     <div 
-                       className={cn(
-                         "relative w-full h-full transition-all duration-150 ease-out",
-                         hoveredImageIndex === index && mousePosition ? "scale-150" : "scale-100"
-                       )}
-                       style={hoveredImageIndex === index && mousePosition ? {
-                         transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
-                       } : undefined}
-                     >
-                       <Image
-                         src={image.full_url || image.url || "/images/images/placeholder.svg"}
-                         alt={`Property image ${index + 1}`}
-                         fill
-                         className="object-cover"
-                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                         priority={index === 0}
-                       />
-                     </div>
-                     {/* Overlay effect for hovered image */}
-                     {hoveredImageIndex === index && (
-                       <div className="absolute inset-0 bg-black/10 transition-opacity duration-300" />
-                     )}
-                   </div>
-                 </CarouselItem>
-               ))}
-             </CarouselContent>
+            <CarouselContent className="w-full" dir="ltr">
+              {sortedImages.map((image, index) => (
+                <CarouselItem key={image.id || index}>
+                  <div className="relative h-80 w-full overflow-hidden rounded-lg">
+                    <div
+                      className={cn(
+                        "relative w-full h-full transition-all duration-150 ease-out",
+                        hoveredImageIndex === index && mousePosition ? "scale-150" : "scale-100"
+                      )}
+                      style={hoveredImageIndex === index && mousePosition ? {
+                        transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
+                      } : undefined}
+                    >
+                      <CachedImage
+                        src={image.full_url || image.url || "/images/images/placeholder.svg"}
+                        alt={`Property image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={index === 0}
+                        onError={() => setImageErrors(prev => new Set(prev).add(index))}
+                      />
+                    </div>
+                    {/* Overlay effect for hovered image */}
+                    {hoveredImageIndex === index && (
+                      <div className="absolute inset-0 bg-black/10 transition-opacity duration-300" />
+                    )}
+
+                    {/* Error overlay for failed images */}
+                    {imageErrors.has(index) && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center"></div>
+                        <div className="w-20 h-20 flex-col mx-auto mb-2 rounded-lg bg-gray-200 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="text-xs mt-2 text-muted-foreground">
+                            {locale === 'ar' ? 'فشل التحميل' : 'Failed to load'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
 
             {/* Navigation Arrows */}
             {sortedImages.length > 1 && (
@@ -362,29 +384,42 @@ export function PropertyGallery({
         {sortedImages.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide flex-row ">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide   rtl:justify-end">
-               {sortedImages.slice(0, 4).map((image, index) => (
-                 <button
-                   key={image.id || index}
-                   onClick={() => scrollToIndex(index)}
+              {sortedImages.slice(0, 4).map((image, index) => (
+                <button
+                  key={image.id || index}
+                  onClick={() => scrollToIndex(index)}
                   //  onMouseEnter={(e) => handleImageHover(index, e)}
                   //  onMouseMove={handleImageMouseMove}
                   //  onMouseLeave={handleImageLeave}
-                   className={cn(
-                     "flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer",
-                     currentIndex === index
-                       ? "border-primary ring-2 ring-primary/20"
-                       : "border-transparent opacity-60 hover:opacity-100",
-                   )}
-                 >
-                   <Image
-                     src={image.full_url || image.url || "/images/placeholder.svg"}
-                     alt={`Thumbnail ${index + 1}`}
-                     width={80}
-                     height={80}
-                     className="w-full h-full object-cover"
-                   />
-                 </button>
-               ))}
+                  className={cn(
+                    "relative flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer",
+                    currentIndex === index
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "border-transparent opacity-60 hover:opacity-100",
+                  )}
+                >
+                  <CachedImage
+                    src={image.full_url || image.url || "/images/placeholder.svg"}
+                    alt={`Thumbnail ${index + 1}`}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-cover"
+                    onError={() => setImageErrors(prev => new Set(prev).add(index))}
+                  />
+                  {imageErrors.has(index) && (
+                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center rounded-2xl">
+                      <div className="flex flex-col items-center">
+                        <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-xs mt-1 text-muted-foreground">
+                          {locale === 'ar' ? 'فشل' : 'Failed'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </button>
+              ))}
             </div>
             {sortedImages.length > 4 && (
               <button className="flex-shrink-0 w-20 h-20 rounded-2xl bg-foreground/90 text-background flex items-center justify-center text-sm font-bold">
@@ -409,7 +444,7 @@ export function PropertyGallery({
             </Button>
 
             <div className="relative w-full h-full flex items-center justify-center p-4">
-              <Image
+              <CachedImage
                 src={sortedImages[currentIndex]?.full_url || sortedImages[currentIndex]?.url || "/images/placeholder.svg"}
                 alt={`Property image ${currentIndex + 1}`}
                 fill

@@ -1,33 +1,17 @@
 "use client";
 
-import LoadingSkeleton from "@/app/[locale]/(public)/loading";
 import { CategoryFilter } from "@/components/filters/category-filter";
 import { HeroSlider } from "@/components/home/hero-slider";
-import { MainLayout } from "@/components/layout/main-layout";
 import { ListingGrid } from "@/components/listings/listing-grid";
-import { useTranslationsHook } from "@/hooks/use-translations";
-import { useAdvancedFilters } from "@/hooks/use-advanced-filters";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function HomePage({ locale = 'ar' }: any) {
-  const t = useTranslationsHook();
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const { filters } = useAdvancedFilters();
-  const [sortField, setSortField] = useState('sort_order');
-  const [sortOrder, setSortOrder] = useState('asc');
 
- 
-
-  const queryParams =  searchParams.toString();
+  const queryParams = searchParams.toString();
   const hasFilters = queryParams.length > 0;
-
 
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products', locale],
@@ -52,15 +36,13 @@ export default function HomePage({ locale = 'ar' }: any) {
   // add api call to get listings
 
   const { data: listingsData, isLoading: isListingsLoading, error: isListingsError } = useQuery({
-    queryKey: ['listings', locale, queryParams, sortField, sortOrder],
+    queryKey: ['listings', locale, queryParams],
     queryFn: async () => {
       const response = await api.get(`/user/listings?${queryParams}`);
       return response;
     },
   });
-
-  if (isLoading) return <LoadingSkeleton />
-
+  
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -76,15 +58,16 @@ export default function HomePage({ locale = 'ar' }: any) {
       <main className="space-y-6 mt-2">
 
         {/* Hero Slider */}
-        <HeroSlider sliders={products?.data?.sliders} />
+        <HeroSlider sliders={products?.data?.sliders} isLoading={isLoading} />
 
         {/* Category Filter */}
-        <CategoryFilter data={products?.data?.categories} />
+        <CategoryFilter data={products?.data?.categories} isLoading={isLoading} />
 
         {/* Listings */}
         <div className="px-4">
           <ListingGrid
             data={listingsData?.data || listingsData}
+            // isLoading={true}
             isLoading={isListingsLoading}
             pagination={listingsData?.meta as any}
           />

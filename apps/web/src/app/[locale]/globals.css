@@ -315,3 +315,19 @@ body {
   font-family: "ITF Qomra Arabic", system-ui, -apple-system, sans-serif;
   font-weight: 900;
 }
+
+/* Shimmer Animation for Skeleton Loading */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+  background-size: 1000px 100%;
+}

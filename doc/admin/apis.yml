@@ -14,27 +14,9 @@ api:
   listings:
     - GET: /users/listings/{id}/wa-click
     - POST: /admin/listings/{id}/reject 
-      {{status: rejected, message: string}}
-    - PUT: /admin/listings/{id}
-      {
-        "success": false,
-        "message": "ليس لديك صلاحية للقيام بهذا الإجراء",
-        "key": "messages.permission.error"
-      }
-    - POST: /admin/listings/reorder
+      {{status: rejected, message: string}} 
   reports:
-    - GET: /admin/reports
-  categories: 
-    - POST: /admin/categories/reorder
-  properties:
-    - POST: /admin/properties/reorder
-  features:
-    - POST: /admin/features/reorder
-  locations:
-    - POST: /admin/governorates/reorder
-    - POST: /admin/cities/reorder
-  sliders:
-    - POST: /admin/sliders/reorder
+    - GET: /admin/reports 
   reviews:  
     - POST: /admin/reviews/{id}/status {{status: approved, rejected}}
     - DELETE: /users/reviews/{id} 

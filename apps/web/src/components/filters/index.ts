@@ -6,7 +6,6 @@
 export { FilterDrawer } from './filter-drawer'
 export { FilterDrawerWrapper } from './filter-drawer-wrapper'
 export { FilterBadge } from './filter-badge'
-export { ActiveFilters } from './active-filters'
 export { CategoryFilter } from './category-filter'
 export { CategoryHierarchy } from './category-hierarchy'
 export { CategoryTabs } from './category-tabs'

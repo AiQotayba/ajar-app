@@ -8,6 +8,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
+import { useTranslations, useLocale } from "next-intl"
 import { CoushIcon } from "../icons/coush"
 import { HeartIcon } from "../icons/heart"
 import { HeartFillIcon } from "../icons/heart-fill"
@@ -82,12 +83,15 @@ interface ListingCardProps {
 // مكون منفصل لأزرار الحذف والتعديل
 interface ListingActionsProps {
   listingId: number
+  locale: string
   onEdit?: (listingId: number) => void
   onDelete?: (listingId: number) => void
 }
 
-function ListingActions({ listingId, onEdit, onDelete }: ListingActionsProps) {
+function ListingActions({ listingId, locale, onEdit, onDelete }: ListingActionsProps) {
   const [isDeleting, setIsDeleting] = useState(false)
+  const t = useTranslations('property')
+  const currentLocale = useLocale()
 
   const handleDelete = async () => {
     if (!onDelete) return
@@ -105,7 +109,7 @@ function ListingActions({ listingId, onEdit, onDelete }: ListingActionsProps) {
   const handleEdit = () => onEdit && onEdit(listingId)
 
   return (
-    <DropdownMenu dir="rtl">
+    <DropdownMenu dir={(locale || currentLocale) === 'ar' ? 'rtl' : 'ltr'}>
       <DropdownMenuTrigger asChild>
         <Button
           size="icon"
@@ -118,7 +122,7 @@ function ListingActions({ listingId, onEdit, onDelete }: ListingActionsProps) {
       <DropdownMenuContent align="end" className="w-48 bg-white">
         <DropdownMenuItem onClick={handleEdit} className="cursor-pointer hover:text-primary">
           <Edit className="mx-2 h-4 w-4 text-primary" />
-          <span className="text-primary">تعديل الإعلان</span>
+          <span className="text-primary">{t('editListing')}</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleDelete}
@@ -126,20 +130,22 @@ function ListingActions({ listingId, onEdit, onDelete }: ListingActionsProps) {
           disabled={isDeleting}
         >
           <Trash2 className="mx-2 h-4 w-4 text-destructive" />
-          {isDeleting ? 'جاري الحذف...' : 'حذف الإعلان'}
+          {isDeleting ? t('deleting') : t('deleteListing')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdit, deleteListing }: ListingCardProps) {
+export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, deleteListing }: ListingCardProps) {
   const [isFavorite, setIsFavorite] = useState(listing.is_favorite || false)
   const [favoritesCount, setFavoritesCount] = useState(listing.favorites_count || 0)
   const [isLoading, setIsLoading] = useState(false)
+  const [imageError, setImageError] = useState(false)
+  const t = useTranslations('property')
+  const currentLocale = useLocale()
 
-  const getLocalizedText = (text: { ar: string; en: string }) => text[locale as keyof typeof text] || text.ar
-
+  const getLocalizedText = (text: { ar: string; en: string }) => text[(locale || currentLocale) as keyof typeof text] || text.ar
 
   const displayTitle = getLocalizedText(listing.title)
   const displayLocation = listing.city
@@ -147,15 +153,17 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
     : getLocalizedText(listing.governorate.name)
 
   const displayPrice = `${listing.price.toLocaleString()} ${listing.currency}`
-  const periodText = listing.type === 'rent' ? (listing.pay_every ? `كل ${listing.pay_every} شهر` : 'شهرياً') : ''
+  const periodText = listing.type === 'rent' ? (listing.pay_every ? t('everyMonth', { months: listing.pay_every }) : t('monthly')) : ''
 
   const mainImage = listing.cover_image || (listing.images?.[0]?.full_url) || "/images/placeholder.svg?height=400&width=600&query=modern property"
+  const placeholderImage = "/images/placeholder.svg?height=400&width=600&query=modern property"
+  const imageToShow = imageError ? placeholderImage : mainImage
 
   // Check if furnished from features
-  const isFurnished = listing.features?.some(feature =>
-    getLocalizedText(feature.name).toLowerCase().includes('مفروش') ||
-    getLocalizedText(feature.name).toLowerCase().includes('furnished')
-  ) || false
+  const isFurnished = listing.features?.some(feature => {
+    const featureName = getLocalizedText(feature.name).toLowerCase()
+    return featureName.includes('مفروش') || featureName.includes('furnished')
+  }) || false
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation to listing details
@@ -186,11 +194,11 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
         toast.success(data.message)
       } else {
         // Handle API error
-        toast.error(data.message || (locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites'))
+        toast.error(data.message || t('favoritesError'))
       }
     } catch (error) {
       console.error('Error toggling favorite:', error)
-      toast.error(locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites')
+      toast.error(t('favoritesError'))
     } finally {
       setIsLoading(false)
     }
@@ -205,15 +213,15 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
         await navigator.share({
           title: displayTitle,
           text: getLocalizedText(listing.description),
-          url: window.location.origin + `/${locale}/listings/${listing.id}`,
+          url: window.location.origin + `/${locale || currentLocale}/listings/${listing.id}`,
         })
       } catch (error) {
         console.error('Error sharing:', error)
       }
     } else {
       // Fallback to copying URL
-      navigator.clipboard.writeText(window.location.origin + `/${locale}/listings/${listing.id}`)
-      toast.success(locale === 'ar' ? 'تم نسخ الرابط' : 'Link copied')
+      navigator.clipboard.writeText(window.location.origin + `/${locale || currentLocale}/listings/${listing.id}`)
+      toast.success(t('linkCopied'))
     }
   }
 
@@ -227,15 +235,15 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
       const response = await api.delete(`/user/listings/${listingId}`)
 
       if (!response.isError) {
-        toast.success('تم حذف الإعلان بنجاح')
+        toast.success(t('deleteListing'))
         // Refresh the page or update the list
         window.location.reload()
       } else {
-        toast.error(response.message || 'حدث خطأ في حذف الإعلان')
+        toast.error(response.message || t('deleteListing'))
       }
     } catch (error) {
       console.error('Error deleting listing:', error)
-      toast.error('حدث خطأ في حذف الإعلان')
+      toast.error(t('deleteListing'))
     }
   }
 
@@ -243,24 +251,42 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
     <Link href={`/listings/${listing.id}`} className="block group">
       <div className="bg-card  overflow-hidden transition-all duration-300">
         <div className="relative h-56 overflow-hidden">
+          {/* Image Layer */}
           <Image
-            src={mainImage}
+            src={imageToShow}
             alt={displayTitle}
             className="w-full h-full object-cover transition-transform duration-500 !rounded-2xl"
             fill
+            onError={() => setImageError(true)}
+            onLoad={() => setImageError(false)}
           />
 
+          {/* Placeholder Overlay - Show when using placeholder image */}
+          {imageError && (
+            <div className="absolute inset-0   flex items-center justify-center z-10">
+              <div className="text-center  "></div>
+              <div className="w-20 h-20 flex-col mx-auto mb-2 rounded-lg bg-gray-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p className="text-xs mt-2 text-muted-foreground">
+                  {t('imageLoadFailed')}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 !rounded-2xl via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 !rounded-2xl via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20" />
 
           {/* Badges */}
-          <div className="absolute top-4 right-4 flex flex-col gap-2">
+          <div className="absolute top-4 right-4 flex flex-col gap-2 z-30">
             {listing.is_featured && (
               <Badge
                 variant="default"
                 className="shadow-lg"
               >
-                مميز
+                {t('featured')}
               </Badge>
             )}
             {listing.status_badge && (
@@ -274,7 +300,7 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
           </div>
 
           {/* Action Buttons */}
-          <div className="absolute top-4 left-4 flex gap-2">
+          <div className="absolute top-4 left-4 flex gap-2 z-30">
             <Button
               size="icon"
               variant="secondary"
@@ -315,7 +341,7 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
             <div className="flex flex-wrap  items-center gap-2">
               <div className="p-2 text-primary font-bold w-max">
                 {displayPrice}
-                {listing.type === 'rent' && ' / شهر'}
+                {listing.type === 'rent' && ` / ${t('perMonth')}`}
               </div>
               {periodText && (
                 <Badge variant="default" className="text-md p-2 rounded-full px-4 text-[14px] text-gray-600 bg-primary/10">
@@ -327,6 +353,7 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
             {(openEdit || deleteListing) && (
               <ListingActions
                 listingId={listing.id}
+                locale={locale || currentLocale}
                 onEdit={openEdit ? handleEdit : undefined}
                 onDelete={deleteListing ? handleDelete : undefined}
               />
@@ -342,13 +369,13 @@ export function ListingCard({ listing, locale = 'ar', onFavoriteRemoved, openEdi
             {listing.features && listing.features.length > 0 && (
               <div className="flex items-center gap-1.5">
                 <CoushIcon className="h-4 w-4" />
-                <span>{isFurnished ? "مفروش" : "غير مفروش"}</span>
+                <span>{isFurnished ? t('furnished') : t('unfurnished')}</span>
               </div>
             )}
             {listing.insurance && (
               <div className="flex items-center gap-2 text-sm">
                 <ShieldCheckIcon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">تأمين: {listing.insurance.toLocaleString()} {listing.currency}</span>
+                <span className="text-muted-foreground">{t('insurance')}: {listing.insurance.toLocaleString()} {listing.currency}</span>
               </div>
             )}
           </div>

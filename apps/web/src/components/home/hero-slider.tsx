@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils"
 import Autoplay from "embla-carousel-autoplay"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
+import { api as Api } from "@/lib/api"
+import { useLocale } from "next-intl"
+import { useRouter } from "next/navigation"
 
 
 interface Slider {
@@ -28,21 +31,55 @@ interface Slider {
   updated_at: string;
 }
 
-export function HeroSlider({ sliders }: { sliders: Slider[] | undefined }) {
+export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefined, isLoading: boolean }) {
   const plugin = useRef(Autoplay({ delay: 5000, stopOnInteraction: false }))
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [api, setApi] = useState<any>(null)
+  const [carouselApi, setCarouselApi] = useState<any>(null)
+  const locale = useLocale()
+  const [clickedSliders, setClickedSliders] = useState<Set<number>>(new Set())
+  const router = useRouter()
 
   // تحديث المؤشر عند تغيير السلايد
   useEffect(() => {
-    if (!api) return
+    if (!carouselApi) return
 
-    setSelectedIndex(api.selectedScrollSnap())
+    setSelectedIndex(carouselApi.selectedScrollSnap())
 
-    const onSelect = () => setSelectedIndex(api.selectedScrollSnap())
-    api.on("select", onSelect)
-    return () => api.off("select", onSelect)
-  }, [api])
+    const onSelect = () => setSelectedIndex(carouselApi.selectedScrollSnap())
+    carouselApi.on("select", onSelect)
+    return () => {
+      carouselApi.off("select", onSelect)
+    }
+  }, [carouselApi])
+  // دالة لتتبع النقرات
+  const handleSliderClick = async (slide: Slider) => {
+    try {
+      // إرسال إحصائيات النقر إذا لم يتم النقر من قبل
+      if (!clickedSliders.has(slide.id)) {
+        // استخدام request method بدلاً من post
+        await Api.post(`/user/sliders/${slide.id}/click`)
+          .then(() => {
+            setClickedSliders(prev => new Set(Array.from(prev).concat(slide.id)))
+            window.open(slide.target_url, '_blank')
+          })
+          .catch((error) => {
+            console.error('Error tracking slider click:', error)
+          })
+      }
+
+      // فتح الرابط في نافذة جديدة
+
+    } catch (error) {
+      console.error('Error tracking slider click:', error)
+      // فتح الرابط حتى لو فشل تتبع النقر
+      // window.open(slide.target_url, '_blank')
+    }
+  }
+
+  // Show loading skeleton if loading
+  if (isLoading) {
+    return <HeroSliderSkeleton />
+  }
 
   // إذا لم تكن هناك سلايدرز، لا نعرض المكون
   if (!sliders || sliders.length === 0) {
@@ -52,31 +89,58 @@ export function HeroSlider({ sliders }: { sliders: Slider[] | undefined }) {
   return (
     <div dir="rtl" className="relative w-full group">
       <Carousel
-        setApi={setApi}
+        setApi={setCarouselApi}
         opts={{
           align: "center",
           loop: true,
-          direction: "rtl", // ✅ الاتجاه من اليمين لليسار
+          direction: "rtl",
         }}
         plugins={[plugin.current as any]}
-        className="w-full pb-4"
+        className="w-full pb-6"
       >
-        <CarouselContent className="rounded-3xl gap-2 mx-2 w-full px-2" >
+        <CarouselContent className="rounded-3xl gap-4 mx-4 w-full px-2" >
           {sliders.map((slide: Slider) => (
-            <CarouselItem key={slide.id} className="basis-[90%] mx-auto">
-              <div className="relative h-56 rounded-3xl overflow-hidden cursor-pointer"
-                onClick={() => window.open(slide.target_url, '_blank')}>
+            <CarouselItem key={slide.id} className="basis-[95%] sm:basis-[90%] md:basis-[85%] lg:basis-[80%] xl:basis-[75%] mx-auto">
+              <div
+                className="relative h-64 sm:h-72 md:h-80 lg:h-96 rounded-3xl overflow-hidden cursor-pointer group/slide transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
+                onClick={() => handleSliderClick(slide)}
+              >
                 <Image
                   src={slide.image_url || "/luxury-modern-house-exterior-wooden-deck.jpg"}
-                  alt={slide.title.ar}
+                  alt={slide.title[locale as keyof typeof slide.title]}
                   fill
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover/slide:scale-105"
+                  priority={false}
+                  sizes="(max-width: 640px) 95vw, (max-width: 768px) 90vw, (max-width: 1024px) 85vw, (max-width: 1280px) 80vw, 75vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                <div className="absolute bottom-0 right-0 left-0 p-6 text-white text-right">
-                  <h2 className="text-2xl font-bold mb-1">{slide.title.ar}</h2>
-                  <p className="text-sm text-white/80">{slide.description.ar}</p>
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover/slide:opacity-100 transition-opacity duration-300" />
+
+                {/* Content */}
+                <div className="absolute bottom-0 right-0 left-0 p-4 sm:p-6 text-white">
+                  <div className="space-y-2 sm:space-y-3">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+                      {slide.title[locale as keyof typeof slide.title]}
+                    </h2>
+                    <p className="text-sm sm:text-base text-white/90 leading-relaxed max-w-2xl">
+                      {slide.description[locale as keyof typeof slide.description]}
+                    </p>
+                  </div>
+
+                  {/* Click Indicator */}
+                  {/* <div className="mt-4 flex items-center gap-2 text-white/70 text-xs sm:text-sm">
+                    <div className="w-2 h-2 bg-white/50 rounded-full animate-pulse" />
+                    <span>{locale === 'ar' ? 'انقر للمزيد' : 'Click for more'}</span>
+                  </div> */}
+                </div>
+
+                {/* Corner Decoration */}
+                <div className="absolute top-4 right-4 w-8 h-8 border-2 border-white/30 rounded-full flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white/60 rounded-full" />
                 </div>
               </div>
             </CarouselItem>
@@ -84,15 +148,85 @@ export function HeroSlider({ sliders }: { sliders: Slider[] | undefined }) {
         </CarouselContent>
       </Carousel>
 
-      {/* ✅ مؤشرات أسفل السلايدر */}
-      <div className="absolute left-0 right-0 flex justify-center gap-2">
+      {/* Enhanced Indicators */}
+      <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2 px-4">
         {sliders.map((_, index) => (
-          <span
+          <button
             key={index}
+            onClick={() => carouselApi?.scrollTo(index)}
             className={cn(
-              "h-2 w-2 rounded-full transition-all bg-primary duration-300 ",
-              index === selectedIndex ? "w-[30px] scale-125 mx-2" : "p-1"
+              "h-2 rounded-full transition-all duration-300 bg-white/40 hover:bg-white/60 focus:outline-none focus:ring-2 focus:ring-white/50",
+              index === selectedIndex
+                ? "w-8 bg-white scale-110"
+                : "w-2 hover:w-4"
             )}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Navigation Arrows (Hidden on mobile) */}
+      <button
+        onClick={() => carouselApi?.scrollPrev()}
+        className="absolute left-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all duration-300 opacity-0 group-hover:opacity-100"
+        aria-label="Previous slide"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <button
+        onClick={() => carouselApi?.scrollNext()}
+        className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all duration-300 opacity-0 group-hover:opacity-100"
+        aria-label="Next slide"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+function HeroSliderSkeleton() {
+  return (
+    <div dir="rtl" className="relative w-full mx-4 px-2">
+      <div className="w-full pb-6">
+        <div className="rounded-3xl overflow-hidden">
+          {/* Main slider skeleton */}
+          <div className="relative h-64 sm:h-72 md:h-80 lg:h-96 rounded-3xl overflow-hidden bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse">
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 animate-shimmer opacity-50" />
+            
+            {/* Content skeleton */}
+            <div className="absolute bottom-0 right-0 left-0 p-4 sm:p-6">
+              <div className="space-y-3 animate-pulse">
+                {/* Title skeleton */}
+                <div className="h-8 sm:h-10 md:h-12 bg-white/20 rounded-lg w-3/4" />
+                <div className="h-6 sm:h-8 bg-white/20 rounded-lg w-full" />
+                {/* Description skeleton */}
+                <div className="space-y-2 max-w-2xl">
+                  <div className="h-4 sm:h-5 bg-white/10 rounded w-full" />
+                  <div className="h-4 sm:h-5 bg-white/10 rounded w-5/6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Corner decoration skeleton */}
+            <div className="absolute top-4 right-4 w-8 h-8 border-2 border-white/30 rounded-full flex items-center justify-center bg-white/10">
+              <div className="w-2 h-2 bg-white/40 rounded-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Indicators skeleton */}
+      <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2 px-4">
+        {[1, 2, 3].map((index) => (
+          <div
+            key={index}
+            className="h-2 w-2 rounded-full bg-white/40 animate-pulse"
           />
         ))}
       </div>

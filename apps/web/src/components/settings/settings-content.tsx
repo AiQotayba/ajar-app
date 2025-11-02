@@ -4,22 +4,26 @@ import { Switch } from "@/components/ui/switch"
 import { ChevronDown, ChevronLeft } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { useTranslations, useLocale } from "next-intl"
 
 export function SettingsContent() {
+  const t = useTranslations('settings')
+  const locale = useLocale()
+  const direction = locale === 'ar' ? 'rtl' : 'ltr'
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background max-w-2xl mx-auto" dir={direction}>
 
       <div className="p-6 space-y-4">
         {/* Notifications Toggle */}
-        <div className="flex items-center justify-between p-4 bg-card rounded-2xl border" dir="rtl">
-          <span className="font-medium">إشعارات التطبيق</span>
+        <div className="flex items-center justify-between p-4 bg-card rounded-2xl border" dir={direction}>
+          <span className="font-medium">{t('appNotifications')}</span>
           <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
         </div>
 
         {/* Language Selector */}
-        <Link href="/settings" locale="ar" className="w-full flex items-center justify-between p-4 bg-card rounded-2xl border hover:shadow-md transition-colors">
+        {/* <Link href="/settings" locale="ar" className="w-full flex items-center justify-between p-4 bg-card rounded-2xl border hover:shadow-md transition-colors">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 flex items-center justify-center">
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -35,7 +39,7 @@ export function SettingsContent() {
                 <path d="M20.9993 8.75001C20.8008 8.7487 20.6108 8.66926 20.4705 8.52889C20.3301 8.38853 20.2507 8.19852 20.2493 8.00001C20.2482 6.58919 19.7705 5.22011 18.8938 4.11473C18.0171 3.00935 16.7928 2.23247 15.4193 1.91001L15.6893 2.36001C15.7399 2.44471 15.7733 2.53855 15.7876 2.63615C15.8019 2.73375 15.7968 2.83322 15.7727 2.92886C15.7485 3.0245 15.7058 3.11446 15.6469 3.19358C15.588 3.27271 15.514 3.33945 15.4293 3.39001C15.3446 3.44057 15.2508 3.47395 15.1532 3.48825C15.0556 3.50254 14.9561 3.49748 14.8605 3.47333C14.7649 3.44919 14.6749 3.40644 14.5958 3.34754C14.5167 3.28863 14.4499 3.21471 14.3993 3.13001L13.3493 1.38001C13.2821 1.2667 13.2461 1.13758 13.2451 1.00582C13.244 0.874067 13.2779 0.744388 13.3433 0.630012C13.4068 0.514336 13.5003 0.417955 13.614 0.351064C13.7277 0.284173 13.8574 0.249258 13.9893 0.250012C16.0444 0.252392 18.0147 1.06954 19.4682 2.52232C20.9217 3.9751 21.7399 5.94495 21.7433 8.00001C21.7445 8.09833 21.7262 8.1959 21.6893 8.28704C21.6524 8.37818 21.5977 8.46107 21.5285 8.53088C21.4592 8.60068 21.3768 8.65601 21.2859 8.69363C21.1951 8.73125 21.0977 8.75042 20.9993 8.75001Z" fill="#333333" />
               </svg>
             </div>
-            <span className="font-medium">اللغة (العربية)</span>
+            <span className="font-medium">{t('language')} ({locale === 'ar' ? t('arabic') : t('english')})</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
@@ -43,10 +47,10 @@ export function SettingsContent() {
             </div>
           </div>
 
-        </Link>
+        </Link> */}
 
         {/* About App */}
-        <Link href="/about-app" className="w-full flex items-center justify-between p-4 bg-card rounded-2xl border hover:shadow-md transition-colors">
+        <Link href="/about" className="w-full flex items-center justify-between p-4 bg-card rounded-2xl border hover:shadow-md transition-colors">
           <div className="flex items-center gap-2">
             <svg width="20" height="22" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M10.0002 12.75C9.80165 12.7487 9.61164 12.6693 9.47127 12.5289C9.3309 12.3885 9.25146 12.1985 9.25015 12V6.75C9.25146 6.55149 9.3309 6.36149 9.47127 6.22112C9.61164 6.08075 9.80165 6.00131 10.0002 6C10.1987 6.00131 10.3887 6.08075 10.529 6.22112C10.6694 6.36149 10.7488 6.55149 10.7502 6.75V12C10.7488 12.1985 10.6694 12.3885 10.529 12.5289C10.3887 12.6693 10.1987 12.7487 10.0002 12.75Z" fill="#333333" />
@@ -54,11 +58,11 @@ export function SettingsContent() {
               <path d="M10.0002 21.745C9.31565 21.7468 8.64287 21.5674 8.05016 21.225L2.11016 17.795C1.51941 17.4509 1.02875 16.9585 0.686731 16.3666C0.344716 15.7746 0.163204 15.1036 0.160156 14.42V7.57998C0.162334 6.89549 0.343434 6.22346 0.685492 5.63056C1.02755 5.03766 1.51868 4.54449 2.11016 4.19998L8.05016 0.769984C8.6425 0.426114 9.31524 0.244995 10.0002 0.244995C10.6851 0.244995 11.3578 0.426114 11.9502 0.769984L17.8902 4.19998C18.4816 4.54449 18.9728 5.03766 19.3148 5.63056C19.6569 6.22346 19.838 6.89549 19.8402 7.57998V14.42C19.838 15.1045 19.6569 15.7765 19.3148 16.3694C18.9728 16.9623 18.4816 17.4555 17.8902 17.8L11.9502 21.23C11.357 21.5706 10.6842 21.7483 10.0002 21.745ZM10.0002 1.74498C9.57932 1.74686 9.16605 1.85706 8.80016 2.06498L2.86016 5.49998C2.49549 5.71122 2.19271 6.01454 1.98211 6.37957C1.77152 6.74461 1.66049 7.15856 1.66016 7.57998V14.42C1.6618 14.8411 1.77337 15.2546 1.98383 15.6194C2.1943 15.9842 2.49637 16.2877 2.86016 16.5L8.80016 19.93C9.16298 20.1412 9.57532 20.2525 9.99516 20.2525C10.415 20.2525 10.8273 20.1412 11.1902 19.93L17.1302 16.5C17.4948 16.2887 17.7976 15.9854 18.0082 15.6204C18.2188 15.2554 18.3298 14.8414 18.3302 14.42V7.57998C18.3285 7.15882 18.2169 6.74538 18.0065 6.38057C17.796 6.01576 17.4939 5.71222 17.1302 5.49998L11.1902 2.06998C10.8288 1.85921 10.4185 1.74713 10.0002 1.74498Z" fill="#333333" />
             </svg>
 
-            <span className="font-medium">عن التطبيق</span>
+            <span className="font-medium">{t('aboutApp')}</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center">
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 ltr:rotate-180 rtl:rotate-0" />
             </div>
           </div>
         </Link>

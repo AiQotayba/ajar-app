@@ -1,0 +1,39 @@
+references:
+  api[../API-docx.json]:
+web:
+  (public):
+    - امكانية اضافة فديو
+    - home:
+      - listingsGrid: 
+        - add loading skeleton 
+      - map:
+        - add skeleton loading  
+  (authenticated):
+    - favorites:
+      - skeleton loading
+    - my-listings:
+      - Form: 
+        - امكانية اضافة فديو 
+        - create Api- POST /user/listings
+        - edit Api- PUT /user/listings/{id} 
+          - تعبئة كل المدخلات [category_id, governorate_id, city_id]
+          - تحديث وحذف الصور
+          - ترتيب الصور 
+admin:
+  - tasks:
+    - تفريغ الفديو
+    - الاختبار 
+  - listings:
+    - change status directly
+    - form:
+      - create Api- POST /admin/listings
+      - edit Api- PUT /admin/listings/{id}
+      - copy listing in web
+      - ترتيب لوحة التحكم 
+  - categories:
+    - tableTree
+    - FormCreate
+    - FormEdit
+    - reorder drag drop
+
+[All Tasks {{55}}]
