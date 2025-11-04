@@ -304,19 +304,18 @@ function TableSkeleton({ columns, rows = 5, variant = "default" }: TableSkeleton
 
 // Empty State Component
 function EmptyState({ message }: { message: string }) {
-  // const t = useTranslations('table') // Removed useTranslations
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      {" "}
-      {/* Increased padding */}
-      <div className="rounded-full bg-gradient-to-br from-primary/10 to-accent/10 p-6 mb-4 shadow-lg">
-        {" "}
-        {/* Changed background and added shadow */}
-        <Search className="h-10 w-10 text-primary" /> {/* Increased size and changed color */}
+    <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in zoom-in-95 duration-500">
+      <div className="relative mb-4">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 blur-2xl animate-pulse opacity-50" />
+        <div className="relative rounded-full bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 p-6 shadow-lg border border-border/50">
+          <Search className="h-10 w-10 text-primary drop-shadow-sm" />
+        </div>
       </div>
-      <h3 className="text-xl font-bold mb-2 text-foreground">لا توجد نتائج</h3>{" "}
-      {/* Changed text to Arabic and made bold */}
-      <p className="text-sm text-muted-foreground max-w-md">{message}</p> {/* Added max-width */}
+      <h3 className="text-lg font-semibold mb-2 text-foreground">
+        لا توجد نتائج
+      </h3>
+      <p className="text-sm text-muted-foreground max-w-md leading-relaxed">{message}</p>
     </div>
   )
 }
@@ -589,8 +588,8 @@ export function TableCore<T extends Record<string, any>>({
       className: "font-mono text-sm",
       width: "w-14 ",
       render: (value) => (
-        <div className="h-8 w-fit px-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
-          <span className="text-xs font-bold text-blue-600">#{value}</span>
+        <div className="h-8 w-fit px-2 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+          <span className="text-xs font-bold text-primary">#{value}</span>
         </div>
       ),
     },
@@ -608,11 +607,19 @@ export function TableCore<T extends Record<string, any>>({
   initColumns = [...initColumns, ...columns]
   const hasActiveFilters = Object.keys(activeFilters).length > 0 || !!dateRange.from || !!dateRange.to
   return (
-    <div className="space-y-4 bg-white rounded-xl shadow-sm p-4">
-      {/* Toolbar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 items-center gap-2 w-full justify-start">
-          <div className="flex flex-row w-full gap-2">
+    <div className="space-y-4 bg-card rounded-3xl shadow-lg p-4 md:p-6 border border-border/50 relative overflow-hidden group">
+      {/* Decorative gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      
+      {/* Animated background elements */}
+      <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl animate-pulse opacity-30" />
+      <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-accent/10 rounded-full blur-3xl animate-pulse opacity-30 delay-1000" />
+      
+      <div className="relative z-10">
+        {/* Toolbar */}
+        <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center md:justify-between mb-4 md:mb-6">
+        <div className="flex flex-1 items-center gap-2 w-full">
+          <div className="flex flex-col sm:flex-row w-full gap-2">
             <TableSearch
               searchValue={searchParams.get("search") || ""}
               placeholder={searchPlaceholder || "بحث..."} // Changed placeholder to Arabic
@@ -635,8 +642,8 @@ export function TableCore<T extends Record<string, any>>({
               variant={isDragEnabled ? "default" : "outline"}
               size="icon"
               onClick={() => setIsDragEnabled(!isDragEnabled)}
-              title={isDragEnabled ? "تعطيل السحب والإفلات" : "تفعيل السحب والإفلات"} // Changed title to Arabic
-              className="shrink-0" // Added shrink-0 class
+              title={isDragEnabled ? "تعطيل السحب والإفلات" : "تفعيل السحب والإفلات"}
+              className="shrink-0 transition-all duration-300 hover:scale-110 hover:shadow-lg"
             >
               <GripVertical className="h-4 w-4" />
             </Button>
@@ -645,9 +652,7 @@ export function TableCore<T extends Record<string, any>>({
       </div>
 
       {/* Table */}
-      <div className="rounded-xl   bg-card overflow-hidden relative shadow-sm">
-        {" "}
-        {/* Added rounded-xl, bg-card, shadow-sm */}
+      <div className="rounded-2xl bg-card overflow-hidden relative shadow-md border border-border/50 transition-all duration-300 hover:shadow-lg">
         {isLoading ? (
           <TableSkeleton
             columns={initColumns.length + (enableActions ? 1 : 0)}
@@ -659,19 +664,17 @@ export function TableCore<T extends Record<string, any>>({
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 hover:from-primary/10 hover:via-accent/10 hover:to-primary/10 transition-all">
-                {" "}
-                {/* Added gradient background */}
+              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 hover:from-primary/15 hover:via-primary/10 hover:to-accent/15 transition-all duration-300 border-b border-border/50">
                 {isDragEnabled && <TableHead className="w-12" />}
                 {initColumns.map((column) => (
                   <TableHead
                     key={column.key}
                     className={cn(
-                      "font-bold text-foreground", // Added font-bold and text-foreground
+                      "text-sm font-semibold text-foreground transition-all duration-200",
                       column.sortable &&
                       !isDragEnabled &&
-                      "cursor-pointer select-none hover:bg-primary/10 transition-colors", // Changed hover effect
-                      column.width, // Apply width from column config
+                      "cursor-pointer select-none hover:bg-primary/20 hover:scale-[1.02] transition-all duration-200",
+                      column.width,
                       column.className,
                     )}
                     onClick={() => column.sortable && handleSort(column.key)}
@@ -679,12 +682,12 @@ export function TableCore<T extends Record<string, any>>({
                     <div className="flex items-center gap-2">
                       {column.label}
                       {column.sortable && !isDragEnabled && (
-                        <div className="flex flex-col">
+                        <div className="flex flex-col transition-all duration-200">
                           {sortColumn === column.key ? (
                             sortDirection === "asc" ? (
-                              <ChevronUp className="h-4 w-4 text-primary" />
+                              <ChevronUp className="h-4 w-4 text-primary animate-in zoom-in-95" />
                             ) : sortDirection === "desc" ? (
-                              <ChevronDown className="h-4 w-4 text-primary" />
+                              <ChevronDown className="h-4 w-4 text-primary animate-in zoom-in-95" />
                             ) : (
                               <div className="flex flex-col -space-y-1">
                                 <ChevronUp className="h-3 w-3 text-muted-foreground/50" />
@@ -692,7 +695,7 @@ export function TableCore<T extends Record<string, any>>({
                               </div>
                             )
                           ) : (
-                            <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                               <ChevronUp className="h-3 w-3 text-muted-foreground/50" />
                               <ChevronDown className="h-3 w-3 text-muted-foreground/50" />
                             </div>
@@ -703,8 +706,8 @@ export function TableCore<T extends Record<string, any>>({
                   </TableHead>
                 ))}
                 {enableActions && (
-                  <TableHead className="w-32 text-center font-bold text-foreground">الإجراءات</TableHead>
-                )}{" "}
+                  <TableHead className="w-32 text-center text-sm font-semibold text-foreground">الإجراءات</TableHead>
+                )}
                 {/* Changed header text to Arabic and added styling */}
               </TableRow>
             </TableHeader>
@@ -719,20 +722,21 @@ export function TableCore<T extends Record<string, any>>({
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
                   className={cn(
-                    "hover:bg-primary/5 transition-colors", // Changed hover effect
+                    "hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 transition-all duration-300",
+                    "group/row",
                     isDragEnabled && "cursor-move",
-                    draggedIndex === index && "opacity-50",
-                    index % 2 === 0 && "bg-muted/30", // Added zebra striping
+                    draggedIndex === index && "opacity-50 scale-95",
+                    index % 2 === 0 && "bg-muted/20",
                   )}
                 >
                   {isDragEnabled && (
                     <TableCell>
-                      <GripVertical className="h-4 w-4 text-muted-foreground" />
+                      <GripVertical className="h-4 w-4 text-muted-foreground group-hover/row:text-primary transition-colors" />
                     </TableCell>
                   )}
 
                   {initColumns.map((column) => (
-                    <TableCell key={column.key} className={cn(column.width, column.className)}>
+                    <TableCell key={column.key} className={cn(column.width, column.className, "transition-colors duration-200")}>
                       {column.render ? column.render(row[column.key], row) : row[column.key]}
                     </TableCell>
                   ))}
@@ -746,9 +750,9 @@ export function TableCore<T extends Record<string, any>>({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="عرض" // Changed title to Arabic
+                            title="عرض"
                             onClick={() => actions.onView!(row)}
-                            className="hover:bg-primary/10 hover:text-primary transition-colors" // Added hover effect
+                            className="hover:bg-primary/20 hover:text-primary hover:scale-110 hover:shadow-md transition-all duration-300"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -757,9 +761,9 @@ export function TableCore<T extends Record<string, any>>({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="تعديل" // Changed title to Arabic
+                            title="تعديل"
                             onClick={() => actions.onEdit!(row)}
-                            className="hover:bg-primary/10 hover:text-primary transition-colors" // Added hover effect
+                            className="hover:bg-primary/20 hover:text-primary hover:scale-110 hover:shadow-md transition-all duration-300"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -768,9 +772,9 @@ export function TableCore<T extends Record<string, any>>({
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            title="حذف" // Changed title to Arabic
+                            title="حذف"
                             onClick={() => handleDeleteClick(row)}
-                            className="hover:bg-destructive/10 hover:text-destructive transition-colors" // Added hover effect
+                            className="hover:bg-destructive/20 hover:text-destructive hover:scale-110 hover:shadow-md transition-all duration-300"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -795,10 +799,10 @@ export function TableCore<T extends Record<string, any>>({
       {/* Delete Dialog */}
       {selectedRow && (
         <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent >
+          <DialogContent className="bg-card border-border shadow-xl">
             <DialogHeader>
-              <DialogTitle>{deleteTitle}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-foreground">{deleteTitle}</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
                 {deleteDescription ? (
                   deleteDescription(selectedRow)
                 ) : (
@@ -816,6 +820,7 @@ export function TableCore<T extends Record<string, any>>({
                 variant="outline"
                 onClick={() => setDeleteDialogOpen(false)}
                 disabled={isDeleting}
+                className="transition-all duration-300 hover:scale-105"
               >
                 إلغاء
               </Button>
@@ -823,6 +828,7 @@ export function TableCore<T extends Record<string, any>>({
                 variant="destructive"
                 onClick={handleDeleteConfirm}
                 disabled={isDeleting}
+                className="transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 {isDeleting ? "جاري الحذف..." : "حذف"}
               </Button>
@@ -830,6 +836,7 @@ export function TableCore<T extends Record<string, any>>({
           </DialogContent>
         </Dialog>
       )}
+      </div>
     </div>
   )
 }
@@ -875,20 +882,19 @@ function TableSearch({ searchValue, placeholder, onSearch }: TableSearchProps) {
   }, [])
 
   return (
-    <div className="relative w-full max-w-sm">
-      <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />{" "}
-      {/* Changed icon position */}
+    <div className="relative w-full max-w-sm group/search">
+      <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors duration-200 group-focus-within/search:text-primary" />
       <Input
         value={localValue}
         placeholder={placeholder}
         onChange={(e) => handleChange(e.target.value)}
-        className="pr-9 w-full" // Changed padding
+        className="pr-9 w-full transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary/50"
       />
       {localValue && (
         <Button
           variant="ghost"
           size="icon-sm"
-          className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7" // Changed position
+          className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 transition-all duration-200 hover:scale-110 hover:bg-destructive/10 hover:text-destructive"
           onClick={() => {
             setLocalValue("")
             onSearch("")
@@ -933,21 +939,17 @@ function TableFilters({
     <div className="flex items-center gap-2">
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2 hover:bg-primary/10 transition-colors bg-transparent">
-            {" "}
-            {/* Added hover effect */}
-            <SlidersHorizontal className="h-4 w-4" />
-            <span>تصفية</span> {/* Changed text to Arabic */}
+          <Button variant="outline" size="sm" className="gap-2 hover:bg-primary/20 hover:scale-105 hover:shadow-md transition-all duration-300 bg-transparent">
+            <SlidersHorizontal className="h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+            <span>تصفية</span>
             {hasActiveFilters && (
-              <Badge variant="default" className="ml-1 rounded-full px-2 py-0.5 text-xs bg-primary">
-                {" "}
-                {/* Changed badge styling */}
+              <Badge variant="default" className="ml-1 rounded-full px-2 py-0.5 text-xs bg-primary animate-in zoom-in-95">
                 {activeFilterCount}
               </Badge>
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-96 bg-card shadow-lg border-primary/20" align="end">
+        <PopoverContent className="w-96 bg-card shadow-xl border-primary/20 rounded-2xl" align="end">
           {" "}
           {/* Changed background, added shadow and border */}
           <div className="space-y-4">
@@ -971,10 +973,10 @@ function TableFilters({
                   variant="ghost"
                   size="sm"
                   onClick={onClearFilters}
-                  className="h-8 hover:bg-destructive/10 hover:text-destructive" // Added hover effect
+                  className="h-8 hover:bg-destructive/20 hover:text-destructive hover:scale-105 transition-all duration-300"
                 >
                   <X className="mr-1 h-3 w-3" />
-                  مسح الكل {/* Changed text to Arabic */}
+                  مسح الكل
                 </Button>
               )}
             </div>
@@ -1171,19 +1173,20 @@ function TablePagination({ meta, isLoading, hasData, onPageChange }: TablePagina
   const endItem = Math.min(current_page * per_page, total)
 
   return (
-    <div className="flex flex-col gap-4 px-4 rounded-lg sm:flex-row sm:items-center sm:justify-between">
-      {" "}
-      {/* Added background, rounded-lg, padding, and border */}
+    <div className="flex flex-col gap-4 px-4 pt-4 rounded-xl bg-gradient-to-r from-muted/30 to-muted/10 border border-border/30 sm:flex-row sm:items-center sm:justify-between">
       {/* Results Info */}
-      <p className="text-sm text-muted-foreground flex flex-row *:flex *:flex-row gap-2">
-        {/* <span>من</span> */}
-        <b>{startItem}</b>
-        {/* <span>.</span> */}
+      <p className="text-sm text-muted-foreground flex flex-row items-center gap-2 font-medium">
+        <span className="px-2 py-1 rounded-lg bg-primary/10 text-primary font-bold">
+          {startItem}
+        </span>
         <span>حتى</span>
-        <b>{endItem}</b>
-        <span>.</span>
-        <span>المجموع</span>
-        <b>{total}</b>
+        <span className="px-2 py-1 rounded-lg bg-primary/10 text-primary font-bold">
+          {endItem}
+        </span>
+        <span>من</span>
+        <span className="px-2 py-1 rounded-lg bg-accent/10 text-accent-foreground font-bold">
+          {total}
+        </span>
       </p>
       {/* Pagination Controls */}
       <PaginationUI>
@@ -1193,7 +1196,7 @@ function TablePagination({ meta, isLoading, hasData, onPageChange }: TablePagina
               onClick={() => current_page > 1 && onPageChange(current_page - 1)}
               className={cn(
                 current_page === 1 && "pointer-events-none opacity-50",
-                "hover:bg-primary/10 transition-colors", // Added hover effect
+                "hover:bg-primary/20 hover:scale-105 hover:shadow-md transition-all duration-300",
               )}
             />
           </PaginationItem>
@@ -1209,8 +1212,8 @@ function TablePagination({ meta, isLoading, hasData, onPageChange }: TablePagina
                   onClick={() => onPageChange(page)}
                   isActive={current_page === page}
                   className={cn(
-                    current_page === page && "bg-primary text-primary-foreground", // Added active state styling
-                    "hover:bg-primary/10 transition-colors", // Added hover effect
+                    current_page === page && "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg shadow-primary/30 scale-105",
+                    "hover:bg-primary/20 hover:scale-105 hover:shadow-md transition-all duration-300",
                   )}
                 >
                   {page}
@@ -1224,7 +1227,7 @@ function TablePagination({ meta, isLoading, hasData, onPageChange }: TablePagina
               onClick={() => current_page < last_page && onPageChange(current_page + 1)}
               className={cn(
                 current_page === last_page && "pointer-events-none opacity-50",
-                "hover:bg-primary/10 transition-colors", // Added hover effect
+                "hover:bg-primary/20 hover:scale-105 hover:shadow-md transition-all duration-300",
               )}
             />
           </PaginationItem>

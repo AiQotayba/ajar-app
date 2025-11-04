@@ -138,16 +138,18 @@ export default function FeaturesPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title="إدارة المميزات"
         description="إدارة مميزات الإعلانات لكل فئة وتنظيمها"
         icon={Sparkles} 
-        action={{
-          label: "إضافة ميزة جديدة",
-          icon: Plus,
-          onClick: () => toast.info("سيتم فتح نافذة إضافة ميزة"),
-        }}
+        actions={[
+          {
+            label: "إضافة ميزة جديدة",
+            icon: Plus,
+            onClick: () => toast.info("سيتم فتح نافذة إضافة ميزة"),
+          }
+        ]}
       />
 
       {/* Table */}

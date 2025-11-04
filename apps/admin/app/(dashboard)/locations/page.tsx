@@ -82,13 +82,15 @@ export default function LocationsPage() {
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 md:space-y-6">
             {activeTab === 'cities' && (
                 <PageHeader
                     title="إدارة المواقع"
                     description="إدارة المحافظات والمدن في النظام"
                     icon={MapPin}
-                    action={{ label: "إضافة مدينة", icon: Plus, onClick: handleCityCreate }}
+                    actions={[
+                        { label: "إضافة مدينة", icon: Plus, onClick: handleCityCreate }
+                    ]}
                 />
             )}
             {activeTab === 'governorates' && (

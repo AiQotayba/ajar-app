@@ -200,16 +200,18 @@ export default function PropertiesPage() {
 
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 md:space-y-6">
             <PageHeader
                 title="إدارة الخصائص"
                 description="إدارة خصائص الإعلانات وأنواع البيانات والتحقق من الصحة"
                 icon={Database} 
-                action={{
-                    label: "إضافة خاصية جديدة",
-                    icon: Plus,
-                    onClick: () => toast.info("سيتم فتح نافذة إضافة خاصية"),
-                }}
+                actions={[
+                    {
+                        label: "إضافة خاصية جديدة",
+                        icon: Plus,
+                        onClick: () => toast.info("سيتم فتح نافذة إضافة خاصية"),
+                    }
+                ]}
             />
 
             {/* Table */}

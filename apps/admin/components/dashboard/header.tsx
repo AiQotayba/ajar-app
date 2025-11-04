@@ -1,34 +1,72 @@
 "use client"
 
-import { Bell, Search } from "lucide-react"
+import { Bell, Download, Calendar, ChevronDown, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
-export function Header() {
+interface HeaderProps {
+  onMenuToggle?: () => void
+}
+
+export function Header({ onMenuToggle }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-end gap-4 border-b border-border bg-background px-6">
-      {/* Search */}
-      {/* <div className="flex flex-1 items-center gap-4">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input type="search" placeholder="بحث..." className="w-full pr-10" />
+    <header
+      className={cn(
+        "sticky top-0 z-30 flex h-16 items-center justify-between",
+        "bg-card rounded-3xl m-4 mb-0",
+        "px-4 md:px-6 shadow-lg",
+        "transition-all duration-200"
+      )}
+      dir="rtl"
+    >
+      {/* Left - Page Title */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <LayoutDashboard className="h-5 w-5" />
         </div>
-      </div> */}
+        <h1 className="text-xl font-semibold text-foreground">لوحة التحكم</h1>
+      </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-2">
-        <Button variant="ghost" size="icon" className="relative">
+
+      {/* Right - Actions */}
+      <div className="flex items-center gap-2 md:gap-4">
+
+        {/* User Avatar with Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              aria-label="قائمة المستخدم"
+              aria-expanded="false"
+            >
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/80 ring-2 ring-border" />
+              <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>الملف الشخصي</DropdownMenuItem>
+            <DropdownMenuItem>الإعدادات</DropdownMenuItem>
+            <DropdownMenuItem>تسجيل الخروج</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Notification Bell */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-9 w-9"
+          aria-label="الإشعارات"
+        >
           <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-white" aria-hidden="true" />
         </Button>
-
-        <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
-          <div className="text-right">
-            <p className="text-sm font-medium">أحمد محمد</p>
-            <p className="text-xs text-muted-foreground">مدير النظام</p>
-          </div>
-          <div className="h-8 w-8 rounded-full bg-primary" />
-        </div>
       </div>
     </header>
   )

@@ -1,0 +1,135 @@
+visual_identity_v2: 
+  # 2. الألوان (Color Palette - Light Mode)
+  colors_light_mode:
+    primary: # اللون الأساسي (التركيز والعمليات الرئيسية)
+      name: "Emerald Green"
+      css_var: "--primary"
+      hex: "#059669"
+      usage: "Primary CTAs, Active Navigation, Focus Rings, Success Indicators (Implicit)."
+    secondary: # اللون الثانوي (الخلفيات الخفيفة والمكونات الثانوية)
+      name: "Light Gray Secondary"
+      css_var: "--secondary"
+      hex: "#f3f4f6"
+      usage: "Secondary Buttons, Component Backgrounds (Tabs, Chips)."
+    accent: # لون التمييز/الإنذار
+      name: "Amber Accent"
+      css_var: "--accent"
+      hex: "#fbbf24"
+      usage: "Warning States, Highlighting, Secondary Data Visualization."
+    neutral_background:
+      page_bg:
+        css_var: "--background"
+        hex: "#fafafa"
+      card_surface:
+        css_var: "--card"
+        hex: "#ffffff"
+      muted_bg: # خلفية هادئة (للمسارات/الفواصل)
+        css_var: "--muted"
+        hex: "#f9fafb"
+        foreground: {css_var: "--muted-foreground", hex: "#6b7280"}
+    text_and_border:
+      text_foreground:
+        css_var: "--foreground"
+        hex: "#1a1a1a"
+      text_on_primary:
+        css_var: "--primary-foreground"
+        hex: "#ffffff"
+      border:
+        css_var: "--border"
+        hex: "#e5e7eb"
+    semantic: # الألوان الدلالية المحددة
+      destructive:
+        css_var: "--destructive"
+        hex: "#ef4444"
+        usage: "Error Messages, Critical Actions, Decline Metrics."
+
+  # 3. الألوان (Color Palette - Dark Mode)
+  colors_dark_mode:
+    primary: {css_var: "--primary", hex: "#10b981"}
+    secondary: {css_var: "--secondary", hex: "#1e293b"}
+    accent: {css_var: "--accent", hex: "#f59e0b"}
+    neutral_background:
+      page_bg: {css_var: "--background", hex: "#0f172a"}
+      card_surface: {css_var: "--card", hex: "#1e293b"}
+      muted_bg: {css_var: "--muted", hex: "#1e293b"}
+    text_and_border:
+      text_foreground: {css_var: "--foreground", hex: "#f1f5f9"}
+      border: {css_var: "--border", hex: "#334155"}
+ 
+  # 6. التفاعلات وتجربة المستخدم (Interactions & UX/UI Enhancements)
+  ui_ux_enhancements:
+    transitions:
+      standard: "transition-smooth (all 0.3s cubic-bezier)" # للانتقالات السلسة
+    loading_state:
+      shimmer_animation: "Implemented via @keyframes shimmer for skeleton loading."
+    scrollbar_control:
+      style: "Custom, rounded thumb (var(--muted-foreground) on var(--muted) track)."
+      hide_class: "scrollbar-hide" # لإخفاء شريط التمرير الأفقي أو في المكونات الصغيرة.
+    advanced_effects:
+      glass_effect: "Implemented (backdrop-filter: blur(10px)) for translucent overlays."
+    arabic_text_rendering:
+      optimization: "text-rendering: optimizeLegibility and anti-aliasing applied for RTL text."
+
+  # 1. المنهجية العامة وهيكل الثيم (General Methodology and Theme Structure)
+  approach:
+    type: "Modular & Themed SaaS Dashboard"
+    direction: "RTL (Right-to-Left)"
+    font_system: "ITF Qomra Arabic for all text"
+    framework: "Tailwind CSS + CSS Variables (as defined in provided CSS)"
+    theme_division:
+      light_mode: "Defined via :root CSS block."
+      dark_mode: "Defined via .dark CSS block."
+      theming_mechanism: "CSS variables enable easy white-labeling or theming by updating variables."
+
+  # 2. تقسيم أدوار المتغيرات الأساسية (Core Variable Roles Breakdown)
+  css_variable_roles:
+    background_system:
+      --background: "Default page/canvas background."
+      --card: "Background for floating elements (Cards, Modals, Popovers). Typically lighter than --background."
+      --muted: "Background for subtle elements (Scroll tracks, Dividers, Low-emphasis sections)."
+    text_and_foreground:
+      --foreground: "Primary text color (Headings, Main content)."
+      --card-foreground: "Text color specifically on top of --card background."
+      --muted-foreground: "Secondary/Hint text color (Captions, Placeholders)."
+    action_and_focus:
+      --primary: "Main brand color (CTAs, Active states, Primary data highlight)."
+      --primary-foreground: "Text color used on --primary background."
+      --ring: "Focus ring color (Ensures accessibility on active inputs/buttons)."
+    semantic_and_feedback:
+      --accent: "Secondary highlight or Warning/Info status."
+      --destructive: "Error, Critical, or Negative status."
+      --destructive-foreground: "Text color on --destructive background."
+    structure_and_input:
+      --border: "Color for borders, lines, and separators."
+      --input: "Background/Border color for input fields."
+
+  # 3. الخطوط ونظام الأوزان (Typography and Weight System)
+  typography:
+    family_arabic: "ITF Qomra Arabic"
+    weights_used_and_roles: # توضيح كيف يتم استخدام الأوزان المتوفرة (300, 400, 500, 700, 900)
+      weight_900_black: "Used exclusively for **Key Performance Indicator (KPI) values and Critical Data** (لأقصى وضوح رقمي)."
+      weight_700_bold: "Used for **Headings and Section Titles** (للتأكيد والتقسيم الهرمي)."
+      weight_500_medium: "Used for **Navigation Links and Component Labels** (للتفاعل والتمييز المعتدل)."
+      weight_400_regular: "Used for **Body Text and Descriptions** (للقراءة العامة)."
+      weight_300_light: "Available for **Subtle Captions or Aesthetic Use** (للاستخدام الخفيف جداً)."
+
+  # 4. نظام الزوايا والتباعد (Radius and Spacing System)
+  geometry:
+    base_radius: {css_var: "--radius", role: "Used for Cards, Buttons, and major containers (0.75rem)."}
+    radius_scale: # نظام قياسي يوفر مرونة في أحجام الزوايا
+      --radius-sm: "Smallest radius (e.g., Input fields, Badges)."
+      --radius-md: "Default radius (e.g., Small buttons, secondary containers)."
+      --radius-lg: "Base radius (e.g., Main Cards, Modals)."
+      --radius-xl: "Largest radius (e.g., Hero components, large containers)."
+    spacing_system: "Implicitly 8-point system due to Tailwind CSS convention. Requires consistent use of multiples of 4px or 8px (p-1, p-2, p-3, etc.)."
+
+  # 5. مهام UI/UX لتحسين التقسيم والنصوص (Structural and Text Improvement Tasks)
+  ux_text_and_structure_tasks:
+    - task: "STRUCT_THEMING_01: **تحسين تقسيم لون الواجهة الجانبية (Sidebar)**."
+      description: "إضافة متغيرات CSS خاصة للواجهة الجانبية (--sidebar, --sidebar-border) إذا كان لونها أو خلفيتها تختلف عن --background لتمكين تخصيصها بشكل مستقل عن جسم الصفحة الرئيسي، خاصةً في الوضع الداكن."
+    - task: "STRUCT_TYPO_02: **توحيد Line-Height العربية**."
+      description: "مراجعة 'arabic-text' و 'arabic-body' للتأكد من أن `line-height: 1.6` مناسب لخط ITF Qomra Arabic في جميع الأجهزة، لضمان قراءة مريحة خاصةً في كتل النصوص الطويلة."
+    - task: "STRUCT_RTL_MIRRORING: **التحقق من المحاذاة الداخلية للأرقام**."
+      description: "عند استخدام محاذاة النص لليمين (text-align: right) لـ RTL، يجب التأكد من أن جميع الأرقام والقيم العددية في الجداول والرسوم البيانية يتم محاذاتها لليمين بشكل صحيح للحفاظ على الوضوح الرقمي."
+    - task: "UX_CONSISTENCY_03: **نظام الأيقونات الدلالي**."
+      description: "تعريف وتوثيق الأيقونات التي يجب أن تعكس الألوان الدلالية (--primary, --destructive) ومتى يجب أن تستخدم اللون الثانوي (--muted-foreground) لضمان أن الإشارات البصرية متناسقة مع الحالة (State) عبر جميع مكونات لوحة التحكم."

@@ -1,3 +1,5 @@
+"use client"
+
 import { Building2, Users, Star, MessageSquare, LayoutDashboard } from "lucide-react"
 import { StatsCard } from "@/components/dashboard/stats-card"
 import { ListingsChart } from "@/components/dashboard/listings-chart"
@@ -7,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-6 md:space-y-8 p-4 md:p-6">
       {/* Page Header */}
       <PageHeader
         title="لوحة التحكم"
@@ -16,7 +18,7 @@ export default function DashboardPage() {
       />
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard title="الإعلانات المنشورة" value="245" icon={Building2} trend={{ value: 12, isPositive: true }} />
         <StatsCard title="قيد المراجعة" value="18" icon={MessageSquare} trend={{ value: 5, isPositive: false }} />
         <StatsCard title="المستخدمين الجدد" value="1,248" icon={Users} trend={{ value: 8, isPositive: true }} />
@@ -24,15 +26,15 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         <ListingsChart />
         <UsersChart />
       </div>
 
       {/* Recent Activity */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-lg">
-          <h3 className="mb-6 text-lg font-semibold">آخر الإعلانات</h3>
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-border/50 bg-card p-4 md:p-6 shadow-md hover:shadow-lg transition-all duration-300">
+          <h3 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold">آخر الإعلانات</h3>
           <div className="space-y-3">
             {[
               { title: "فيلا فاخرة للبيع في عمان", time: "منذ ساعة", status: "قيد المراجعة" },
@@ -57,8 +59,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border/50 bg-card p-6 shadow-lg">
-          <h3 className="mb-6 text-lg font-semibold">آخر المستخدمين</h3>
+        <div className="rounded-2xl border border-border/50 bg-card p-4 md:p-6 shadow-md hover:shadow-lg transition-all duration-300">
+          <h3 className="mb-4 md:mb-6 text-lg md:text-xl font-semibold">آخر المستخدمين</h3>
           <div className="space-y-3">
             {[
               { name: "أحمد محمد علي", time: "انضم منذ يوم", status: "نشط" },

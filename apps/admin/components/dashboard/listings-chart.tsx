@@ -14,9 +14,9 @@ const data = [
 
 export function ListingsChart() {
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border border-border/50 shadow-md hover:shadow-lg transition-all duration-300">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">اتجاه الإعلانات</CardTitle>
+        <CardTitle className="text-xl font-semibold">اتجاه الإعلانات</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>

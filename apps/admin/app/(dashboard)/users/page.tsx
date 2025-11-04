@@ -91,16 +91,18 @@ export default function UsersPage() {
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 md:space-y-6">
             <PageHeader
                 title="المستخدمين"
                 description="إدارة المستخدمين وصلاحياتهم في النظام"
                 icon={UsersIcon}
-                action={{
-                    label: "إضافة مستخدم جديد",
-                    icon: Plus,
-                    onClick: handleCreate,
-                }}
+                actions={[
+                    {
+                        label: "إضافة مستخدم جديد",
+                        icon: Plus,
+                        onClick: handleCreate,
+                    }
+                ]}
             />
 
             <TableCore<User>

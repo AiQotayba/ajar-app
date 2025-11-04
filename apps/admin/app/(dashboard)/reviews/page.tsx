@@ -49,7 +49,7 @@ export default function ReviewsPage() {
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 md:space-y-6">
             <PageHeader
                 title="إدارة التقييمات"
                 description="إدارة تقييمات المستخدمين للإعلانات"

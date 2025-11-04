@@ -61,16 +61,18 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 md:space-y-6">
             <PageHeader
                 title="إعدادات التطبيق"
                 description="إدارة إعدادات التطبيق العامة والنصوص والروابط الخارجية"
                 icon={SettingsIcon}
-                action={{
-                    label: "إضافة إعداد جديد",
-                    icon: Plus,
-                    onClick: handleCreate,
-                }}
+                actions={[
+                    {
+                        label: "إضافة إعداد جديد",
+                        icon: Plus,
+                        onClick: handleCreate,
+                    }
+                ]}
             />
 
             <TableCore<Setting>

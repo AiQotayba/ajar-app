@@ -31,16 +31,18 @@ export default function SlidersPage() {
     }
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="space-y-4 md:space-y-6">
             <PageHeader
                 title="إدارة السلايدر"
                 description="إدارة شرائح العرض الرئيسية في الصفحة الرئيسية"
                 icon={ImageIcon}
-                action={{
-                    label: "إضافة سلايد جديد",
-                    icon: Plus,
-                    onClick: handleCreate,
-                }}
+                actions={[
+                    {
+                        label: "إضافة سلايد جديد",
+                        icon: Plus,
+                        onClick: handleCreate,
+                    }
+                ]}
             />
 
             <TableCore<Slider>

@@ -10,14 +10,36 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
+  
   return (
-    <div className="flex h-screen bg-gradient-to-br from-primary/8 via-background to-primary/5">
+    <div 
+      className={cn(
+        "flex h-screen w-full",
+        "bg-muted/50",
+        "relative overflow-hidden"
+      )}
+      dir="rtl"
+    >
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-      <div className={cn("flex flex-1 flex-col", isOpen ? "md:mr-64" : "mr-16")}>
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="mx-auto">
+      
+      {/* Main Content Area */}
+      <div 
+        className={cn(
+          "flex flex-1 flex-col overflow-hidden relative",
+          "transition-all duration-300 ease-out",
+          isOpen ? "md:mr-72" : "md:mr-20"
+        )}
+      >
+        <Header onMenuToggle={() => setIsOpen(!isOpen)} />
+        
+        <main 
+          className={cn(
+            "flex-1 overflow-y-auto relative",
+            "px-4"
+          )}
+        >
+          <div className="mx-auto max-w-7xl pt-4 pb-6">
             {children}
           </div>
         </main>

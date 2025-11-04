@@ -103,16 +103,18 @@ export default function ListingsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 md:space-y-6">
       <PageHeader
         title="إدارة الإعلانات"
         description="جدول شامل مع البحث والتصفية والترتيب والسحب والإفلات"
         icon={Building2}
-        action={{
-          label: "إضافة إعلان جديد",
-          icon: Plus,
-          onClick: handleCreate,
-        }}
+        actions={[
+          {
+            label: "إضافة إعلان جديد",
+            icon: Plus,
+            onClick: handleCreate,
+          }
+        ]}
       />
 
       <TableCore<Listing>
