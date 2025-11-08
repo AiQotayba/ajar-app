@@ -28,7 +28,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { locationsApi } from "@/lib/api/locations"
+import { api } from "@/lib/api"
 import type { Governorate } from "@/lib/types/location"
 
 // Form validation schema
@@ -64,7 +64,7 @@ export function GovernorateForm({ open, onOpenChange, urlEndpoint, governorate, 
 
     // Create mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => locationsApi.createGovernorate(data),
+        mutationFn: (data: any) => api.post(`/admin/governorates`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
@@ -77,7 +77,7 @@ export function GovernorateForm({ open, onOpenChange, urlEndpoint, governorate, 
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => locationsApi.updateGovernorate(governorate!.id, data),
+        mutationFn: (data: any) => api.put(`/admin/governorates/${governorate!.id}`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)

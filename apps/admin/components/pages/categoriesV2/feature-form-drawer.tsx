@@ -29,7 +29,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { ImageUpload } from "@/components/ui/image-upload"
-import { featuresApi } from "@/lib/api/features"
+import { api } from "@/lib/api"
 
 const featureFormSchema = z.object({
 	name_ar: z.string().min(1, "الاسم بالعربية مطلوب"),
@@ -91,7 +91,7 @@ export function FeatureFormDrawer({ open, onOpenChange, categoryId, feature }: F
 	}, [feature, categoryId, form])
 
 	const createMutation = useMutation({
-		mutationFn: (data: FeatureFormValues) => featuresApi.create({
+		mutationFn: (data: FeatureFormValues) => api.post('/admin/features', {
 			name: { ar: data.name_ar, en: data.name_en || "" },
 			description: { ar: data.description_ar || "", en: data.description_en || "" },
 			category_id: data.category_id,
@@ -108,7 +108,7 @@ export function FeatureFormDrawer({ open, onOpenChange, categoryId, feature }: F
 	})
 
 	const updateMutation = useMutation({
-		mutationFn: (data: FeatureFormValues) => featuresApi.update(feature!.id, {
+		mutationFn: (data: FeatureFormValues) => api.put(`/admin/features/${feature!.id}`, {
 			name: { ar: data.name_ar, en: data.name_en || "" },
 			description: { ar: data.description_ar || "", en: data.description_en || "" },
 			icon: data.icon || "",
@@ -144,7 +144,15 @@ export function FeatureFormDrawer({ open, onOpenChange, categoryId, feature }: F
 				</DrawerHeader>
 
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)} className="px-4 space-y-4 pb-4">
+					<form 
+						onSubmit={(e) => {
+							e.preventDefault()
+							e.stopPropagation()
+							form.handleSubmit(onSubmit)(e)
+						}} 
+						className="px-4 space-y-4 pb-4" 
+						noValidate
+					>
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
 								control={form.control}

@@ -45,8 +45,7 @@ export default function ResetPasswordPage() {
 
   // Check if temp token exists
   React.useEffect(() => {
-    const tempToken = tokenManager.getTempToken()
-    console.log(tempToken)
+    const tempToken = tokenManager.getTempToken() 
     if (!tempToken) {
       toast.error("جلسة التحقق منتهية. الرجاء البدء من جديد")
       router.push("/forgot-password")
@@ -77,8 +76,7 @@ export default function ResetPasswordPage() {
         phone,
         password: data.password,
         password_confirmation: data.password_confirmation,
-      })
-      console.log(response)
+      }) 
       if (response.success) {
         // Clear OTP info and temp token
         clearOtpInfo()

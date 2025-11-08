@@ -51,7 +51,7 @@ export function LocationPickerMap({
 }: LocationPickerMapProps) {
   // Validate and sanitize initial coordinates
   const validatedCoords = validateCoordinates(initialLat, initialLng)
-  
+
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number
     lng: number
@@ -74,8 +74,6 @@ export function LocationPickerMap({
     const lat = event.latLng.lat()
     const lng = event.latLng.lng()
 
-    console.log("🗺️ Map clicked:", { lat, lng })
-
     setSelectedLocation({ lat, lng })
 
     // استخراج الإحداثيات تلقائياً
@@ -87,7 +85,6 @@ export function LocationPickerMap({
       geocoder.geocode({ location: { lat, lng } }, (results, status) => {
         if (status === 'OK' && results && results[0]) {
           const address = results[0].formatted_address
-          console.log("📍 Address found:", address)
           setSelectedLocation(prev => ({ ...prev, address }))
           // إرسال العنوان أيضاً
           onLocationSelect(lat, lng, address)
@@ -111,26 +108,21 @@ export function LocationPickerMap({
         const lng = location.lng()
         const address = results[0].formatted_address
 
-        console.log("🔍 Search result:", { lat, lng, address })
-
         setSelectedLocation({ lat, lng, address })
         // استخراج الإحداثيات تلقائياً
         onLocationSelect(lat, lng, address)
       } else {
-        console.error("❌ Geocoding failed:", status)
       }
     })
   }, [searchQuery, onLocationSelect])
 
   const handleConfirm = () => {
-    console.log("✅ Location confirmed:", selectedLocation)
     onLocationSelect(selectedLocation.lat, selectedLocation.lng, selectedLocation.address)
     onClose()
   }
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      console.error("❌ Geolocation not supported")
       return
     }
 
@@ -138,8 +130,6 @@ export function LocationPickerMap({
       (position) => {
         const lat = position.coords.latitude
         const lng = position.coords.longitude
-
-        console.log("📍 Current location:", { lat, lng })
 
         setSelectedLocation({ lat, lng })
         // استخراج الإحداثيات تلقائياً
@@ -159,7 +149,6 @@ export function LocationPickerMap({
         }
       },
       (error) => {
-        console.error("❌ Geolocation error:", error)
       }
     )
   }
@@ -189,7 +178,7 @@ export function LocationPickerMap({
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="space-y-2"> 
+      <div className="space-y-2">
         <div className="flex gap-2">
           {/* <Input
             value={searchQuery}

@@ -4,7 +4,7 @@ import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, Settings as SettingsIcon } from "lucide-react"
 import { TableCore, type TableFilter } from "@/components/table/table-core"
-import { settingsApi } from "@/lib/api/settings"
+import { api } from "@/lib/api"
 import type { Setting } from "@/lib/types/setting"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { getSettingsColumns, getKeyLabel, SettingForm, SettingView } from "@/components/pages/settings"
@@ -56,7 +56,7 @@ export default function SettingsPage() {
     }
 
     const handleDelete = async (setting: Setting) => {
-        await settingsApi.delete(setting.id)
+        await api.delete(`/admin/settings/${setting.id}`)
         queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
     }
 

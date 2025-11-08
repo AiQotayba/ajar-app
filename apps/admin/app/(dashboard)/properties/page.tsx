@@ -7,10 +7,9 @@ import { TableCore, type TableColumn, type TableFilter } from "@/components/tabl
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
-import { propertiesApi } from "@/lib/api/properties"
-import type { Property } from "@/lib/types/property"
-import { StatsGrid, type StatCard } from "@/components/dashboard/stats-grid"
+import type { Property } from "@/lib/types/property" 
 import { PageHeader } from "@/components/dashboard/page-header"
+import { api } from "@/lib/api"
 
 export default function PropertiesPage() {
     const queryClient = useQueryClient()
@@ -18,7 +17,7 @@ export default function PropertiesPage() {
     // Toggle visibility mutation
     const toggleVisibilityMutation = useMutation({
         mutationFn: ({ id, is_visible }: { id: number; is_visible: boolean }) =>
-            propertiesApi.toggleVisibility(id, is_visible),
+            api.put(`/admin/properties/${id}`, { is_visible: is_visible }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data"] })
             toast.success("تم تحديث حالة الظهور بنجاح")
@@ -63,7 +62,6 @@ export default function PropertiesPage() {
             label: "نوع البيانات",
             sortable: true,
             render: (value) => {
-                console.log(value)
 
                 const typeConfig = {
                     string: { label: "نص", color: "bg-blue-100 text-blue-700 border-blue-300" },
@@ -189,7 +187,7 @@ export default function PropertiesPage() {
     }
 
     const handleDelete = async (property: Property) => {
-        const response = await propertiesApi.delete(property.id)
+        const response = await api.delete(`/admin/properties/${property.id}`)
         queryClient.invalidateQueries({ queryKey: ["table-data"] })
         
         // عرض رسالة من API

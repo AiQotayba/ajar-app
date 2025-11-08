@@ -38,9 +38,9 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { ImageUpload } from "@/components/ui/image-upload"
-import { usersApi } from "@/lib/api/users"
 import type { User } from "@/lib/types/user"
 import { toast } from "sonner"
+import { api } from "@/lib/api"
 
 // Form validation schema - for create
 const createUserSchema = z.object({
@@ -125,14 +125,14 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
 
     // Create mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => usersApi.create(data),
+        mutationFn: (data: any) => api.post(`/admin/users`, data),
         onSuccess: (response: any) => {
             console.info("📥 Create User Response:", response)
-            
+
             // Check if response indicates an error
             if (response?.isError || (response?.status && response.status >= 400)) {
                 console.error("❌ Create User Failed:", response)
-                
+
                 // Handle validation errors
                 if (response?.errors) {
                     const firstError = Object.values(response.errors)[0]
@@ -143,7 +143,7 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
                 }
                 return
             }
-            
+
             console.info("✅ Create User Success")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
@@ -159,14 +159,14 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => usersApi.update(user!.id, data),
+        mutationFn: (data: any) => api.put(`/admin/users/${user!.id}`, data),
         onSuccess: (response: any) => {
             console.info("📥 Update User Response:", response)
-            
+
             // Check if response indicates an error
             if (response?.isError || (response?.status && response.status >= 400)) {
                 console.error("❌ Update User Failed:", response)
-                
+
                 // Handle validation errors
                 if (response?.errors) {
                     const firstError = Object.values(response.errors)[0]
@@ -177,7 +177,7 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
                 }
                 return
             }
-            
+
             console.info("✅ Update User Success")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
@@ -196,9 +196,9 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
             ...values,
             phone: values.phone && !values.phone.startsWith('+') ? `+${values.phone}` : values.phone
         }
-        
+
         console.info("📤 Submitting User Data:", submitData)
-        
+
         if (mode === "create") {
             createMutation.mutate(submitData)
         } else {

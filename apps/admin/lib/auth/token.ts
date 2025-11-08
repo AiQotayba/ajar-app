@@ -24,7 +24,6 @@ export const tokenManager = {
     // Get temporary token (for password reset)
     getTempToken: (): string | null => {
         if (typeof window === 'undefined') return null
-        console.log(TEMP_TOKEN_KEY)
         return Cookies.get(TEMP_TOKEN_KEY) || null
     },
 

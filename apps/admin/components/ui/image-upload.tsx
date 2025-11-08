@@ -76,31 +76,25 @@ export function ImageUpload({
                 showErrorToast: false,
             })
 
-      console.log("📤 Upload Response:", response)
-      console.log("📤 Response Data:", response.data)
 
-      // Get image_name (to save in DB) and build full URL for display
-      const imageName = response.data?.image_name || response.data?.path
-      
-      if (!response.isError && imageName) {
-        // Save the relative path (image_name) to form/database
-        onChange(imageName)
-        console.log("✅ Image name set to:", imageName)
-        
-        // Build full URL for preview display
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
-        const fullImageUrl = `${baseUrl}/storage/${imageName}`
-        setPreview(fullImageUrl)
-        console.log("🖼️ Preview URL:", fullImageUrl)
-        
-        toast.success("تم رفع الصورة بنجاح")
-      } else {
-        console.error("❌ Upload failed or no image_name in response")
-        setPreview(null)
-        toast.error(response.message || "فشل رفع الصورة")
-      }
+            // Get image_name (to save in DB) and build full URL for display
+            const imageName = response.data?.image_name || response.data?.path
+
+            if (!response.isError && imageName) {
+                // Save the relative path (image_name) to form/database
+                onChange(imageName)
+
+                // Build full URL for preview display
+                const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
+                const fullImageUrl = `${baseUrl}/storage/${imageName}`
+                setPreview(fullImageUrl)
+
+                toast.success("تم رفع الصورة بنجاح")
+            } else {
+                setPreview(null)
+                toast.error(response.message || "فشل رفع الصورة")
+            }
         } catch (error: any) {
-            console.error("Upload error:", error)
             setPreview(null)
             toast.error(error?.message || "فشل رفع الصورة")
         } finally {
@@ -146,7 +140,7 @@ export function ImageUpload({
         <div className={cn("space-y-2", className)}>
             <div
                 className={cn(
-                    "relative w-full rounded-lg border-2 border-dashed transition-colors overflow-hidden",
+                    "relative rounded-lg border-2 w-42 border-dashed transition-colors overflow-hidden",
                     aspectRatioClasses[aspectRatio],
                     disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:border-primary",
                     !preview && "bg-muted",

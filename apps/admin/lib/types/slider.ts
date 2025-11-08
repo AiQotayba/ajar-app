@@ -9,6 +9,7 @@ export interface Slider {
     en: string
   }
   image_url: string
+  cover_image?: string
   target_url: string
   start_at: string
   end_at: string

@@ -8,6 +8,8 @@ import { X, Upload, Star, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { uploadImage } from "@/lib/api/listings"
 import type { ListingFormData } from "../types"
+import Image from "next/image"
+import CachedImage from "@/components/CachedImage"
 
 interface ImagesStepProps {
   onNext: () => void
@@ -37,7 +39,6 @@ export function ImagesStep({
 
   const media: any = watch("media") || []
   const coverImageIndex = watch("cover_image_index") || 0
-  console.log(media);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -246,7 +247,9 @@ export function ImagesStep({
             {media.map((mediaItem: any, index: any) => (
               <div key={index} className="relative group">
                 <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                  <img
+                  <CachedImage
+                    width={100}
+                    height={100}
                     src={media[index]?.full_url || (typeof mediaItem === 'string' ? mediaItem : '')}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-full object-cover"

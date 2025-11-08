@@ -48,7 +48,6 @@ export function AddReviewModal({ open, onClose, propertyId, locale = 'ar', onRev
         rating,
         comment: comment.trim()
       })
-      console.log(response);
 
       if (!response.isError) {
         // Show success message with review details
@@ -56,14 +55,6 @@ export function AddReviewModal({ open, onClose, propertyId, locale = 'ar', onRev
         const successMessage = response.message || (locale === 'ar' ? 'تم إرسال التقييم بنجاح' : 'Review submitted successfully')
 
         toast.success(successMessage)
-
-        // Log review data for debugging
-        console.log('Review created successfully:', {
-          id: reviewData?.id,
-          rating: reviewData?.rating,
-          isApproved: reviewData?.is_approved,
-          userName: reviewData?.user?.full_name
-        })
 
         // Reset form
         setRating(0)

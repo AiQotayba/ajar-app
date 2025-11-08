@@ -195,8 +195,7 @@ export const uploadImageDirect = async (
       error.message?.includes('timeout') ||
       error.message?.includes('network') ||
       error.message?.includes('Failed to fetch')
-    )) {
-      console.log(`🔄 Retrying upload (${retryCount + 1}/${maxRetries})...`)
+    )) { 
       await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)))
       return uploadImageDirect(file, retryCount + 1)
     }

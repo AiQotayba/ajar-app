@@ -35,7 +35,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { locationsApi } from "@/lib/api/locations"
+import { api } from "@/lib/api"
 import type { City } from "@/lib/types/location"
 
 // Form validation schema
@@ -63,7 +63,7 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFo
     // Fetch governorates
     const { data: governoratesData } = useQuery({
         queryKey: ["governorates"],
-        queryFn: () => locationsApi.getAllGovernorates(),
+        queryFn: () => api.get(`/admin/governorates`),
     })
 
     const governorates = (governoratesData?.data || []) as any[]
@@ -81,7 +81,7 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFo
 
     // Create mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => locationsApi.createCity(data),
+        mutationFn: (data: any) => api.post(`/admin/cities`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
@@ -94,7 +94,7 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFo
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => locationsApi.updateCity(city!.id, data),
+        mutationFn: (data: any) => api.put(`/admin/cities/${city!.id}`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)

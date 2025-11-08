@@ -4,7 +4,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Calendar, Image as ImageIcon, Link2, Languages } from "lucide-react"
+import { Calendar, Image as ImageIcon, Link2, Languages, AlertCircle, Star } from "lucide-react"
 import { format } from "date-fns"
 import { ar } from "date-fns/locale"
 import { toast } from "sonner"
@@ -36,7 +36,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { cn } from "@/lib/utils"
-import { slidersApi } from "@/lib/api/sliders"
+import { api } from "@/lib/api"
 import type { Slider } from "@/lib/types/slider"
 
 // Form validation schema
@@ -54,10 +54,11 @@ const sliderFormSchema = z.object({
         required_error: "يجب تحديد تاريخ النهاية",
     }),
     active: z.boolean().default(true),
-}).refine((data) => data.end_at > data.start_at, {
-    message: "تاريخ النهاية يجب أن يكون بعد تاريخ البداية",
-    path: ["end_at"],
 })
+    .refine((data) => data.end_at > data.start_at, {
+        message: "تاريخ النهاية يجب أن يكون بعد تاريخ البداية",
+        path: ["end_at"],
+    })
 
 type SliderFormValues = z.infer<typeof sliderFormSchema>
 
@@ -71,7 +72,10 @@ interface SliderFormProps {
 
 export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: SliderFormProps) {
     const queryClient = useQueryClient()
-    
+
+    // Helper function to get default start date (at least 1 minute from now)
+    const getDefaultStartDate = () => new Date(new Date().getTime() + 60 * 1000) // Add 1 minute   
+
     const form = useForm<SliderFormValues>({
         resolver: zodResolver(sliderFormSchema),
         defaultValues: {
@@ -81,7 +85,7 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
             description_en: slider?.description.en || "",
             image_url: slider?.image_url || "",
             target_url: slider?.target_url || "",
-            start_at: slider?.start_at ? new Date(slider.start_at) : new Date(),
+            start_at: slider?.start_at ? new Date(slider.start_at) : getDefaultStartDate(),
             end_at: slider?.end_at ? new Date(slider.end_at) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             active: slider?.active ?? true,
         },
@@ -89,11 +93,9 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
 
     // Create mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => slidersApi.create(data),
-        onSuccess: () => {
-            // Invalidate all table-data queries for this endpoint
-            queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
-            // toast.success("تم إضافة السلايد بنجاح")
+        mutationFn: (data: any) => api.post(`/admin/sliders`, data),
+        onSuccess: (data: any) => {
+            toast.success("تم إضافة السلايد بنجاح")
             onOpenChange(false)
             form.reset()
         },
@@ -106,7 +108,7 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => slidersApi.update(slider!.id, data),
+        mutationFn: (data: any) => api.put(`/admin/sliders/${slider!.id}`, data),
         onSuccess: () => {
             // Invalidate all table-data queries for this endpoint
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
@@ -121,6 +123,24 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
     })
 
     const onSubmit = (values: SliderFormValues) => {
+
+        // Ensure start_at is at least 5 minutes after now (accounting for timezone/server differences)
+        const now = new Date()
+        const minStartDate = new Date(now.getTime() + 5 * 60 * 1000) // +5 minutes
+
+        let startAt = values.start_at
+        const originalStartAt = new Date(startAt)
+
+
+        // Check if start_at is less than 5 minutes from now (to account for server timezone differences)
+        const timeDiff = startAt.getTime() - now.getTime()
+        const minDiff = 5 * 60 * 1000 // 5 minutes in milliseconds
+
+        if (timeDiff < minDiff) {
+            startAt = minStartDate
+            form.setValue("start_at", startAt)
+        }
+
         const formattedData: any = {
             title: {
                 ar: values.title_ar,
@@ -131,10 +151,16 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                 en: values.description_en,
             },
             target_url: values.target_url,
-            start_at: values.start_at.toISOString(),
+            start_at: startAt.toISOString(),
             end_at: values.end_at.toISOString(),
             active: values.active,
         }
+
+        console.info("📦 [DEBUG] Formatted data to send:", {
+            ...formattedData,
+            start_at: formattedData.start_at,
+            end_at: formattedData.end_at
+        })
 
         // Only include image_url if it's a new image or in create mode
         if (mode === "create") {
@@ -153,8 +179,10 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
         }
 
         if (mode === "create") {
+            console.info("🚀 [DEBUG] Creating slider with data:", formattedData)
             createMutation.mutate(formattedData)
         } else {
+            console.info("🔄 [DEBUG] Updating slider with data:", formattedData)
             updateMutation.mutate(formattedData)
         }
     }
@@ -162,7 +190,19 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
     const isLoading = createMutation.isPending || updateMutation.isPending
 
     React.useEffect(() => {
+        console.info("🔄 [DEBUG] useEffect triggered:", { mode, hasSlider: !!slider })
+
         if (slider && mode === "update") {
+            const startAtDate = new Date(slider.start_at)
+            const endAtDate = new Date(slider.end_at)
+
+            console.info("📝 [DEBUG] Resetting form for update mode:", {
+                sliderStartAt: slider.start_at,
+                parsedStartAt: startAtDate.toISOString(),
+                sliderEndAt: slider.end_at,
+                parsedEndAt: endAtDate.toISOString()
+            })
+
             form.reset({
                 title_ar: slider.title.ar,
                 title_en: slider.title.en,
@@ -170,11 +210,19 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                 description_en: slider.description.en,
                 image_url: slider.image_url || "",
                 target_url: slider.target_url,
-                start_at: new Date(slider.start_at),
-                end_at: new Date(slider.end_at),
+                start_at: startAtDate,
+                end_at: endAtDate,
                 active: slider.active,
             })
         } else if (mode === "create") {
+            const defaultStart = getDefaultStartDate()
+            const defaultEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+            console.info("📝 [DEBUG] Resetting form for create mode:", {
+                defaultStart: defaultStart.toISOString(),
+                defaultEnd: defaultEnd.toISOString()
+            })
+
             // Reset form for create mode
             form.reset({
                 title_ar: "",
@@ -183,8 +231,8 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                 description_en: "",
                 image_url: "",
                 target_url: "",
-                start_at: new Date(),
-                end_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                start_at: defaultStart,
+                end_at: defaultEnd,
                 active: true,
             })
         }
@@ -199,7 +247,7 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                         {mode === "create" ? "إضافة سلايد جديد" : "تعديل السلايد"}
                     </DialogTitle>
                     <DialogDescription>
-                        {mode === "create" 
+                        {mode === "create"
                             ? "قم بإضافة سلايد جديد للعرض في الصفحة الرئيسية"
                             : "قم بتعديل بيانات السلايد"}
                     </DialogDescription>
@@ -241,10 +289,10 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                                         <FormItem>
                                             <FormLabel>الوصف بالعربية</FormLabel>
                                             <FormControl>
-                                                <Textarea 
-                                                    placeholder="أدخل وصف السلايد" 
+                                                <Textarea
+                                                    placeholder="أدخل وصف السلايد"
                                                     className="min-h-[100px]"
-                                                    {...field} 
+                                                    {...field}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -275,10 +323,10 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                                         <FormItem>
                                             <FormLabel>Description in English</FormLabel>
                                             <FormControl>
-                                                <Textarea 
-                                                    placeholder="Enter slide description" 
+                                                <Textarea
+                                                    placeholder="Enter slide description"
                                                     className="min-h-[100px]"
-                                                    {...field} 
+                                                    {...field}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -361,10 +409,49 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                                                 <CalendarComponent
                                                     mode="single"
                                                     selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) =>
-                                                        date < new Date(new Date().setHours(0, 0, 0, 0))
-                                                    }
+                                                    onSelect={(date) => {
+                                                        if (date) {
+
+                                                            // Set time to current time + 1 minute to ensure it's after now
+                                                            const now = new Date()
+                                                            const selectedDate = new Date(date)
+
+                                                            // If selected date is today, set time to now + 1 minute
+                                                            const today = new Date()
+                                                            today.setHours(0, 0, 0, 0)
+                                                            const selectedDay = new Date(selectedDate)
+                                                            selectedDay.setHours(0, 0, 0, 0)
+
+                                                            const isToday = selectedDay.getTime() === today.getTime()
+
+                                                            if (isToday) {
+                                                                // Today: set to now + 5 minutes (to account for server timezone differences)
+                                                                const beforeAdjust = new Date(selectedDate)
+                                                                const futureTime = new Date(now.getTime() + 5 * 60 * 1000) // +5 minutes
+                                                                selectedDate.setHours(futureTime.getHours())
+                                                                selectedDate.setMinutes(futureTime.getMinutes())
+                                                                selectedDate.setSeconds(futureTime.getSeconds())
+                                                                selectedDate.setMilliseconds(futureTime.getMilliseconds())
+
+                                                            } else {
+                                                                // Future date: set to start of day (00:00:00)
+                                                                const beforeAdjust = new Date(selectedDate)
+                                                                selectedDate.setHours(0)
+                                                                selectedDate.setMinutes(0)
+                                                                selectedDate.setSeconds(0)
+                                                                selectedDate.setMilliseconds(0)
+                                                            }
+
+                                                            field.onChange(selectedDate)
+                                                        } else {
+                                                            field.onChange(date)
+                                                        }
+                                                    }}
+                                                    disabled={(date) => {
+                                                        const today = new Date()
+                                                        today.setHours(0, 0, 0, 0)
+                                                        return date < today
+                                                    }}
                                                     initialFocus
                                                 />
                                             </PopoverContent>
@@ -437,7 +524,15 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                                 </FormItem>
                             )}
                         />
+                        <div className="space-y-2">
 
+                            {form.formState.errors && Object.keys(form.formState.errors).length > 0 &&
+                                Object.values(form.formState.errors).map((error) => (
+                                    <p className="text-destructive text-xs">
+                                        - {error.message}
+                                    </p>
+                                ))}
+                        </div>
                         <DialogFooter>
                             <Button
                                 type="button"

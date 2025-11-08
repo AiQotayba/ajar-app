@@ -46,9 +46,9 @@ export const authApi = {
         body: JSON.stringify(data),
       }
     )
-    
+
     const result = await response.json()
-    
+
     // Store token and user if login successful
     if (result.success && result.access_token) {
       tokenManager.setToken(result.access_token)
@@ -56,7 +56,7 @@ export const authApi = {
         tokenManager.setUser(result.data)
       }
     }
-    
+
     return result
   },
 
@@ -108,22 +108,21 @@ export const authApi = {
         body: JSON.stringify(data),
       }
     )
-    
+
     const result = await response.json()
-    console.log(result);
-    
+
     // Store temporary token for password reset
     if (result.success && result?.access_token) {
       tokenManager.setTempToken(result.access_token, 30) // 30 minutes
     }
-    
+
     return result
   },
 
   // Reset Password
   resetPassword: async (data: ResetPasswordData) => {
     const tempToken = tokenManager.getTempToken()
-    
+
     if (!tempToken) {
       throw new Error("No temporary token found. Please verify OTP first.")
     }
@@ -142,9 +141,9 @@ export const authApi = {
         body: JSON.stringify(data),
       }
     )
-    
+
     const result = await response.json()
-    
+
     // If successful, login with new credentials
     if (result.success && result.access_token) {
       tokenManager.removeTempToken()
@@ -153,7 +152,7 @@ export const authApi = {
         tokenManager.setUser(result.data)
       }
     }
-    
+
     return result
   },
 

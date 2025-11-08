@@ -37,7 +37,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { createCategory, updateCategory, getCategories } from "@/lib/api/categories"
+import { api } from "@/lib/api"
 import type { Category } from "@/lib/types/category"
 import { ImageUpload } from "@/components/ui/image-upload"
 
@@ -66,7 +66,7 @@ interface CategoryFormProps {
 export function CategoryForm({ open, onOpenChange, urlEndpoint, category, mode, defaultParentId }: CategoryFormProps) {
 	const queryClient = useQueryClient()
 
-	const { data: categoriesData } = useQuery({ queryKey: ["categories"], queryFn: getCategories })
+	const { data: categoriesData } = useQuery({ queryKey: ["categories"], queryFn: () => api.get(`/admin/categories`) })
 	const allCategories = (categoriesData?.data as unknown as Category[]) || []
 
 	const flattenCategories = (categories: Category[]): Category[] =>
@@ -93,7 +93,7 @@ export function CategoryForm({ open, onOpenChange, urlEndpoint, category, mode, 
 	})
 
 	const createMutation = useMutation({
-		mutationFn: (payload: any) => createCategory(payload),
+		mutationFn: (payload: any) => api.post(`/admin/categories`, payload),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
 			queryClient.invalidateQueries({ queryKey: ["categories"] })
@@ -105,7 +105,7 @@ export function CategoryForm({ open, onOpenChange, urlEndpoint, category, mode, 
 	})
 
 	const updateMutation = useMutation({
-		mutationFn: (payload: any) => updateCategory(category!.id, payload),
+		mutationFn: (payload: any) => api.put(`/admin/categories/${category!.id}`, payload),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
 			queryClient.invalidateQueries({ queryKey: ["categories"] })

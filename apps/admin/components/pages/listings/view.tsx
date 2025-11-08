@@ -54,16 +54,13 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
         enabled: open && !!listing.id,
     })
 
-    console.info("📥 Reviews Data:", reviewsData)
     const reviews = reviewsData?.data || []
-    console.info("📋 Reviews Array:", reviews)
 
     // Reply mutation
     const replyMutation = useMutation({
         mutationFn: ({ id, message }: { id: number; message: string }) =>
             api.post(`/admin/reviews/${id}/replay`, { message }),
         onSuccess: (response: any) => {
-            console.info("✅ Reply Success:", response)
             queryClient.invalidateQueries({ queryKey: ["listing-reviews", listing.id] })
             toast.success(response?.message || "تم إضافة الرد بنجاح")
             setReplyDialogOpen(false)
@@ -71,7 +68,6 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
             setSelectedReview(null)
         },
         onError: (error: any) => {
-            console.error("❌ Reply Error:", error)
             toast.error(error?.response?.data?.message || "فشل إضافة الرد")
         },
     })
@@ -81,12 +77,10 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
         mutationFn: ({ id, status }: { id: number; status: "approved" | "rejected" }) =>
             api.post(`/admin/reviews/${id}/status`, { status }),
         onSuccess: (response: any) => {
-            console.info("✅ Update Status Success:", response)
             queryClient.invalidateQueries({ queryKey: ["listing-reviews", listing.id] })
             toast.success(response?.message || "تم تحديث حالة التقييم")
         },
         onError: (error: any) => {
-            console.error("❌ Update Status Error:", error)
             toast.error(error?.response?.data?.message || "فشل تحديث الحالة")
         },
     })
@@ -95,12 +89,10 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
     const deleteMutation = useMutation({
         mutationFn: (id: number) => api.delete(`/users/reviews/${id}`),
         onSuccess: (response: any) => {
-            console.info("✅ Delete Review Success:", response)
             queryClient.invalidateQueries({ queryKey: ["listing-reviews", listing.id] })
             toast.success(response?.message || "تم حذف التقييم")
         },
         onError: (error: any) => {
-            console.error("❌ Delete Review Error:", error)
             toast.error(error?.response?.data?.message || "فشل حذف التقييم")
         },
     })
@@ -162,7 +154,7 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                                                 alt={listing.title?.ar || "صورة الإعلان"}
                                                 className="w-full h-full object-cover"
                                             />
-                        </div>
+                                        </div>
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
@@ -193,8 +185,8 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                             {listing.description?.ar && (
                                 <p className="text-sm text-muted-foreground line-clamp-2">
                                     {listing.description.ar}
-                                    </p>
-                                )}
+                                </p>
+                            )}
                         </div>
                         <div className="text-left">
                             <p className="text-2xl font-bold text-primary">
@@ -206,14 +198,14 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
 
                     {/* Info Grid */}
                     <div className="grid grid-cols-2 gap-3 text-sm">
-                                    {listing.governorate && (
-                                        <div className="flex items-center gap-2">
+                        {listing.governorate && (
+                            <div className="flex items-center gap-2">
                                 <MapPin className="h-4 w-4 text-muted-foreground" />
                                 <span>{listing.governorate.name.ar}</span>
                             </div>
-                    )}
+                        )}
 
-                    {listing.category && (
+                        {listing.category && (
                             <div className="flex items-center gap-2">
                                 <Building2 className="h-4 w-4 text-muted-foreground" />
                                 <span>{listing.category.name.ar}</span>
@@ -284,9 +276,9 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                                         <p className="text-xs text-muted-foreground font-mono" dir="ltr">
                                             {listing.owner.phone}
                                         </p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
                             {listing.average_rating > 0 && (
                                 <div className="flex items-center gap-2 p-3 rounded-lg border">
@@ -294,9 +286,9 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                                     <div>
                                         <p className="text-lg font-bold">{listing.average_rating.toFixed(1)}</p>
                                         <p className="text-xs text-muted-foreground">{listing.reviews_count} تقييم</p>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                         </TabsContent>
 
                         {/* Features Tab */}
@@ -359,8 +351,8 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                                                     <AvatarImage src={review.user?.avatar_url} />
                                                     <AvatarFallback className="text-sm">
                                                         {review.user?.first_name?.[0]}{review.user?.last_name?.[0]}
-                                        </AvatarFallback>
-                                    </Avatar>
+                                                    </AvatarFallback>
+                                                </Avatar>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between mb-1">
                                                         <p className="text-sm font-medium">
@@ -385,9 +377,9 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                                                         ) : (
                                                             <Badge variant="secondary" className="h-5 text-xs">قيد المراجعة</Badge>
                                                         )}
-                                    </div>
-                                </div>
-                            </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
                                             {/* Actions */}
                                             <div className="flex items-center gap-2 justify-between">
@@ -446,9 +438,9 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </div>
-                        </div>
+                                        </div>
                                     ))}
-                        </div>
+                                </div>
                             ) : (
                                 <p className="text-sm text-muted-foreground text-center py-8">
                                     لا توجد تقييمات لهذا الإعلان

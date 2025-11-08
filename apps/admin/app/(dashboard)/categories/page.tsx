@@ -1,191 +1,89 @@
 "use client"
 
-import { Plus, FolderTree } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
-
-import { TableCore, TableFilter } from "@/components/table/table-core"
-import type { Category } from "@/lib/types/category"
-import { PageHeader } from "@/components/dashboard/page-header"
-import { getCategories } from "@/lib/api/categories"
-
-import { CategoriesSidebar } from "@/components/pages/categories/sidebar"
-import { CategoryDetailView } from "@/components/pages/categories/category-detail-view"
 import { useState } from "react"
-import { api } from "@/lib/api-client"
-import { CategoryForm } from "@/components/pages/categories/form"
-import { categoriesColumns } from "@/components/pages/categories/columns"
+import { useQuery } from "@tanstack/react-query"
+import { FolderTree, Plus } from "lucide-react"
+import { PageHeader } from "@/components/dashboard/page-header"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { Category } from "@/lib/types/category"
+import { CategoriesAccordion, CategoriesDetailSidebar, CategoryFormDrawer } from "@/components/pages/categoriesV2"
+import { api } from "@/lib/api"
 
-export default function CategoriesPage() {
-	const [viewMode, setViewMode] = useState<"table" | "detail">("table")
-	const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
-	const [formOpen, setFormOpen] = useState(false)
-	const [formMode, setFormMode] = useState<"create" | "update">("create")
-	const [parentIdForNew, setParentIdForNew] = useState<number | null>(null)
+export default function TestPage() {
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
-	const UrlEndpoint = "/admin/categories"
+    const { data: categories, isLoading } = useQuery({
+        queryKey: ["categories"],
+        queryFn: async () => {
+            const response = await api.get<{ data: Category[] }>('/admin/categories')
+            return response.data
+        },
+    })
 
-	// Fetch categories
-	const { data } = useQuery({
-		queryKey: ["categories"],
-		queryFn: getCategories,
-	})
+    const handleSelectCategory = (category: Category | null) => {
+        setSelectedCategory(category)
+        console.info("✅ Selected category:", category?.name.ar || category?.name.en)
+    }
 
-	const allCategories = (data?.data as unknown as Category[]) || []
+    // Categories Skeleton Component
+    const CategoriesSkeleton = () => (
+        <div className="max-w-4xl mx-auto space-y-3" dir="rtl">
+            {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="border rounded-lg p-4 space-y-3">
+                    {/* Accordion Header Skeleton */}
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1">
+                            <Skeleton className="h-5 w-5 rounded" />
+                            <Skeleton className="h-4 w-32 rounded" />
+                            <Skeleton className="h-5 w-5 rounded" />
+                        </div>
+                        <Skeleton className="h-6 w-6 rounded-full" />
+                    </div>
+                    {/* Accordion Content Skeleton (for some items) */}
+                </div>
+            ))}
+        </div>
+    )
 
-	const flattenedCategories = allCategories.flatMap((parent: Category) => [
-		parent,
-		...parent.children.map((child: Category) => ({ ...child, parent_name: parent.name.ar })),
-	])
+    return (
+        <div className="flex h-full flex-col">
+            <div className="border-b p-6">
+                <PageHeader
+                    title="إدارة التصنيفات"
+                    description="نظم وحدّث تصنيفات العقارات الخاصة بك. يمكنك إضافة تصنيفات جديدة، تعديل الموجودة، أو حذفها حسب الحاجة"
+                    icon={FolderTree}
+                    actions={[
+                        {
+                            label: "إضافة تصنيف",
+                            onClick: () => setIsCreateDialogOpen(true),
+                            icon: Plus,
+                            variant: "default",
+                        },
+                    ]}
+                />
+            </div>
 
-	const handleSelectCategory = (category: Category) => {
-		setSelectedCategory(category)
-		setViewMode("detail")
-	}
+            <CategoryFormDrawer
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+                category={null}
+            />
 
-	const handleBackToTable = () => {
-		setViewMode("table")
-		setSelectedCategory(null)
-	}
+            <div className=" overflow-hidden grid grid-cols-1 lg:grid-cols-3 h-full">
+                {/* Sidebar على اليسار */}
+                {/* المحتوى الرئيسي - Accordion */}
+                <div className="col-span-1 overflow-auto bg-muted/30 p-6">
+                    {isLoading
+                        ? <CategoriesSkeleton />
+                        : <CategoriesAccordion categories={categories?.data as any || []} onSelectCategory={handleSelectCategory} selectedCategory={selectedCategory} />
+                    }
+                </div>
+                <CategoriesDetailSidebar
+                    category={selectedCategory}
+                />
 
-	const handleEdit = (category: Category) => {
-		setSelectedCategory(category)
-		setFormMode("update")
-		setParentIdForNew(null)
-		setFormOpen(true)
-	}
-
-	const handleCreate = () => {
-		setSelectedCategory(null)
-		setFormMode("create")
-		setParentIdForNew(null)
-		setFormOpen(true)
-	}
-
-	const handleAddSubCategory = (parentCategory: Category) => {
-		setSelectedCategory(null)
-		setFormMode("create")
-		setParentIdForNew(parentCategory.id)
-		setFormOpen(true)
-	}
-
-	const filters: TableFilter[] = [
-		{
-			key: "is_visible",
-			label: "حالة الظهور",
-			type: "select",
-			options: [
-				{ label: "الكل", value: "all" },
-				{ label: "ظاهرة", value: "true" },
-				{ label: "مخفية", value: "false" },
-			],
-		},
-		{
-			key: "parent_id",
-			label: "نوع الفئة",
-			type: "select",
-			options: [
-				{ label: "الكل", value: "all" },
-				{ label: "فئات رئيسية", value: "null" },
-				{ label: "فئات فرعية", value: "not_null" },
-			],
-		},
-	]
-
-	return (
-		<div className="flex h-screen flex-col">
-			<div className="border-b p-6">
-				<PageHeader
-					title="إدارة الفئات"
-					description="إدارة فئات الإعلانات وخصائصها ومميزاتها"
-					icon={FolderTree}
-					action={{ label: "إضافة فئة جديدة", icon: Plus, onClick: handleCreate }}
-				/>
-			</div>
-
-			<div className="flex flex-1 overflow-hidden">
-				<CategoriesSidebar
-					categories={allCategories}
-					selectedCategory={selectedCategory}
-					onSelectCategory={handleSelectCategory}
-					onBackToRoot={handleBackToTable}
-					onReorder={async ({ id, newParentId, newIndex }: { id: number; newParentId: number | null; newIndex: number }) => {
-						await api.put(`${UrlEndpoint}/${id}/reorder`, {
-							id,
-							newParentId,
-							newIndex,
-						})
-					}}
-				/>
-
-				<div className="flex-1 overflow-auto bg-muted/30">
-					{viewMode === "table" ? (
-						<div className="p-6">
-							<TableCore<Category>
-								columns={categoriesColumns}
-								apiEndpoint={UrlEndpoint}
-								data={flattenedCategories}
-								filters={filters}
-								enableDragDrop={true}
-								enableActions={true}
-								enableSortOrder={true}
-								actions={{
-									onView: handleSelectCategory,
-									onEdit: handleEdit,
-								}}
-								enableView={true}
-								enableEdit={true}
-								enableDelete={true}
-								enableDateRange={true}
-								searchPlaceholder="ابحث في الفئات..."
-								emptyMessage="لا توجد فئات."
-								skeletonRows={8}
-								skeletonVariant="comfortable"
-								deleteTitle="تأكيد حذف الفئة"
-								deleteDescription={(category) => `هل أنت متأكد من حذف الفئة "${category.name.ar}"؟`}
-								deleteWarning={(category) =>
-									category.listings_count && category.listings_count > 0
-										? `تحذير: هذه الفئة تحتوي على ${category.listings_count} إعلان`
-										: null
-								}
-							/>
-						</div>
-					) : selectedCategory ? (
-						<CategoryDetailView
-							category={selectedCategory}
-							onEdit={handleEdit}
-							onAddSubCategory={handleAddSubCategory}
-							onDelete={async (category) => {
-								try {
-									await api.delete(`${UrlEndpoint}/${category.id}`)
-									setViewMode("table")
-									setSelectedCategory(null)
-								} catch (e) {
-									console.error("Failed to delete category", e)
-								}
-							}}
-							onSelectChild={(child) => {
-								setSelectedCategory(child)
-							}}
-							onBackToTable={handleBackToTable}
-							onPropertyAdd={() => { console.info("property add clicked") }}
-							onPropertyEdit={() => { console.info("property edit clicked") }}
-							onPropertyDelete={async () => { console.info("property delete clicked"); }}
-							onFeatureAdd={() => { console.info("feature add clicked") }}
-							onFeatureEdit={() => { console.info("feature edit clicked") }}
-							onFeatureDelete={async () => { console.info("feature delete clicked"); }}
-						/>
-					) : null}
-				</div>
-			</div>
-
-			<CategoryForm
-				open={formOpen}
-				onOpenChange={setFormOpen}
-				urlEndpoint={UrlEndpoint}
-				category={selectedCategory}
-				mode={formMode}
-				defaultParentId={parentIdForNew}
-			/>
-		</div>
-	)
-} 
+            </div>
+        </div>
+    )
+}

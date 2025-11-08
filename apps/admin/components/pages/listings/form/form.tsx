@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
 import { api } from "@/lib/api-client"
-import { createListing, updateListing, listingsApi } from "@/lib/api/listings"
 import { listingFormSchema, type ListingFormData, type Category, type Governorate, type City } from "./types"
 import { SuccessModal } from "./components"
 import { LocationPickerMap } from "./components/location-picker-map"
@@ -19,7 +18,6 @@ import { ImagesStep } from "./steps/images-step"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import { DollarSign } from "lucide-react"
 import type { Listing } from "@/lib/types/listing"
 
 interface ListingFormProps {
@@ -47,6 +45,8 @@ export function ListingForm({
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [selectedSubCategory, setSelectedSubCategory] = useState<Category | null>(null)
     const [selectedSubSubCategory, setSelectedSubSubCategory] = useState<Category | null>(null)
+    const [subCategoryId, setSubCategoryId] = useState<string>("")
+    const [subSubCategoryId, setSubSubCategoryId] = useState<string>("")
     const [subCategories, setSubCategories] = useState<Category[]>([])
     const [subSubCategories, setSubSubCategories] = useState<Category[]>([])
     const [availableProperties, setAvailableProperties] = useState<any[]>([])
@@ -75,11 +75,45 @@ export function ListingForm({
     const transformListingToFormData = (listing: Listing): Partial<ListingFormData> => {
         const validatedCoords = validateCoordinates(listing.latitude, listing.longitude)
 
-        // Extract media URLs
-        const mediaUrls = (listing.media || listing.images || []).map((item) => {
+        // Extract media URLs - use url (image_name) for form, but keep full_url for matching cover_image
+        const mediaItems = (listing.images || listing.media || [])
+        const mediaUrls = mediaItems.map((item) => {
             if (typeof item === 'string') return item
-            return item.full_url || item.url || ''
+            // Use url (image_name/relative path) for form data, not full_url
+            // This ensures we send the relative path to the API
+            return item.url || item.full_url || ''
         }).filter(Boolean)
+
+        // Find cover_image_index by matching cover_image with media URLs
+        let coverImageIndex = 0
+        if (listing.cover_image && mediaItems.length > 0) {
+            // Try to find the index of the cover image in the media array
+            const coverImageUrl = listing.cover_image
+            const index = mediaItems.findIndex((item) => {
+                // Check if item is a string
+                if (typeof item === 'string') {
+                    return item === coverImageUrl
+                }
+                // Check both url and full_url properties 
+                const itemFullUrl = item.full_url || ''
+
+                // Direct match
+                if (itemFullUrl === coverImageUrl) {
+                    return true
+                }
+
+                // Match by filename (extract from path)
+                if (typeof coverImageUrl === 'string') {
+                    const coverFileName = coverImageUrl.split('/').pop()?.split('?')[0]
+                    const itemFullUrlFileName = itemFullUrl.split('/').pop()?.split('?')[0]
+
+                    return coverFileName === itemFullUrlFileName
+                }
+
+                return false
+            })
+            coverImageIndex = index >= 0 ? index : 0
+        }
 
         // Extract properties
         const properties = (listing.properties || []).map((prop: any) => ({
@@ -110,8 +144,8 @@ export function ListingForm({
             city_id: listing.city_id?.toString() || "",
             latitude: validatedCoords.lat,
             longitude: validatedCoords.lng,
-            media: mediaUrls,
-            cover_image_index: 0,
+            images: mediaUrls,
+            cover_image_index: coverImageIndex,
             price: listing.price || 0,
             payment_frequency: listing.pay_every?.toString() || "",
             insurance: listing.insurance || 0,
@@ -138,13 +172,15 @@ export function ListingForm({
             },
             type: initialFormData?.type || "",
             category_id: initialFormData?.category_id || "",
+            sub_category_id: initialFormData?.sub_category_id || "",
+            sub_sub_category_id: initialFormData?.sub_sub_category_id || "",
             properties: initialFormData?.properties || [],
             features: initialFormData?.features || [],
             governorate_id: initialFormData?.governorate_id || "",
             city_id: initialFormData?.city_id || "",
             latitude: validatedCoords.lat,
             longitude: validatedCoords.lng,
-            media: initialFormData?.media || [],
+            images: initialFormData?.images || [],
             cover_image_index: initialFormData?.cover_image_index || 0,
             price: initialFormData?.price || 0,
             payment_frequency: initialFormData?.payment_frequency || "",
@@ -170,8 +206,16 @@ export function ListingForm({
             })
 
             // Set preview URLs for existing images
-            if (formData.media && formData.media.length > 0) {
-                setPreviewUrls(formData.media as string[])
+            if (formData.images && formData.images.length > 0) {
+                setPreviewUrls(formData.images as string[])
+            }
+
+            // Load category data if category_id exists
+            if (formData.category_id && formData.category_id !== "") {
+                // Small delay to ensure form is reset first
+                setTimeout(() => {
+                    handleCategoryChange(formData.category_id!)
+                }, 100)
             }
         } else if (!listing && open) {
             // Reset to defaults for create mode
@@ -180,13 +224,15 @@ export function ListingForm({
                 description: { ar: "", en: "" },
                 type: "",
                 category_id: "",
+                sub_category_id: "",
+                sub_sub_category_id: "",
                 properties: [],
                 features: [],
                 governorate_id: "",
                 city_id: "",
                 latitude: validatedCoords.lat,
                 longitude: validatedCoords.lng,
-                media: [],
+                images: [],
                 cover_image_index: 0,
                 price: 0,
                 payment_frequency: "",
@@ -232,29 +278,41 @@ export function ListingForm({
     })
 
     const selectedGovernorateId = watch("governorate_id")
+    const selectedCityId = watch("city_id")
 
+    // Load all cities if city is selected but governorate is not, otherwise load cities by governorate
     const { data: cities = [] } = useQuery({
-        queryKey: ['admin-cities', selectedGovernorateId],
+        queryKey: ['admin-cities', selectedGovernorateId, selectedCityId],
         queryFn: async () => {
-            if (!selectedGovernorateId) return []
-            const response = await api.get(`/admin/cities?governorate_id=${selectedGovernorateId}`)
-            if (response.isError) {
-                throw new Error(response.message)
+            // If governorate is selected, load cities for that governorate
+            if (selectedGovernorateId) {
+                const response = await api.get(`/admin/cities?governorate_id=${selectedGovernorateId}`)
+                if (response.isError) {
+                    throw new Error(response.message)
+                }
+                return response.data?.data || response.data || []
             }
-            // Handle different response structures
-            return response.data?.data || response.data || []
+            // If city is selected but no governorate, load all cities to find the selected city
+            if (selectedCityId) {
+                const response = await api.get(`/admin/cities`)
+                if (response.isError) {
+                    throw new Error(response.message)
+                }
+                return response.data?.data || response.data || []
+            }
+            return []
         },
-        enabled: open && !!selectedGovernorateId,
+        enabled: open && (!!selectedGovernorateId || !!selectedCityId),
         refetchOnWindowFocus: false,
     })
 
-    // Load category data when category_id changes
+    // Load category data when category_id changes (only if not editing or if listing changed)
     useEffect(() => {
         const categoryId = watch("category_id")
-        if (categoryId && categories.length > 0) {
+        if (categoryId && categories.length > 0 && !isEditing) {
             handleCategoryChange(categoryId.toString())
         }
-    }, [watch("category_id"), categories])
+    }, [watch("category_id"), categories, isEditing])
 
     // Load location data when editing
     useEffect(() => {
@@ -269,16 +327,40 @@ export function ListingForm({
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: (data: ListingFormData) => createListing(data),
+        mutationFn: async (data: ListingFormData) => {
+            console.group("📤 [CREATE MUTATION] Creating listing")
+            console.info("📦 [PAYLOAD] Data being sent to API:", data)
+            const result = await api.post(`/admin/listings`, data)
+            console.info("✅ [RESPONSE] API response:", result)
+            console.groupEnd()
+            return result
+        },
         onSuccess: (data) => {
-            console.info("✅ Listing created successfully:", data)
+            console.group("✅ [CREATE SUCCESS] Listing created successfully")
+            console.info("📊 [RESPONSE DATA] Created listing data:", data)
+            
+            // Auto-refresh: Invalidate and refetch queries
+            console.info("🔄 [AUTO-REFRESH] Invalidating queries for auto-update")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
+            queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
+            
+            // Refetch immediately for better UX
+            queryClient.refetchQueries({ queryKey: ["table-data", urlEndpoint] })
+            
+            console.info("✨ [SUCCESS] All queries invalidated and refetched")
+            console.groupEnd()
+            
             setShowSuccess(true)
             setIsLoading(false)
         },
         onError: (error: any) => {
-            console.error("❌ Error creating listing:", error)
+            console.group("❌ [CREATE ERROR] Error creating listing")
+            console.error("🔴 [ERROR DETAILS] Full error object:", error)
+            console.error("📝 [ERROR MESSAGE] Error message:", error?.message)
+            console.error("📋 [ERROR RESPONSE] API response:", error?.response?.data)
+            console.groupEnd()
+            
             const errorMessage = error?.response?.data?.message || error?.message || "فشل إنشاء الإعلان"
             toast.error(errorMessage)
             setIsLoading(false)
@@ -286,20 +368,45 @@ export function ListingForm({
     })
 
     const updateMutation = useMutation({
-        mutationFn: (data: ListingFormData) => {
+        mutationFn: async (data: ListingFormData) => {
             if (!listing?.id) throw new Error("Listing ID is required")
-            return updateListing(listing.id, data)
+            
+            console.group("📤 [UPDATE MUTATION] Updating listing")
+            console.info("🆔 [LISTING ID] Listing ID:", listing.id)
+            console.info("📦 [PAYLOAD] Data being sent to API:", data)
+            const result = await api.put(`/admin/listings/${listing.id}`, data)
+            console.info("✅ [RESPONSE] API response:", result)
+            console.groupEnd()
+            return result
         },
         onSuccess: (data) => {
-            console.info("✅ Listing updated successfully:", data)
+            console.group("✅ [UPDATE SUCCESS] Listing updated successfully")
+            console.info("📊 [RESPONSE DATA] Updated listing data:", data)
+            
+            // Auto-refresh: Invalidate and refetch queries
+            console.info("🔄 [AUTO-REFRESH] Invalidating queries for auto-update")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
+            queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
             queryClient.invalidateQueries({ queryKey: ["listing", listing?.id] })
+            
+            // Refetch immediately for better UX
+            queryClient.refetchQueries({ queryKey: ["table-data", urlEndpoint] })
+            queryClient.refetchQueries({ queryKey: ["listing", listing?.id] })
+            
+            console.info("✨ [SUCCESS] All queries invalidated and refetched")
+            console.groupEnd()
+            
             setShowSuccess(true)
             setIsLoading(false)
         },
         onError: (error: any) => {
-            console.error("❌ Error updating listing:", error)
+            console.group("❌ [UPDATE ERROR] Error updating listing")
+            console.error("🔴 [ERROR DETAILS] Full error object:", error)
+            console.error("📝 [ERROR MESSAGE] Error message:", error?.message)
+            console.error("📋 [ERROR RESPONSE] API response:", error?.response?.data)
+            console.groupEnd()
+            
             const errorMessage = error?.response?.data?.message || error?.message || "فشل تحديث الإعلان"
             toast.error(errorMessage)
             setIsLoading(false)
@@ -313,6 +420,13 @@ export function ListingForm({
 
         setSelectedCategory(category)
         setValue("category_id", categoryId)
+        // Clear sub categories when main category changes
+        setSelectedSubCategory(null)
+        setSelectedSubSubCategory(null)
+        setSubCategoryId("")
+        setSubSubCategoryId("")
+        setValue("sub_category_id", "")
+        setValue("sub_sub_category_id", "")
 
         if (category.children && category.children.length > 0) {
             setSubCategories(category.children)
@@ -348,6 +462,12 @@ export function ListingForm({
         if (!subCategory) return
 
         setSelectedSubCategory(subCategory)
+        setSubCategoryId(subCategoryId)
+        setValue("sub_category_id", subCategoryId)
+        // Clear sub-sub category when sub category changes
+        setSelectedSubSubCategory(null)
+        setSubSubCategoryId("")
+        setValue("sub_sub_category_id", "")
 
         if (subCategory.properties && subCategory.properties.length > 0) {
             setAvailableProperties(subCategory.properties)
@@ -385,6 +505,8 @@ export function ListingForm({
         if (!subSubCategory) return
 
         setSelectedSubSubCategory(subSubCategory)
+        setSubSubCategoryId(subSubCategoryId)
+        setValue("sub_sub_category_id", subSubCategoryId)
 
         if (subSubCategory.properties && subSubCategory.properties.length > 0) {
             setAvailableProperties(subSubCategory.properties)
@@ -429,17 +551,27 @@ export function ListingForm({
 
     // Form submission
     const onSubmit = async (data: ListingFormData) => {
-        console.info("🚀 Form submission started - Editing:", isEditing, "ID:", listing?.id)
+        console.group("🚀 [FORM SUBMISSION] Starting form submission")
+        console.info("📋 [FORM DATA] Raw form data:", {
+            mode: isEditing ? "update" : "create",
+            listingId: listing?.id,
+            data: {
+                ...data,
+                images: data.images?.length || 0,
+                properties: data.properties?.length || 0,
+                features: data.features?.length || 0,
+            }
+        })
 
         const isValid = await methods.trigger()
-        console.info("🔍 Form validation result:", isValid)
+        console.info("✅ [VALIDATION] Form validation result:", isValid)
 
         if (!isValid) {
             const validationErrors = methods.formState.errors
-            console.error("❌ Form validation failed:", validationErrors)
+            console.error("❌ [VALIDATION ERRORS] Form validation failed:", validationErrors)
 
-            if (validationErrors.media) {
-                toast.error(`خطأ في الصور: ${validationErrors.media.message || 'يجب رفع صورة واحدة على الأقل'}`)
+            if (validationErrors.images) {
+                toast.error(`خطأ في الصور: ${validationErrors.images.message || 'يجب رفع صورة واحدة على الأقل'}`)
             } else if (validationErrors.category_id) {
                 toast.error("التصنيف مطلوب")
             } else if (validationErrors.governorate_id) {
@@ -447,23 +579,26 @@ export function ListingForm({
             } else {
                 toast.error("يرجى تصحيح الأخطاء في النموذج")
             }
+            console.groupEnd()
             return
         }
 
         setIsLoading(true)
         try {
             if (isEditing && listing?.id) {
-                console.info("🔄 Updating existing listing...")
+                console.info("🔄 [UPDATE] Updating existing listing:", listing.id)
                 await updateMutation.mutateAsync(data)
             } else {
-                console.info("🆕 Creating new listing...")
+                console.info("🆕 [CREATE] Creating new listing")
                 await createMutation.mutateAsync(data)
             }
         } catch (error: any) {
-            console.error("❌ Form submission error:", error)
+            console.error("❌ [SUBMISSION ERROR] Form submission error:", error)
             const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء حفظ الإعلان"
             toast.error(errorMessage)
             setIsLoading(false)
+        } finally {
+            console.groupEnd()
         }
     }
 
@@ -591,7 +726,7 @@ export function ListingForm({
                                     <Label className="text-right block text-lg font-semibold">
                                         حالة التوفر <span className="text-destructive">*</span>
                                     </Label>
-                                    <div className="grid grid-cols-4 gap-3">
+                                    <div className="grid grid-cols-2 gap-3">
                                         <Option
                                             className={watch("availability_status") === "available" ? "border-primary bg-primary/5" : "border-gray-200"}
                                             classNameSub={watch("availability_status") === "available" && "bg-primary"}
@@ -625,9 +760,13 @@ export function ListingForm({
                                 {/* Category */}
                                 <div className="space-y-2">
                                     <Label htmlFor="category_id" className="text-right block">
-                                        التصنيف الرئيسي <span className="text-destructive">*</span>
+                                        التصنيف الرئيسي
+                                        {!watch("sub_category_id") && !watch("sub_sub_category_id") && (
+                                            <span className="text-destructive">*</span>
+                                        )}
                                     </Label>
                                     <Select
+                                        dir="rtl"
                                         value={watch("category_id") || ""}
                                         onValueChange={(value) => {
                                             setValue("category_id", value)
@@ -655,9 +794,13 @@ export function ListingForm({
                                     <div className="space-y-2">
                                         <Label htmlFor="sub_category" className="text-right block">
                                             التصنيف الفرعي
+                                            {!watch("category_id") && !watch("sub_sub_category_id") && (
+                                                <span className="text-destructive">*</span>
+                                            )}
                                         </Label>
                                         <Select
-                                            value={selectedSubCategory?.id.toString() || ""}
+                                            dir="rtl"
+                                            value={selectedSubCategory?.id.toString() || watch("sub_category_id") || ""}
                                             onValueChange={(value) => handleSubCategoryChange(value)}
                                         >
                                             <SelectTrigger id="sub_category" className="text-right">
@@ -679,9 +822,13 @@ export function ListingForm({
                                     <div className="space-y-2">
                                         <Label htmlFor="sub_sub_category" className="text-right block">
                                             التصنيف الفرعي للفرعي
+                                            {!watch("category_id") && !watch("sub_category_id") && (
+                                                <span className="text-destructive">*</span>
+                                            )}
                                         </Label>
                                         <Select
-                                            value={selectedSubSubCategory?.id.toString() || ""}
+                                            dir="rtl"
+                                            value={selectedSubSubCategory?.id.toString() || watch("sub_sub_category_id") || ""}
                                             onValueChange={(value) => handleSubSubCategoryChange(value)}
                                         >
                                             <SelectTrigger id="sub_sub_category" className="text-right">
@@ -750,6 +897,7 @@ export function ListingForm({
                                                     )}
                                                     {(property.type === 'select' || (property.options && property.options.length > 0)) && (
                                                         <Select
+                                                            dir="rtl"
                                                             value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
                                                             onValueChange={(value) => {
                                                                 const newProperties = [...(watch("properties") || [])]
@@ -795,7 +943,7 @@ export function ListingForm({
                                         </Label>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             {availableFeatures.map((feature) => (
-                                                <div key={feature.id} className="flex items-center space-x-2 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
+                                                <div key={feature.id} className="flex items-center gap-2 space-x-2 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
                                                     <Checkbox
                                                         id={`feature_${feature.id}`}
                                                         checked={watch("features")?.includes(feature.id.toString()) || false}
@@ -838,9 +986,13 @@ export function ListingForm({
                                 {/* Governorate */}
                                 <div className="space-y-2">
                                     <Label htmlFor="governorate_id" className="text-right block">
-                                        المحافظة <span className="text-destructive">*</span>
+                                        المحافظة
+                                        {!watch("city_id") && (
+                                            <span className="text-destructive">*</span>
+                                        )}
                                     </Label>
                                     <Select
+                                        dir="rtl"
                                         value={watch("governorate_id") || ""}
                                         onValueChange={(value) => setValue("governorate_id", value)}
                                     >
@@ -866,9 +1018,20 @@ export function ListingForm({
                                         المدينة (اختياري)
                                     </Label>
                                     <Select
+                                        dir="rtl"
                                         value={watch("city_id") || ""}
-                                        onValueChange={(value) => setValue("city_id", value)}
-                                        disabled={!watch("governorate_id")}
+                                        onValueChange={(value) => {
+                                            setValue("city_id", value)
+                                            // If city is selected, set its governorate_id automatically
+                                            if (value) {
+                                                const selectedCity = cities.find((city: City) => city.id.toString() === value)
+                                                if (selectedCity && selectedCity.governorate_id) {
+                                                    setValue("governorate_id", selectedCity.governorate_id.toString())
+                                                }
+                                                // Clear governorate validation error if exists
+                                                methods.clearErrors("governorate_id")
+                                            }
+                                        }}
                                     >
                                         <SelectTrigger id="city_id" className="text-right">
                                             <SelectValue placeholder="اختر المدينة (اختياري)" />
@@ -912,6 +1075,7 @@ export function ListingForm({
                                     showNavigation={false}
                                     previewUrls={previewUrls}
                                     setPreviewUrls={setPreviewUrls}
+                                    mode={mode}
                                 />
                             </div>
 
@@ -924,7 +1088,7 @@ export function ListingForm({
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
                                         <Label className="text-lg font-semibold text-right">
-                                            السعر (بالدينار الأردني)
+                                            السعر (بالدولار الأمريكي)
                                         </Label>
                                     </div>
 
@@ -1016,6 +1180,7 @@ export function ListingForm({
                                             حالة الإعلان
                                         </Label>
                                         <Select
+                                            dir="rtl"
                                             value={watch("status") || "draft"}
                                             onValueChange={(value) => setValue("status", value as any)}
                                         >
@@ -1043,7 +1208,22 @@ export function ListingForm({
                                     </div>
                                 </div>
                             </div>
-
+                            {/* Display Form Validation Errors */}
+                            {Object.keys(methods.formState.errors).length > 0 && (
+                                <div className="space-y-2 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                                    <p className="text-sm font-semibold text-destructive mb-2">يوجد أخطاء في النموذج:</p>
+                                    <ul className="list-disc list-inside space-y-1 text-xs text-destructive">
+                                        {Object.entries(methods.formState.errors).map(([field, error]) => {
+                                            const errorMessage = error?.message || "خطأ غير معروف"
+                                            return (
+                                                <li key={field}>
+                                                    <span className="font-medium">{field}:</span> {errorMessage}
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </div>
+                            )}
                             {/* Submit Button */}
                             <DialogFooter className="gap-2 pt-4 border-t">
                                 <Button

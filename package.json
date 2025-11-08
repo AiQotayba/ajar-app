@@ -18,11 +18,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "web:dev": "turbo run dev --filter=web",
     "web:build": "turbo run build --filter=web",
-    "admin:dev": "turbo run dev --filter=admin",
-    "admin:build": "turbo run build --filter=admin",
-    "vercel-build": "turbo run build --filter=web",
-    "vercel-build:install": "npm install -g pnpm@latest && pnpm install",
-    "vercel-build:build": "pnpm turbo run build --filter=web"
+    "admin:dev": "turbo run dev --filter=admin", 
+    "admin:build": "turbo run build --filter=admin"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

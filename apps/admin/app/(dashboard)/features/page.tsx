@@ -5,11 +5,11 @@ import { useQueryClient } from "@tanstack/react-query"
 import { FolderTree, Hash, Plus, Sparkles, Star } from "lucide-react"
 import { TableCore, type TableColumn, type TableFilter } from "@/components/table/table-core"
 import { Badge } from "@/components/ui/badge"
-import { toast } from "sonner"
-import { featuresApi } from "@/lib/api/features"
+import { toast } from "sonner" 
 import type { Feature } from "@/lib/types/feature"
 import { StatsGrid, type StatCard } from "@/components/dashboard/stats-grid"
 import { PageHeader } from "@/components/dashboard/page-header"
+import { api } from "@/lib/api"
 
 export default function FeaturesPage() {
   const queryClient = useQueryClient()
@@ -24,14 +24,13 @@ export default function FeaturesPage() {
   React.useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await featuresApi.getAll()
-        if (response.data) {
-          const features = response.data as unknown as Feature[]
+        const response = await api.get<{ data: Feature[] }>('/admin/features')
+        if (response.data.data) {
           setStats({
-            total: features.length,
-            withIcon: features.filter(f => f.icon).length,
-            categories: new Set(features.map(f => f.category_id)).size,
-            used: features.filter(f => (f.usage_count || 0) > 0).length,
+            total: response.data.data.length,
+            withIcon: response.data.data.filter(f => f.icon).length,
+            categories: new Set(response.data.data.map(f => f.category_id)).size,
+            used: response.data.data.filter(f => (f.usage_count || 0) > 0).length,
           })
         }
       } catch (error) {
@@ -128,7 +127,7 @@ export default function FeaturesPage() {
   }
 
   const handleDelete = async (feature: Feature) => {
-    const response = await featuresApi.delete(feature.id)
+    const response = await api.delete(`/admin/features/${feature.id}`)
     queryClient.invalidateQueries({ queryKey: ["table-data"] })
     
     // عرض رسالة من API

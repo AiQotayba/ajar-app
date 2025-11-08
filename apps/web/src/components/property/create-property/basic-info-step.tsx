@@ -70,8 +70,7 @@ export function BasicInfoStep({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onNext()
-  }
-console.log(categories);
+  } 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

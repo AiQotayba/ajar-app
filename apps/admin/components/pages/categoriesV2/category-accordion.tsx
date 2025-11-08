@@ -6,13 +6,13 @@ import { Folder, FolderOpen, ChevronRight } from "lucide-react"
 import type { Category } from "@/lib/types/category"
 import { cn } from "@/lib/utils"
 
-interface TestAccordionProps {
+interface CategoriesAccordionProps {
 	categories: Category[]
 	onSelectCategory: (category: Category | null) => void
 	selectedCategory: Category | null
 }
 
-export function TestAccordion({ categories, onSelectCategory, selectedCategory }: TestAccordionProps) {
+export function CategoriesAccordion({ categories, onSelectCategory, selectedCategory }: CategoriesAccordionProps) {
 	const renderCategoryIcon = (icon: string | null | undefined, hasChildren: boolean) => {
 		if (icon) {
 			const iconUrl = icon.startsWith('http') 

@@ -138,7 +138,6 @@ export function PropertyGallery({
     // Throttle mouse move events for better performance
     requestAnimationFrame(() => {
       const position = calculateMousePosition(event)
-      console.log('Mouse position:', position) // Debug log
       setMousePosition(position)
     })
   }

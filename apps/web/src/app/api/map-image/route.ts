@@ -49,7 +49,6 @@ function validateParams(lat: string, lng: string, zoom: string, size: string): b
 // دالة للحصول على خريطة بديلة عند فشل Google Maps
 async function getOpenStreetMapImage(lat: string, lng: string, zoom: string, size: string) {
     try {
-        console.log('🗺️ Using fallback map due to Google Maps billing issue')
 
         // إنشاء صورة SVG بديلة
         const [width, height] = size.split('x').map(Number)
@@ -81,7 +80,6 @@ async function getOpenStreetMapImage(lat: string, lng: string, zoom: string, siz
             </svg>
         `
 
-        console.log('✅ Fallback SVG map created')
 
         return new Response(svg, {
             headers: {
@@ -93,7 +91,6 @@ async function getOpenStreetMapImage(lat: string, lng: string, zoom: string, siz
             }
         })
     } catch (error) {
-        console.error('❌ Fallback map creation failed:', error)
 
         // إرجاع رسالة خطأ بسيطة
         return new Response('خريطة غير متاحة - يرجى تفعيل الفوترة في Google Cloud', {
@@ -161,7 +158,6 @@ export async function GET(req: NextRequest) {
         const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
         if (!apiKey) {
-            console.error('Google Maps API Key not found')
             return new Response('خطأ في إعداد الخادم', {
                 status: 500, headers: { 'Content-Type': 'text/plain; charset=utf-8' }
             })
@@ -194,20 +190,16 @@ export async function GET(req: NextRequest) {
         })
 
         if (!imageRes.ok) {
-            console.error(`❌ Google Maps API error: ${imageRes.status} ${imageRes.statusText}`)
 
             // محاولة قراءة رسالة الخطأ من Google
             try {
                 const errorText = await imageRes.text()
-                console.error('📄 Google API Error Response:', errorText)
 
                 // إذا كان الخطأ بسبب عدم تفعيل الفوترة، استخدم OpenStreetMap كبديل
                 if (errorText.includes('billing') || errorText.includes('Billing')) {
-                    console.log('🔄 Falling back to OpenStreetMap due to billing issue')
                     return await getOpenStreetMapImage(lat, lng, zoom, size)
                 }
             } catch (e) {
-                console.error('❌ Could not read error response')
             }
 
             return new Response('فشل تحميل الخريطة', {
@@ -227,7 +219,6 @@ export async function GET(req: NextRequest) {
             }
         })
     } catch (error) {
-        console.error('Map API error:', error)
         return new Response('خطأ داخلي في الخادم', {
             status: 500,
             headers: { 'Content-Type': 'text/plain; charset=utf-8' }

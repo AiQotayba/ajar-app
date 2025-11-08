@@ -311,6 +311,17 @@ class ApiCore implements ApiInstance {
       clearTimeout(timeoutId)
 
       const apiResponse = await this.parseResponse<T>(response)
+      
+      // Handle 401 Unauthorized - Auto logout
+      if (response.status === 401) {
+        this.config.onUnauthorized?.()
+        return {
+          ...apiResponse,
+          isError: true,
+          message: apiResponse.message || "تم تسجيل الخروج - انتهت صلاحية الجلسة",
+        } as ApiResponse<T>
+      }
+      
       this.handleSuccess(apiResponse, requestOptions)
 
       return apiResponse as ApiResponse<T>
@@ -429,6 +440,12 @@ class ApiCore implements ApiInstance {
     // Handle unauthorized (expired token or invalid credentials)
     if (error.status === 401 || error.status === 403) {
       this.config.onUnauthorized?.()
+      return {
+        isError: true,
+        data: undefined,
+        message: errorMessage || "تم تسجيل الخروج - انتهت صلاحية الجلسة",
+        status: error.status || 401,
+      }
     }
 
     if (options?.showErrorToast !== false && this.config.showToast) {

@@ -57,7 +57,6 @@ export default function VerifyOtpPage() {
 
     try {
       const response = await authApi.verifyOtp({ phone, otp })
-      console.log(response)
       if (response.success) {
         // Show success message
         if (response.message) {

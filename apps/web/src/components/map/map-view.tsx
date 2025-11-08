@@ -325,7 +325,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
                   }
                 },
                 (error) => {
-                  console.log('Location error:', error)
+                  console.error('Location error:', error)
                 }
               )
             }

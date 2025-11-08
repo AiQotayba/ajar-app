@@ -4,7 +4,7 @@ import * as React from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Star } from "lucide-react"
 import { TableCore } from "@/components/table/table-core"
-import { reviewsApi } from "@/lib/api/reviews"
+import { api } from "@/lib/api"
 import type { Review } from "@/lib/types/review"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { getReviewsColumns, ReviewForm, ReviewView } from "@/components/pages/reviews"
@@ -19,7 +19,7 @@ export default function ReviewsPage() {
     // Update mutation
     const updateMutation = useMutation({
         mutationFn: ({ id, isApproved }: { id: number; isApproved: boolean }) => {
-            return isApproved ? reviewsApi.approve(id) : reviewsApi.reject(id)
+            return isApproved ? api.put(`/admin/reviews/${id}/approve`) : api.put(`/admin/reviews/${id}/reject`)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
@@ -44,7 +44,7 @@ export default function ReviewsPage() {
 
     // Handle delete
     const handleDelete = async (review: Review) => {
-        await reviewsApi.delete(review.id)
+        await api.delete(`/admin/reviews/${review.id}`)
         queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
     }
 
@@ -53,7 +53,7 @@ export default function ReviewsPage() {
             <PageHeader
                 title="إدارة التقييمات"
                 description="إدارة تقييمات المستخدمين للإعلانات"
-                icon={Star} 
+                icon={Star}
             />
 
             <TableCore<Review>

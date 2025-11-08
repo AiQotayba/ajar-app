@@ -578,7 +578,6 @@ export class ApiCore implements ApiInstance {
         try {
             const contentType = response.headers.get('content-type');
 
-            console.log(data)
             return {
                 isError,
                 ...data,

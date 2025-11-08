@@ -18,21 +18,21 @@ export default function MapPage() {
     const checkLocationPermission = () => {
       // Check if permission was previously granted
       const permissionStatus = localStorage.getItem('locationPermission')
-      
+
       if (permissionStatus === 'granted') {
         setHasPermission(true)
         setShowPermissionModal(false)
         setIsLoading(false)
         return
       }
-      
+
       if (permissionStatus === 'denied') {
         setHasPermission(false)
         setShowPermissionModal(false)
         setIsLoading(false)
         return
       }
-      
+
       // No previous permission status, check current status
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -70,18 +70,6 @@ export default function MapPage() {
     setShowPermissionModal(false)
     // Save permission to localStorage
     localStorage.setItem('locationPermission', 'granted')
-    
-    // Request geolocation permission
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log("✅ Location granted:", position.coords)
-        },
-        (error) => {
-          console.log("❌ Location denied:", error)
-        },
-      )
-    }
   }
 
   const handleDenyLocation = () => {
@@ -130,7 +118,7 @@ function MapPageSkeleton() {
       {/* Map skeleton */}
       <div className="w-full h-full bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 relative overflow-hidden">
         <div className="absolute inset-0 animate-shimmer opacity-50" />
-        
+
         {/* Controls skeleton */}
         <div className="absolute bottom-4 left-2 rounded-full right-2 flex gap-2 justify-center">
           <div className="bg-white rounded-lg shadow-lg p-1 flex gap-1">

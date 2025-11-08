@@ -348,7 +348,7 @@ export function BasicInfoStep({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {availableFeatures.map((feature) => { 
               return (
-                <div key={feature.id} className="flex items-center space-x-2 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
+                <div key={feature.id} className="flex items-center space-x-2 gap-4 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
                   <input
                     type="checkbox"
                     id={`feature_${feature.id}`}

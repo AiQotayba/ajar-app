@@ -1,10 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Eye, EyeOff, MousePointer2, Calendar, Image as ImageIcon } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
-import { ar } from "date-fns/locale"
+import { Image as ImageIcon } from "lucide-react"
 import type { TableColumn } from "@/components/table/table-core"
 import type { Slider } from "@/lib/types/slider"
 
@@ -33,7 +30,7 @@ export const slidersColumns: TableColumn<Slider>[] = [
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
                 imageUrl = `${baseUrl}/storage/${value}`
             }
-            
+
             return (
                 <div className="relative h-16 w-24 rounded-lg overflow-hidden bg-muted group">
                     {imageUrl ? (
@@ -60,7 +57,7 @@ export const slidersColumns: TableColumn<Slider>[] = [
             <div className="space-y-1">
                 <div className="flex items-center gap-2">
                     <p className="font-semibold text-foreground">{value?.ar}</p>
-                </div> 
+                </div>
                 <p className="text-xs text-muted-foreground/70">{value?.en}</p>
             </div>
         ),

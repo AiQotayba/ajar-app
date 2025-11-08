@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { reviewsApi } from "@/lib/api/reviews"
+import { api } from "@/lib/api"
 import type { Review } from "@/lib/types/review"
 import { renderStars } from "./columns"
 
@@ -59,7 +59,7 @@ export function ReviewForm({ open, onOpenChange, urlEndpoint, review }: ReviewFo
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => reviewsApi.update(review!.id, data),
+        mutationFn: (data: any) => api.put(`/admin/reviews/${review!.id}`, data),
         onSuccess: () => {
             // Invalidate all table-data queries for this endpoint
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })

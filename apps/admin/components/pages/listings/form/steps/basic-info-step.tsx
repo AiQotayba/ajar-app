@@ -44,7 +44,7 @@ export function BasicInfoStep({
     e.preventDefault()
     onNext()
   }
-  
+
   function Option({ className, classNameSub, text, onClick }: { className: string, classNameSub: any, text: string, onClick: () => void }) {
     return (
       <div
@@ -60,7 +60,7 @@ export function BasicInfoStep({
       </div>
     )
   }
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title Arabic */}
@@ -135,7 +135,7 @@ export function BasicInfoStep({
         <Label className="text-right block text-lg font-semibold">
           حالة التوفر <span className="text-destructive">*</span>
         </Label>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Option
             className={watch("availability_status") === "available" ? "border-primary bg-primary/5" : "border-gray-200"}
             classNameSub={watch("availability_status") === "available" && "bg-primary"}
@@ -172,6 +172,7 @@ export function BasicInfoStep({
           التصنيف الرئيسي <span className="text-destructive">*</span>
         </Label>
         <Select
+          dir="rtl"
           value={watch("category_id")}
           onValueChange={(value) => {
             setValue("category_id", value)
@@ -201,6 +202,7 @@ export function BasicInfoStep({
             التصنيف الفرعي
           </Label>
           <Select
+            dir="rtl"
             value={selectedSubCategory?.id.toString() || ""}
             onValueChange={(value) => {
               onSubCategoryChange?.(value)
@@ -227,6 +229,7 @@ export function BasicInfoStep({
             التصنيف الفرعي للفرعي
           </Label>
           <Select
+            dir="rtl"
             value={selectedSubSubCategory?.id.toString() || ""}
             onValueChange={(value) => onSubSubCategoryChange?.(value)}
           >
@@ -296,6 +299,7 @@ export function BasicInfoStep({
                 )}
                 {(property.type === 'select' || (property.options && property.options.length > 0)) && (
                   <Select
+                    dir="rtl"
                     value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
                     onValueChange={(value) => {
                       const newProperties = [...(watch("properties") || [])]
@@ -341,7 +345,7 @@ export function BasicInfoStep({
           </Label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {availableFeatures.map((feature) => (
-              <div key={feature.id} className="flex items-center space-x-2 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
+              <div key={feature.id} className="flex items-center space-x-2 gap-4 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
                 <Checkbox
                   id={`feature_${feature.id}`}
                   checked={watch("features")?.includes(feature.id.toString()) || false}

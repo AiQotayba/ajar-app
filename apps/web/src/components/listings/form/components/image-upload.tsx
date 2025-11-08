@@ -78,31 +78,24 @@ export function ImageUpload({
         },
       })
 
-      console.log("📤 Upload Response:", response)
-      console.log("📤 Response Data:", response.data)
-
       // Get image_name (to save in DB) and build full URL for display
       const imageName = response.data?.image_name || response.data?.path
       
       if (!response.isError && imageName) {
         // Save the relative path (image_name) to form/database
         onChange(imageName)
-        console.log("✅ Image name set to:", imageName)
         
         // Build full URL for preview display
         const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
         const fullImageUrl = `${baseUrl}/storage/${imageName}`
         setPreview(fullImageUrl)
-        console.log("🖼️ Preview URL:", fullImageUrl)
         
         toast.success("تم رفع الصورة بنجاح")
       } else {
-        console.error("❌ Upload failed or no image_name in response")
         setPreview(null)
         toast.error(response.message || "فشل رفع الصورة")
       }
     } catch (error: any) {
-      console.error("Upload error:", error)
       setPreview(null)
       toast.error(error?.message || "فشل رفع الصورة")
     } finally {

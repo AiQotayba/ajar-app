@@ -4,9 +4,10 @@ import { useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { X, Upload, Star, Loader2 } from "lucide-react"
+import { X, Upload, Star, Loader2, GripVertical } from "lucide-react"
 import { toast } from "sonner"
 import { api } from "@/lib/api-client"
+import { cn } from "@/lib/utils"
 import type { ListingFormData } from "../types"
 
 interface ImagesStepProps {
@@ -15,6 +16,7 @@ interface ImagesStepProps {
   showNavigation?: boolean
   previewUrls?: string[]
   setPreviewUrls?: (urls: string[]) => void
+  mode?: "create" | "update"
 }
 
 export function ImagesStep({
@@ -22,20 +24,24 @@ export function ImagesStep({
   onPrevious,
   showNavigation = true,
   previewUrls: externalPreviewUrls,
-  setPreviewUrls: setExternalPreviewUrls
+  setPreviewUrls: setExternalPreviewUrls,
+  mode = "create"
 }: ImagesStepProps) {
   const { watch, setValue, formState: { errors } } = useFormContext<ListingFormData>()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [internalPreviewUrls, setInternalPreviewUrls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadingFiles, setUploadingFiles] = useState<Set<number>>(new Set())
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   // Use external preview URLs if provided, otherwise use internal state
   const previewUrls = externalPreviewUrls || internalPreviewUrls
   const setPreviewUrls = setExternalPreviewUrls || setInternalPreviewUrls
 
-  const media: any = watch("media") || []
+  const media: any = watch("images") || []
   const coverImageIndex = watch("cover_image_index") || 0
+  const isCreateMode = mode === "create"
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -111,10 +117,10 @@ export function ImagesStep({
         .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
         .length
 
-      // Update media with successfully uploaded URLs
+      // Update images with successfully uploaded URLs
       if (successfulUploads.length > 0) {
         const newMedia = [...media, ...successfulUploads.map(result => result.url)]
-        setValue("media", newMedia as any)
+        setValue("images", newMedia as any)
       }
 
       // Show appropriate messages
@@ -154,7 +160,7 @@ export function ImagesStep({
     const newImages = media.filter((_: any, i: any) => i !== index)
     const newUrls = previewUrls.filter((_, i) => i !== index)
 
-    setValue("media", newImages)
+    setValue("images", newImages)
     setValue("cover_image_index",
       coverImageIndex === index
         ? 0
@@ -174,6 +180,70 @@ export function ImagesStep({
     setValue("cover_image_index", index)
   }
 
+  // Drag and drop handlers (only in create mode)
+  const handleDragStart = (index: number) => {
+    if (!isCreateMode) return
+    setDraggedIndex(index)
+  }
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    if (!isCreateMode) return
+    e.preventDefault()
+    setDragOverIndex(index)
+  }
+
+  const handleDragLeave = () => {
+    if (!isCreateMode) return
+    setDragOverIndex(null)
+  }
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    if (!isCreateMode) return
+    e.preventDefault()
+
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
+    // Reorder images array
+    const newMedia = [...media]
+    const [reorderedItem] = newMedia.splice(draggedIndex, 1)
+    newMedia.splice(dropIndex, 0, reorderedItem)
+
+    // Reorder preview URLs
+    const newPreviewUrls = [...previewUrls]
+    const [reorderedPreview] = newPreviewUrls.splice(draggedIndex, 1)
+    newPreviewUrls.splice(dropIndex, 0, reorderedPreview)
+
+    // Update form values
+    setValue("images", newMedia as any)
+    setPreviewUrls(newPreviewUrls)
+
+    // Update cover_image_index if needed
+    let newCoverIndex = coverImageIndex
+    if (coverImageIndex === draggedIndex) {
+      newCoverIndex = dropIndex
+    } else if (draggedIndex < coverImageIndex && dropIndex >= coverImageIndex) {
+      newCoverIndex = coverImageIndex - 1
+    } else if (draggedIndex > coverImageIndex && dropIndex <= coverImageIndex) {
+      newCoverIndex = coverImageIndex + 1
+    }
+    if (newCoverIndex !== coverImageIndex) {
+      setValue("cover_image_index", newCoverIndex)
+    }
+
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+    toast.success("تم ترتيب الصور بنجاح")
+  }
+
+  const handleDragEnd = () => {
+    if (!isCreateMode) return
+    setDraggedIndex(null)
+    setDragOverIndex(null)
+  }
 
   // Helper to get image URL for display
   const getImageUrl = (mediaItem: any, index: number) => {
@@ -259,15 +329,42 @@ export function ImagesStep({
         <div className="space-y-4">
           <Label className="text-right block text-lg font-semibold">
             الصور المرفوعة ({media.length}/20)
+            {isCreateMode && media.length > 1 && (
+              <span className="block text-sm font-normal text-muted-foreground mt-1">
+                اسحب الصور لترتيبها
+              </span>
+            )}
           </Label>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {media.map((mediaItem: any, index: any) => (
-              <div key={index} className="relative group">
+              <div
+                key={index}
+                draggable={isCreateMode && media.length > 1}
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={cn(
+                  "relative group transition-all duration-200",
+                  isCreateMode && media.length > 1 && "cursor-move",
+                  draggedIndex === index && "opacity-50 scale-95",
+                  dragOverIndex === index && draggedIndex !== index && "ring-2 ring-primary ring-offset-2 scale-105"
+                )}
+              >
+                {/* Drag Handle - Only in create mode */}
+                {isCreateMode && media.length > 1 && (
+                  <div className="absolute top-2 left-2 z-20 bg-background/80 backdrop-blur-sm rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                )}
+
                 <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                   <img
                     src={getImageUrl(mediaItem, index)}
                     alt={`Preview ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none"
+                    draggable={false}
                     onError={(e) => {
                       // Fallback to preview URL if image fails to load
                       if (previewUrls[index]) {

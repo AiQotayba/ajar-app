@@ -4,12 +4,12 @@ import * as React from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus, Building2 } from "lucide-react"
 import { TableCore } from "@/components/table/table-core"
-import { listingsApi } from "@/lib/api/listings"
 import type { Listing } from "@/lib/types/listing"
 import { ListingActionsDialog } from "@/components/listings/listing-actions-dialog"
 import { DeleteListingDialog } from "@/components/listings/delete-listing-dialog"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { listingsColumns, listingsFilters, ListingForm, ListingView } from "@/components/pages/listings"
+import { api } from "@/lib/api"
 
 export default function ListingsPage() {
   const queryClient = useQueryClient()
@@ -40,7 +40,7 @@ export default function ListingsPage() {
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status, reason }: { id: number; status: Listing["status"]; reason?: string }) =>
-      listingsApi.updateStatus(id, status, reason),
+      api.put(`/admin/listings/${id}/status`, { status, reason }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
       setActionDialog({ listing: null, action: null, open: false })
@@ -51,7 +51,7 @@ export default function ListingsPage() {
   })
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => listingsApi.delete(id),
+    mutationFn: (id: number) => api.delete(`/admin/listings/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
       setDeleteDialog({ listing: null, open: false })
@@ -125,7 +125,7 @@ export default function ListingsPage() {
         enableActions={true}
         actions={{
           onView: handleView,
-          onEdit: handleEdit, 
+          onEdit: handleEdit,
         }}
         enableView={true}
         enableEdit={true}

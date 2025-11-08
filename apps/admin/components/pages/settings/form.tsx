@@ -41,7 +41,7 @@ import { Calendar } from "lucide-react"
 import { format } from "date-fns"
 import { ar } from "date-fns/locale"
 import { cn } from "@/lib/utils"
-import { settingsApi } from "@/lib/api/settings"
+import { api } from "@/lib/api"
 import type { Setting } from "@/lib/types/setting"
 
 // Form validation schema
@@ -89,7 +89,7 @@ export function SettingForm({ open, onOpenChange, urlEndpoint, setting, mode }: 
 
     // Create mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => settingsApi.create(data),
+        mutationFn: (data: any) => api.post(`/admin/settings`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
@@ -102,7 +102,7 @@ export function SettingForm({ open, onOpenChange, urlEndpoint, setting, mode }: 
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => settingsApi.update(setting!.id, data),
+        mutationFn: (data: any) => api.put(`/admin/settings/${setting!.id}`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)

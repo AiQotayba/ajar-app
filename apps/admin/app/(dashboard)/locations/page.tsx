@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Plus, MapPin, Building2 } from "lucide-react"
 import { TableCore } from "@/components/table/table-core"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { locationsApi } from "@/lib/api/locations"
+import { api } from "@/lib/api"
 import type { Governorate, City } from "@/lib/types/location"
 import { PageHeader } from "@/components/dashboard/page-header"
 import {
@@ -72,12 +72,12 @@ export default function LocationsPage() {
     }
 
     const handleDeleteGovernorate = async (gov: Governorate) => {
-        await locationsApi.deleteGovernorate(gov.id)
+        await api.delete(`/admin/governorates/${gov.id}`)
         queryClient.invalidateQueries({ queryKey: ["table-data", govEndpoint] })
     }
 
     const handleDeleteCity = async (city: City) => {
-        await locationsApi.deleteCity(city.id)
+        await api.delete(`/admin/cities/${city.id}`)
         queryClient.invalidateQueries({ queryKey: ["table-data", cityEndpoint] })
     }
 

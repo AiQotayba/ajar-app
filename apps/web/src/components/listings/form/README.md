@@ -43,8 +43,7 @@ src/components/listings/form/
 import { ListingForm } from "@/components/listings/form"
 
 export function CreateListingPage() {
-  const handleSuccess = (data: any) => {
-    console.log("تم إنشاء الإعلان:", data)
+  const handleSuccess = (data: any) => { 
     // إعادة توجيه أو إظهار رسالة نجاح
   }
 
@@ -66,8 +65,7 @@ export function CreateListingPage() {
 import { ListingForm } from "@/components/listings/form"
 
 export function EditListingPage({ listingId }: { listingId: string }) {
-  const handleSuccess = (data: any) => {
-    console.log("تم تحديث الإعلان:", data)
+  const handleSuccess = (data: any) => { 
   }
 
   return (

@@ -5,10 +5,10 @@ import { Eye, Sparkles, TrendingUp, Calendar, Clock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { listingsApi } from "@/lib/api/listings"
 import { toast } from "sonner"
 import type { TableColumn, TableFilter } from "@/components/table/table-core"
 import type { Listing } from "@/lib/types/listing"
+import { api } from "@/lib/api"
 
 // Status configuration
 const statusConfig = {
@@ -40,7 +40,7 @@ function StatusSelect({ listingId, currentStatus }: { listingId: number; current
 
     const updateStatusMutation = useMutation({
         mutationFn: async (newStatus: Listing["status"]) => {
-            const response = await listingsApi.quickUpdateStatus(listingId, newStatus)
+            const response = await api.put(`/admin/listings/${listingId}`, { status: newStatus })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
             return response
         },
@@ -62,7 +62,7 @@ function StatusSelect({ listingId, currentStatus }: { listingId: number; current
             disabled={updateStatusMutation.isPending}
             dir="rtl"
         >
-            <SelectTrigger className={`w-[140px] ${config.className}`}>
+            <SelectTrigger className={`w-fit ${config.className}`}>
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -111,22 +111,26 @@ export const listingsColumns: TableColumn<Listing>[] = [
         label: "الصورة",
         sortable: false,
         render: (_, row) => {
-            const imageUrl = row.cover_image || row.images?.[0]?.url || row.images?.[0]?.full_url
-            return (
-                <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted">
-                    {imageUrl ? (
+            const baseUrl = process.env.NEXT_PUBLIC_STORAGE_URL || "https://ajar-backend.mystore.social"
+            const imageUrl = row.cover_image && row.cover_image.startsWith('http') ? row.cover_image : `${baseUrl}/storage/${row.cover_image}`
+            if (!imageUrl) {
+                return (
+                    <div className="w-16 h-16 rounded-md overflow-hidden bg-muted">
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                            لا توجد صورة
+                        </div>
+                    </div>
+                )
+            } else
+                return (
+                    <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted">
                         <img
                             src={imageUrl}
                             alt={row.title?.ar || "صورة العقار"}
                             className="w-full h-full object-cover"
                         />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                            لا توجد صورة
-                        </div>
-                    )}
-                </div>
-            )
+                    </div>
+                )
         },
     },
     {
@@ -161,7 +165,7 @@ export const listingsColumns: TableColumn<Listing>[] = [
                     <p className="text-sm font-medium">
                         {row.owner.first_name} {row.owner.last_name}
                     </p>
-                    <p className="text-xs text-muted-foreground font-mono">{row.owner.phone}</p>
+                    <p className="text-xs text-muted-foreground font-mono text-end" style={{ unicodeBidi: 'plaintext' }}>{row.owner.phone}</p>
                 </div>
             ) : (
                 <span className="text-muted-foreground text-sm">غير محدد</span>
@@ -247,26 +251,7 @@ export const listingsColumns: TableColumn<Listing>[] = [
         render: (value: Listing["status"], row) => {
             return <StatusSelect listingId={row.id} currentStatus={value} />
         },
-    },
-    {
-        key: "views_count",
-        label: "الإحصائيات",
-        sortable: false,
-        render: (value, row) => (
-            <div className="space-y-1">
-                <div className="flex items-center gap-1.5 text-xs">
-                    <Eye className="h-3.5 w-3.5 text-blue-500" />
-                    <span className="font-medium">{value.toLocaleString("ar-EG")}</span>
-                    <span className="text-muted-foreground">مشاهدة</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs">
-                    <TrendingUp className="h-3.5 w-3.5 text-pink-500" />
-                    <span className="font-medium">{row.favorites_count.toLocaleString("ar-EG")}</span>
-                    <span className="text-muted-foreground">مفضلة</span>
-                </div>
-            </div>
-        ),
-    },
+    }
 ]
 
 // Filters definition

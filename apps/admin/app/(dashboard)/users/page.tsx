@@ -4,7 +4,7 @@ import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Plus, Users as UsersIcon } from "lucide-react"
 import { TableCore, type TableFilter } from "@/components/table/table-core"
-import { usersApi } from "@/lib/api/users"
+import { api } from "@/lib/api"
 import type { User } from "@/lib/types/user"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { getUsersColumns, UserForm, UserView } from "@/components/pages/users"
@@ -26,7 +26,7 @@ export default function UsersPage() {
             label: "الدور",
             type: "select",
             options: [
-                { label: "مدير", value: "admin" }, 
+                { label: "مدير", value: "admin" },
                 { label: "مستخدم", value: "user" },
             ],
         },
@@ -69,17 +69,15 @@ export default function UsersPage() {
 
     const handleDelete = async (user: User) => {
         try {
-            console.info("📤 Deleting User:", { id: user.id, name: user.full_name })
-            const response = await usersApi.delete(user.id)
-            console.info("📥 Delete User Response:", response)
-            
+            const response = await api.delete(`/admin/users/${user.id}`)
+
             // Check if response indicates an error
             if (response?.isError || (response?.status && response.status >= 400)) {
                 console.error("❌ Delete User Failed:", response)
                 toast.error(response?.message || "حدث خطأ أثناء حذف المستخدم")
                 return
             }
-            
+
             console.info("✅ Delete User Success")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             toast.success(response?.message || "تم حذف المستخدم بنجاح")

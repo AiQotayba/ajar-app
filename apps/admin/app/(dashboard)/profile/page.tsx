@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { User, Mail, Phone, Lock, Save, X, Edit, Shield } from "lucide-react"
+import { User, Mail, Phone, Lock, Save, X, Edit, Shield, Eye, EyeOff } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -11,10 +11,11 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { profileApi } from "@/lib/api/profile"
+import { api } from "@/lib/api"
 import type { AdminUser, UpdateProfileData, ResetPasswordData } from "@/lib/types/admin-user"
 import { PageHeader } from "@/components/dashboard/page-header"
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import "react-phone-number-input/style.css"
 import "@/styles/phone-input.css"
@@ -23,11 +24,16 @@ export default function MyAccountPage() {
   const queryClient = useQueryClient()
   const [isEditingProfile, setIsEditingProfile] = React.useState(false)
   const [isEditingPassword, setIsEditingPassword] = React.useState(false)
+  
+  // Password visibility states
+  const [showCurrentPassword, setShowCurrentPassword] = React.useState(false)
+  const [showNewPassword, setShowNewPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
 
   // Fetch profile
   const { data: profileData, isLoading } = useQuery({
     queryKey: ["profile"],
-    queryFn: profileApi.getMe,
+    queryFn: () => api.get(`/admin/profile`),
   })
 
   const profile = profileData?.data as AdminUser | undefined
@@ -42,7 +48,6 @@ export default function MyAccountPage() {
 
   // Password form state
   const [passwordForm, setPasswordForm] = React.useState<ResetPasswordData>({
-    current_password: "",
     new_password: "",
     new_password_confirmation: "",
   })
@@ -61,7 +66,7 @@ export default function MyAccountPage() {
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
-    mutationFn: (data: UpdateProfileData) => profileApi.updateProfile(data),
+    mutationFn: (data: UpdateProfileData) => api.put(`/admin/profile`, data),
     onSuccess: (response: any) => {
       console.info("📥 Update Profile Response:", response)
       
@@ -94,7 +99,7 @@ export default function MyAccountPage() {
 
   // Reset password mutation
   const resetPasswordMutation = useMutation({
-    mutationFn: (data: ResetPasswordData) => profileApi.resetPassword(data),
+    mutationFn: (data: ResetPasswordData) => api.put(`/admin/profile/reset-password`, data),
     onSuccess: (response: any) => {
       console.info("📥 Reset Password Response:", response)
       
@@ -115,11 +120,7 @@ export default function MyAccountPage() {
       
       console.info("✅ Reset Password Success")
       toast.success(response?.message || "تم تغيير كلمة المرور بنجاح")
-      setPasswordForm({
-        current_password: "",
-        new_password: "",
-        new_password_confirmation: "",
-      })
+      resetPasswordForm()
       setIsEditingPassword(false)
     },
     onError: (error: any) => {
@@ -149,6 +150,17 @@ export default function MyAccountPage() {
     updateProfileMutation.mutate(submitData)
   }
 
+  // Helper function to reset password form
+  const resetPasswordForm = () => {
+    setPasswordForm({ 
+      new_password: "",
+      new_password_confirmation: "",
+    })
+    setShowCurrentPassword(false)
+    setShowNewPassword(false)
+    setShowConfirmPassword(false)
+  }
+
   // Handle password reset
   const handleResetPassword = () => {
     if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
@@ -164,14 +176,125 @@ export default function MyAccountPage() {
     resetPasswordMutation.mutate(passwordForm)
   }
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4 md:space-y-6">
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  // Profile Skeleton Component
+  const ProfileSkeleton = () => (
+    <div className="space-y-4 md:space-y-6">
+      {/* Page Header Skeleton */}
+      <div className="rounded-3xl border border-border/50 bg-card shadow-lg p-6">
+        <div className="flex flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1">
+            <Skeleton className="h-12 w-12 rounded-xl" />
+            <div className="space-y-2 flex-1">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
+        {/* Profile Card Skeleton */}
+        <Card className="lg:col-span-1 border border-border/50 shadow-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Skeleton className="h-5 w-5 rounded" />
+              <Skeleton className="h-6 w-32" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Avatar Skeleton */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative">
+                <Skeleton className="h-32 w-32 rounded-full" />
+                <Skeleton className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full" />
+              </div>
+              <div className="text-center space-y-2 w-full">
+                <Skeleton className="h-6 w-40 mx-auto" />
+                <Skeleton className="h-4 w-48 mx-auto" />
+              </div>
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+
+            <Separator className="my-4" />
+
+            {/* Stats Skeleton */}
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Edit Profile & Password Skeleton */}
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
+          {/* Edit Profile Card Skeleton */}
+          <Card className="border border-border/50 shadow-md">
+            <CardHeader>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-6 w-40" />
+                  </div>
+                  <Skeleton className="h-4 w-56" />
+                </div>
+                <Skeleton className="h-10 w-24 rounded-lg" />
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-10 w-full rounded-lg" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full rounded-lg" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Reset Password Card Skeleton */}
+          <Card className="border border-border/50 shadow-md">
+            <CardHeader>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-5 rounded" />
+                    <Skeleton className="h-6 w-36" />
+                  </div>
+                  <Skeleton className="h-4 w-56" />
+                </div>
+                <Skeleton className="h-10 w-24 rounded-lg" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="p-8 text-center bg-muted/30 rounded-lg border border-border/50">
+                <Skeleton className="h-12 w-12 rounded-full mx-auto mb-4" />
+                <Skeleton className="h-4 w-48 mx-auto" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         </div>
       </div>
     )
+
+  if (isLoading) {
+    return <ProfileSkeleton />
   }
 
   return (
@@ -196,11 +319,11 @@ export default function MyAccountPage() {
             <div className="flex flex-col items-center gap-4">
               <div className="relative group">
                 <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:border-primary/40">
-                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
+                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
                   <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-3xl font-semibold">
-                    {profile?.first_name?.charAt(0)}{profile?.last_name?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+                  {profile?.first_name?.charAt(0)}{profile?.last_name?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
                 <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-2 shadow-md">
                   <Shield className="h-4 w-4" />
                 </div>
@@ -384,11 +507,7 @@ export default function MyAccountPage() {
                     <Button
                       onClick={() => {
                         setIsEditingPassword(false)
-                        setPasswordForm({
-                          current_password: "",
-                          new_password: "",
-                          new_password_confirmation: "",
-                        })
+                        resetPasswordForm()
                       }}
                       variant="outline"
                       disabled={resetPasswordMutation.isPending}
@@ -404,51 +523,52 @@ export default function MyAccountPage() {
             <CardContent className="space-y-4">
               {isEditingPassword ? (
                 <>
-                  <div className="space-y-2">
-                    <Label htmlFor="current_password" className="text-sm font-medium">كلمة المرور الحالية</Label>
+                  {/* Password Input Component */}
+                  {([
+                    {
+                      id: "new_password",
+                      label: "كلمة المرور الجديدة",
+                      value: passwordForm.new_password,
+                      onChange: (value: string) => setPasswordForm({ ...passwordForm, new_password: value }),
+                      placeholder: "أدخل كلمة المرور الجديدة (8 أحرف على الأقل)",
+                      showPassword: showNewPassword,
+                      setShowPassword: setShowNewPassword,
+                    },
+                    {
+                      id: "new_password_confirmation",
+                      label: "تأكيد كلمة المرور الجديدة",
+                      value: passwordForm.new_password_confirmation,
+                      onChange: (value: string) => setPasswordForm({ ...passwordForm, new_password_confirmation: value }),
+                      placeholder: "أعد إدخال كلمة المرور الجديدة",
+                      showPassword: showConfirmPassword,
+                      setShowPassword: setShowConfirmPassword,
+                    },
+                  ] as const).map((field) => (
+                    <div key={field.id} className="space-y-2">
+                      <Label htmlFor={field.id} className="text-sm font-medium">{field.label}</Label>
                     <div className="relative">
-                      <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                       <Input
-                        id="current_password"
-                        type="password"
-                        value={passwordForm.current_password}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
-                        className="pr-10 transition-all duration-200 hover:border-primary/50 focus:border-primary"
-                        placeholder="أدخل كلمة المرور الحالية"
-                      />
+                          id={field.id}
+                          type={field.showPassword ? "text" : "password"}
+                          value={field.value}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className="pr-10 pl-10 transition-all duration-200 hover:border-primary/50 focus:border-primary"
+                          placeholder={field.placeholder}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => field.setShowPassword(!field.showPassword)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors duration-200 z-10"
+                          aria-label={field.showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                        >
+                          {field.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
                     </div>
                   </div>
+                  ))}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="new_password" className="text-sm font-medium">كلمة المرور الجديدة</Label>
-                    <div className="relative">
-                      <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="new_password"
-                        type="password"
-                        value={passwordForm.new_password}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                        className="pr-10 transition-all duration-200 hover:border-primary/50 focus:border-primary"
-                        placeholder="أدخل كلمة المرور الجديدة (8 أحرف على الأقل)"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="new_password_confirmation" className="text-sm font-medium">تأكيد كلمة المرور الجديدة</Label>
-                    <div className="relative">
-                      <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="new_password_confirmation"
-                        type="password"
-                        value={passwordForm.new_password_confirmation}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, new_password_confirmation: e.target.value })}
-                        className="pr-10 transition-all duration-200 hover:border-primary/50 focus:border-primary"
-                        placeholder="أعد إدخال كلمة المرور الجديدة"
-                      />
-                    </div>
-                  </div>
-
+                  {/* Password Match Validation */}
                   {passwordForm.new_password && passwordForm.new_password_confirmation && (
                     <div className={cn(
                       "text-sm p-3 rounded-lg transition-colors duration-200",
@@ -456,11 +576,11 @@ export default function MyAccountPage() {
                         ? "bg-primary/10 text-primary" 
                         : "bg-destructive/10 text-destructive"
                     )}>
-                      {passwordForm.new_password === passwordForm.new_password_confirmation ? (
-                        <p className="font-medium">✓ كلمات المرور متطابقة</p>
-                      ) : (
-                        <p className="font-medium">✗ كلمات المرور غير متطابقة</p>
-                      )}
+                      <p className="font-medium">
+                        {passwordForm.new_password === passwordForm.new_password_confirmation 
+                          ? "✓ كلمات المرور متطابقة" 
+                          : "✗ كلمات المرور غير متطابقة"}
+                      </p>
                     </div>
                   )}
                 </>
