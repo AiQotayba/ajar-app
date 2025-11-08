@@ -3,6 +3,14 @@
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import {
   Menu,
@@ -16,10 +24,15 @@ import {
   Key,
   Info,
   SlidersHorizontal,
+  Pencil,
+  Lock,
+  FileText,
+  Settings,
+  LogOut,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useLocale } from "next-intl"
+import { usePathname, useRouter } from "next/navigation"
+import { useLocale, useTranslations } from "next-intl"
 import { useState } from "react"
 import Image from "next/image"
 import { Logo } from "../logo"
@@ -28,50 +41,140 @@ import { SearchBar } from "../search/search-bar"
 import { FilterDrawerWrapper } from "../filters/filter-drawer-wrapper"
 import { useAuth } from "@/hooks/use-auth"
 import { LanguageSwitcher } from "../language-switcher"
+import { logout } from "@/lib/logout"
+import { toast } from "sonner"
 
 interface NavbarProps {
   className?: string
 }
 
+const MenuItems = [
+  {
+    key: "profile",
+    href: "/profile",
+    icon: User,
+    isAuth: true
+  },
+  {
+    key: "editAccount",
+    href: "/profile/edit",
+    icon: Pencil,
+    isAuth: true
+  },
+  {
+    key: "changePassword",
+    href: "/profile/change-password",
+    icon: Lock,
+    isAuth: true
+  },
+  {
+    key: "myListings",
+    href: "/my-listings",
+    icon: FileText,
+    isAuth: true
+  },
+  {
+    key: "notifications",
+    href: "/notifications",
+    icon: Bell,
+    isAuth: true
+  },
+  {
+    key: "settings",
+    href: "/settings",
+    icon: Settings,
+    isAuth: true
+  },
+  {
+    key: "logout",
+    href: "#",
+    icon: LogOut,
+    isLogout: true
+  },
+  {
+    key: "login",
+    href: "/login",
+    icon: User,
+    isAuth: false
+  },
+  {
+    key: "register",
+    href: "/register",
+    icon: User,
+    isAuth: false
+  },
+]
+
 export function Navbar({ className }: NavbarProps) {
   const pathname = usePathname()
   const locale = useLocale()
+  const router = useRouter()
+  const t = useTranslations('profile.menuItems')
+  const tProfile = useTranslations('profile')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   const isRTL = locale === 'ar'
 
-  // Mock user authentication state - replace with actual auth logic
-  const isAuthenticated = true // This should come from your auth context 
-  const { user } = useAuth()
+  // Get authentication state from useAuth hook
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      toast.success(tProfile('logoutSuccess'))
+      router.push(`/${locale}/login`)
+      router.refresh()
+    } catch (error) {
+      toast.error(tProfile('logoutError'))
+    }
+  }
+
+  // Filter nav items based on authentication
   const navItems = [
     {
       id: "home",
       label: isRTL ? "الرئيسية" : "Home",
       href: `/${locale}`,
-      icon: Home
+      icon: Home,
+      requiresAuth: false
     },
     {
       id: "map",
       label: isRTL ? "الخريطة" : "Map",
       href: `/${locale}/map`,
-      icon: Map
+      icon: Map,
+      requiresAuth: false
     },
     {
       id: "favorites",
       label: isRTL ? "المفضلة" : "Favorites",
       href: `/${locale}/favorites`,
       icon: Heart,
-      auth: user ? true : false
+      requiresAuth: true
     },
     {
       id: "about",
       label: isRTL ? "من نحن" : "About",
       href: `/${locale}/about`,
-      icon: Info
+      icon: Info,
+      requiresAuth: false
     },
+  ].filter(item => !item.requiresAuth || isAuthenticated)
 
-  ] 
+  // Filter menu items based on authentication
+  const filteredMenuItems = MenuItems.filter((item) => {
+    if (item.isLogout) {
+      return isAuthenticated // Show logout only if authenticated
+    }
+    if (item.isAuth === true) {
+      return isAuthenticated // Show auth-required items only if authenticated
+    }
+    if (item.isAuth === false) {
+      return !isAuthenticated // Show non-auth items only if not authenticated
+    }
+    return true // Show items without auth requirement
+  })
 
   return (
     <header className={cn(
@@ -93,7 +196,7 @@ export function Navbar({ className }: NavbarProps) {
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side={isRTL ? "right" : "left"} className="w-80">
+              <SheetContent side={isRTL ? "right" : "left"} className="w-full max-w-[250px]">
                 <div className="flex flex-col h-full">
                   {/* Mobile Logo */}
                   <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200">
@@ -128,14 +231,16 @@ export function Navbar({ className }: NavbarProps) {
                           </Link>
                         )
                       })}
-                      <Link
-                        href={`/${locale}/my-listings/create`}
-                        className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <Plus className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                        {isRTL ? "إضافة عقار" : "Add Property"}
-                      </Link>
+                      {isAuthenticated && (
+                        <Link
+                          href={`/${locale}/my-listings/create`}
+                          className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <Plus className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                          {isRTL ? "إضافة عقار" : "Add listing"}
+                        </Link>
+                      )}
                     </div>
                   </nav>
                 </div>
@@ -207,57 +312,125 @@ export function Navbar({ className }: NavbarProps) {
               <LanguageSwitcher />
             </div>
 
-            {/* Notifications */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
-            >
-              <Link href={`/${locale}/notifications`}>
-                <Bell className="w-5 h-5" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
-                  3
-                </Badge>
-              </Link>
-            </Button>
+            {/* Notifications - Only show if authenticated */}
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
+                asChild
+              >
+                <Link href={`/${locale}/notifications`}>
+                  <Bell className="w-5 h-5" />
+                  {user?.notifications_unread_count && user.notifications_unread_count > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
+                      {user.notifications_unread_count > 9 ? '9+' : user.notifications_unread_count}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
+            )}
 
-            <Button
-              asChild
-              className="hidden sm:flex bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
-            >
-              <Link href={`/${locale}/my-listings/create`}>
-                <Plus className="w-4 h-4 mx-1" />
-                {isRTL ? "إضافة عقار" : "Add Property"}
-              </Link>
-            </Button>
+            {/* Add Property Button - Only show if authenticated */}
+            {isAuthenticated && (
+              <Button
+                asChild
+                className="hidden sm:flex bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
+              >
+                <Link href={`/${locale}/my-listings/create`}>
+                  <Plus className="w-4 h-4 mx-1" />
+                  {isRTL ? "إضافة عقار" : "Add listing"}
+                </Link>
+              </Button>
+            )}
 
             {/* User Menu */}
-            <div className="relative">
+            <div className="relative items-center flex">
               {isAuthenticated ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 p-1"
-                >
-                  <Link href={`/${locale}/profile`} className="flex items-center">
-                    {user?.avatar_url ? (
-                      <Image
-                        src={user.avatar_url}
-                        alt={user.full_name}
-                        width={32}
-                        height={32}
-                        className="rounded-full border-2 border-emerald-100"
-                      />
-                    ) : (
-                      <User className="w-5 h-5" />
-                    )}
-                  </Link>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div
+                      className="text-gray-600 rounded-full max-w-max px-4 py-auto w-max   overflow-hidden"
+                    >
+                      {user?.avatar_url ? (
+                        <Image
+                          src={user.avatar_url}
+                          alt={user.full_name || 'User'}
+                          width={35}
+                          height={35}
+                          className="rounded-full border-2 border-emerald-100 object-cover max-h-[35px] max-w-[35px]"
+                        />
+                      ) : (
+                        <User className="w-5 h-5" />
+                      )}
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align={isRTL ? "start" : "end"}
+                    className="w-56 bg-white"
+                    sideOffset={8}
+                  >
+                    <DropdownMenuLabel className="font-normal">
+
+                      <div className="flex rtl:flex-row-reverse items-center gap-2 space-y-1">
+                        {user?.avatar_url ? (
+                          <Image
+                            src={user.avatar_url}
+                            alt={user.full_name || 'User'}
+                            width={35}
+                            height={35}
+                            className="rounded-full border-2 border-emerald-100 object-cover max-h-[35px] max-w-[35px]"
+                          />
+                        ) : (
+                          <User className="w-5 h-5" />
+                        )}
+                        <div className="flex flex-col gap-1">
+                        <p className="text-sm font-medium leading-none rtl:text-end text-start">
+                          {user?.full_name || 'User'}
+                        </p>
+                        {user?.phone && (
+                          <p className="text-xs leading-none text-muted-foreground rtl:text-end text-start">
+                            {user.phone}
+                          </p>
+                        )}
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {filteredMenuItems.map((item) => {
+                      if (item.isLogout) {
+                        return (
+                          <DropdownMenuItem
+                            key={item.key}
+                            variant="destructive"
+                            onClick={handleLogout}
+                            className="cursor-pointer rtl:text-end flex rtl:flex-row-reverse"
+                          >
+                            <item.icon className="w-4 h-4" />
+                            <span>{t(item.key)}</span>
+                          </DropdownMenuItem>
+                        )
+                      }
+                      return (
+                        <DropdownMenuItem key={item.key} asChild>
+                          <Link
+                            href={`/${locale}${item.href}`}
+                            className="flex items-center cursor-pointer rtl:text-end text-start rtl:flex-row-reverse hover:text-primary group"
+                          >
+                            <item.icon className="w-4 h-4 group-hover:text-primary" />
+                            <span className="group-hover:text-primary">{t(item.key)}</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Button
                   variant="ghost"
                   size="icon"
                   className="text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
+                  asChild
                 >
                   <Link href={`/${locale}/login`}>
                     <User className="w-5 h-5" />

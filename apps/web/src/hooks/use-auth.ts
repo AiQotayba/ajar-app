@@ -4,7 +4,8 @@ import { clearAuth, getToken, getUser, handleAuthResponse, isAuthenticated, type
 import { logout } from '@/lib/logout'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-
+import { useQueryClient } from '@tanstack/react-query'
+import { useLocale } from 'next-intl'
 export interface UseAuthReturn {
   user: User | null
   token: string | null
@@ -20,7 +21,8 @@ export function useAuth(): UseAuthReturn {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-
+  const queryClient = useQueryClient()
+  const locale = useLocale()
   // Initialize auth state
   useEffect(() => {
     const initAuth = () => {
@@ -47,6 +49,7 @@ export function useAuth(): UseAuthReturn {
       handleAuthResponse(response)
       setToken(response.access_token)
       setUser(response.data)
+      location.reload()
     } catch (error) {
       console.error('Login error:', error)
       clearAuth()
@@ -68,10 +71,10 @@ export function useAuth(): UseAuthReturn {
   }, [])
 
   // Refresh user data
-  const refreshUser = useCallback(() => {
+  const refreshUser = useCallback(async () => {
     try {
-      const currentUser = getUser()
-      setUser(currentUser)
+      const currentUser = await queryClient.getQueryData(['user-profile'])
+      setUser(currentUser as User)
     } catch (error) {
       console.error('Refresh user error:', error)
       clearAuth()

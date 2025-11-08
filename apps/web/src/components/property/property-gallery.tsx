@@ -9,6 +9,7 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { ShareIcon } from "../icons/share"
+import { shareContent } from "@/components/shared/share-content"
 import { HeartIcon } from "../icons/heart"
 import { HeartFillIcon } from "../icons/heart-fill"
 import CachedImage from "../CachedImage"
@@ -31,6 +32,20 @@ interface PropertyGalleryProps {
   ribon_color?: string
   favoritesCount?: number
   onFavoriteToggle?: (isFavorite: boolean, favoritesCount: number) => void
+  listingData?: {
+    title?: { ar: string; en: string }
+    price?: number
+    currency?: string
+    type?: 'rent' | 'sale'
+    category?: { name: { ar: string; en: string } }
+    governorate?: { name: { ar: string; en: string } }
+    city?: { name: { ar: string; en: string } } | null
+    area?: number
+    bedrooms?: number
+    bathrooms?: number
+    latitude?: string | number
+    longitude?: string | number
+  }
 }
 
 export function PropertyGallery({
@@ -43,7 +58,8 @@ export function PropertyGallery({
   ribon_text,
   ribon_color,
   favoritesCount: initialFavoritesCount = 0,
-  onFavoriteToggle
+  onFavoriteToggle,
+  listingData
 }: PropertyGalleryProps) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite)
   const [favoritesCount, setFavoritesCount] = useState(initialFavoritesCount)
@@ -149,21 +165,42 @@ export function PropertyGallery({
   }
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
+    const listingUrl = window.location.href
+    const mainImage = coverImage || (sortedImages[0]?.full_url || sortedImages[0]?.url)
+    const imageUrl = mainImage || undefined
+
+    if (!listingData) {
+      // Fallback to simple share if no listing data
+      await shareContent({
+        data: {
           title: 'Property Listing',
-          text: 'Check out this property listing',
-          url: window.location.href,
-        })
-      } catch (error) {
-        console.error('Error sharing:', error)
-      }
-    } else {
-      // Fallback to copying URL
-      navigator.clipboard.writeText(window.location.href)
-      // You could add a toast notification here
+          listingUrl,
+          imageUrl,
+          locale,
+        },
+      })
+      return
     }
+
+    await shareContent({
+      data: {
+        title: listingData.title || { ar: 'Property Listing', en: 'Property Listing' },
+        price: listingData.price,
+        currency: listingData.currency,
+        type: listingData.type,
+        category: listingData.category,
+        governorate: listingData.governorate,
+        city: listingData.city,
+        area: listingData.area,
+        bedrooms: listingData.bedrooms,
+        bathrooms: listingData.bathrooms,
+        latitude: listingData.latitude,
+        longitude: listingData.longitude,
+        listingUrl,
+        imageUrl,
+        locale,
+      },
+    })
   }
 
   const handleZoom = () => {

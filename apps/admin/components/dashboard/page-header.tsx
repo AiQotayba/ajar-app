@@ -13,6 +13,7 @@ interface PageHeaderProps {
         onClick: () => void
         icon?: LucideIcon
         variant?: "default" | "outline" | "secondary"
+        disabled?: boolean
     }>
     className?: string
 }
@@ -111,6 +112,7 @@ export function PageHeader({
                                         isPrimary && "shadow-sm hover:shadow-md"
                                     )}
                                     onClick={action.onClick}
+                                    disabled={action.disabled}
                                 >
                                     <ActionIcon className="h-4 w-4" />
                                     <span>{action.label}</span>

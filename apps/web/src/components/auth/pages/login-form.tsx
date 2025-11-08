@@ -70,7 +70,7 @@ export function LoginForm() {
           // Account is verified and active, proceed with login
           handleAuthResponse(responseData)
           toast.success(t('auth.login.loginSuccess'))
-          router.push(`/${locale}/`)
+          location.reload()
         }
       } else {
         // Check if account is not verified (different error format)

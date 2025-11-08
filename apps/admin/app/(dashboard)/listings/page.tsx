@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus, Building2 } from "lucide-react"
 import { TableCore } from "@/components/table/table-core"
@@ -8,13 +9,13 @@ import type { Listing } from "@/lib/types/listing"
 import { ListingActionsDialog } from "@/components/listings/listing-actions-dialog"
 import { DeleteListingDialog } from "@/components/listings/delete-listing-dialog"
 import { PageHeader } from "@/components/dashboard/page-header"
-import { listingsColumns, listingsFilters, ListingForm, ListingView } from "@/components/pages/listings"
+import { listingsColumns, listingsFilters, ListingForm } from "@/components/pages/listings"
 import { api } from "@/lib/api"
 
 export default function ListingsPage() {
+  const router = useRouter()
   const queryClient = useQueryClient()
   const [formOpen, setFormOpen] = React.useState(false)
-  const [viewOpen, setViewOpen] = React.useState(false)
   const [selectedListing, setSelectedListing] = React.useState<Listing | null>(null)
   const [formMode, setFormMode] = React.useState<"create" | "update">("create")
   const urlEndpoint = "/admin/listings"
@@ -50,17 +51,6 @@ export default function ListingsPage() {
     },
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => api.delete(`/admin/listings/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
-      setDeleteDialog({ listing: null, open: false })
-    },
-    onError: () => {
-      console.error("حدث خطأ أثناء حذف الإعلان")
-    },
-  })
-
   const handleStatusUpdate = (status: Listing["status"], reason?: string) => {
     if (actionDialog.listing) {
       updateStatusMutation.mutate({
@@ -71,16 +61,8 @@ export default function ListingsPage() {
     }
   }
 
-  const handleDelete = () => {
-    if (deleteDialog.listing) {
-      deleteMutation.mutate(deleteDialog.listing.id)
-    }
-  }
-
-
   const handleView = (listing: Listing) => {
-    setSelectedListing(listing)
-    setViewOpen(true)
+    router.push(`/listings/${listing.id}`)
   }
 
   const handleEdit = (listing: Listing) => {
@@ -90,16 +72,7 @@ export default function ListingsPage() {
   }
 
   const handleCreate = () => {
-    setSelectedListing(null)
-    setFormMode("create")
-    setFormOpen(true)
-  }
-
-  const handleDeleteClick = (listing: Listing) => {
-    setDeleteDialog({
-      listing,
-      open: true,
-    })
+    router.push("/listings/create")
   }
 
   return (
@@ -153,14 +126,6 @@ export default function ListingsPage() {
         urlEndpoint={urlEndpoint}
         listing={selectedListing}
         mode={formMode}
-      />
-
-      {/* Listing View Dialog */}
-      <ListingView
-        open={viewOpen}
-        onOpenChange={setViewOpen}
-        urlEndpoint={urlEndpoint}
-        listing={selectedListing}
       />
     </div>
   )

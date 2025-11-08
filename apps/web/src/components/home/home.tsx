@@ -6,6 +6,7 @@ import { ListingGrid } from "@/components/listings/listing-grid";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
+import { ListingGridMore } from "../listings/listing-grid-more";
 
 export default function HomePage({ locale = 'ar' }: any) {
   const searchParams = useSearchParams();
@@ -42,7 +43,7 @@ export default function HomePage({ locale = 'ar' }: any) {
       return response;
     },
   });
-  
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -65,12 +66,7 @@ export default function HomePage({ locale = 'ar' }: any) {
 
         {/* Listings */}
         <div className="px-4">
-          <ListingGrid
-            data={listingsData?.data || listingsData}
-            // isLoading={true}
-            isLoading={isListingsLoading}
-            pagination={listingsData?.meta as any}
-          />
+          <ListingGridMore />
         </div>
       </main>
     </div>

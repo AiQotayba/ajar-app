@@ -16,25 +16,15 @@ export default function SettingsPage() {
     const [selectedSetting, setSelectedSetting] = React.useState<Setting | null>(null)
     const [formMode, setFormMode] = React.useState<"create" | "update">("create")
 
-    const urlEndpoint = "/admin/settings"
+    const urlEndpoint = "/admin/settings?is_settings=1"
     // Get columns with inline editing support
     const columns = getSettingsColumns()
 
     const filters: TableFilter[] = [
         {
-            key: "type",
-            label: "نوع الإعداد",
-            type: "select",
-            options: [
-                { label: "نص عادي", value: "text" },
-                { label: "نص طويل", value: "long_text" },
-                { label: "رقم صحيح", value: "int" },
-                { label: "رقم عشري", value: "float" },
-                { label: "صح/خطأ", value: "bool" },
-                { label: "JSON", value: "json" },
-                { label: "تاريخ ووقت", value: "datetime" },
-                { label: "HTML", value: "html" },
-            ],
+            key: "key",
+            label: "اسم الإعداد",
+            type: "text",
         },
     ]
 
@@ -66,13 +56,6 @@ export default function SettingsPage() {
                 title="إعدادات التطبيق"
                 description="إدارة إعدادات التطبيق العامة والنصوص والروابط الخارجية"
                 icon={SettingsIcon}
-                actions={[
-                    {
-                        label: "إضافة إعداد جديد",
-                        icon: Plus,
-                        onClick: handleCreate,
-                    }
-                ]}
             />
 
             <TableCore<Setting>

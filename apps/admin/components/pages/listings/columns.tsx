@@ -9,6 +9,8 @@ import { toast } from "sonner"
 import type { TableColumn, TableFilter } from "@/components/table/table-core"
 import type { Listing } from "@/lib/types/listing"
 import { api } from "@/lib/api"
+import ListingImage from "@/components/ui/image"
+import Images from "@/components/ui/image"
 
 // Status configuration
 const statusConfig = {
@@ -83,6 +85,7 @@ function StatusSelect({ listingId, currentStatus }: { listingId: number; current
     )
 }
 
+
 // Calculate availability status
 export function getAvailabilityStatus(availableFrom: string | null, availableUntil: string | null) {
     if (!availableFrom || !availableUntil) {
@@ -111,27 +114,17 @@ export const listingsColumns: TableColumn<Listing>[] = [
         label: "الصورة",
         sortable: false,
         render: (_, row) => {
-            const baseUrl = process.env.NEXT_PUBLIC_STORAGE_URL || "https://ajar-backend.mystore.social"
-            const imageUrl = row.cover_image && row.cover_image.startsWith('http') ? row.cover_image : `${baseUrl}/storage/${row.cover_image}`
-            if (!imageUrl) {
-                return (
-                    <div className="w-16 h-16 rounded-md overflow-hidden bg-muted">
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                            لا توجد صورة
-                        </div>
-                    </div>
-                )
-            } else
-                return (
-                    <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted">
-                        <img
-                            src={imageUrl}
-                            alt={row.title?.ar || "صورة العقار"}
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                )
-        },
+            return (
+                <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted">
+                    <Images
+                        src={row.cover_image}
+                        alt={row.title?.ar}
+                        className="object-cover"
+                        fill
+                    />
+                </div>
+            )
+        }
     },
     {
         key: "title",

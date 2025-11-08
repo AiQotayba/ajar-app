@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Review } from "@/lib/types/review"
 import { renderStars } from "./columns"
+import Images from "@/components/ui/image"
 
 interface ReviewViewProps {
     open: boolean
@@ -113,7 +114,7 @@ export function ReviewView({ open, onOpenChange, urlEndpoint, review }: ReviewVi
                         <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/30">
                             <div className="relative h-20 w-28 rounded-lg overflow-hidden bg-muted shrink-0">
                                 {review.listing.cover_image ? (
-                                    <img
+                                    <Images
                                         src={review.listing.cover_image}
                                         alt={review.listing.title.ar}
                                         className="h-full w-full object-cover"

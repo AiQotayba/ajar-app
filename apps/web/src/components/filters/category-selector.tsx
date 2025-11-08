@@ -3,7 +3,7 @@
  * مكون اختيار التصنيفات مع دعم التصنيفات الفرعية
  */
 import { useState, useEffect } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 
@@ -31,11 +31,14 @@ export function CategorySelector({
   categories, 
   selectedCategoryId, 
   onCategorySelect, 
-  placeholder = "اختر التصنيف",
-  label = "التصنيف",
+  placeholder,
+  label,
   className 
 }: CategorySelectorProps) {
   const locale = useLocale() as 'ar' | 'en'
+  const t = useTranslations('filters.category')
+  const defaultPlaceholder = placeholder || t('selectCategory')
+  const defaultLabel = label || t('title')
   const [selectedMainCategory, setSelectedMainCategory] = useState<string>('')
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>('')
 
@@ -88,10 +91,10 @@ export function CategorySelector({
     <div className={`space-y-4 ${className}`}>
       {/* Main Category */}
       <div className="space-y-2">
-        <Label className="text-base font-semibold">{label}</Label>
+        <Label className="text-base font-semibold">{defaultLabel}</Label>
         <Select value={selectedMainCategory} onValueChange={handleMainCategoryChange}>
           <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
-            <SelectValue placeholder={placeholder} />
+            <SelectValue placeholder={defaultPlaceholder} />
           </SelectTrigger>
           <SelectContent>
             {organizedCategories.map((category) => (
@@ -106,10 +109,10 @@ export function CategorySelector({
       {/* Sub Category */}
       {selectedMainCategory && availableSubCategories.length > 0 && (
         <div className="space-y-2">
-          <Label className="text-base font-semibold">التصنيف الفرعي</Label>
+          <Label className="text-base font-semibold">{t('subCategory')}</Label>
           <Select value={selectedSubCategory} onValueChange={handleSubCategoryChange}>
             <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
-              <SelectValue placeholder="اختر التصنيف الفرعي" />
+              <SelectValue placeholder={t('selectSubCategory')} />
             </SelectTrigger>
             <SelectContent>
               {availableSubCategories.map((subCategory) => (

@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Link from "next/link"
 
 interface HeaderProps {
   onMenuToggle?: () => void
@@ -36,37 +37,17 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
       {/* Right - Actions */}
       <div className="flex items-center gap-2 md:gap-4">
-
-        {/* User Avatar with Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              aria-label="قائمة المستخدم"
-              aria-expanded="false"
-            >
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-primary/80 ring-2 ring-border" />
-              <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>الملف الشخصي</DropdownMenuItem>
-            <DropdownMenuItem>الإعدادات</DropdownMenuItem>
-            <DropdownMenuItem>تسجيل الخروج</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Notification Bell */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative h-9 w-9"
-          aria-label="الإشعارات"
-        >
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-white" aria-hidden="true" />
-        </Button>
+        <Link href="/notifications">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative h-9 w-9"
+            aria-label="الإشعارات"
+          >
+            <Bell className="h-5 w-5" />
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-white" aria-hidden="true" />
+          </Button>
+        </Link>
       </div>
     </header>
   )

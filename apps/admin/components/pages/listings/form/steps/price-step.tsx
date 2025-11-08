@@ -22,12 +22,12 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* Price Section */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-primary" />
-          <Label className="text-lg font-semibold text-right">
+          <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+          <Label className="text-base sm:text-lg font-semibold text-right">
             السعر (بالدولار الأمريكي)
           </Label>
         </div>
@@ -53,8 +53,8 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
 
       {/* Payment Frequency - Only for Rent */}
       {watch("type") === "rent" && (
-        <div className="space-y-4">
-          <Label className="text-lg font-semibold text-right block">
+        <div className="space-y-3 sm:space-y-4">
+          <Label className="text-base sm:text-lg font-semibold text-right block">
             دورية الدفع (للإيجار)
           </Label>
           
@@ -88,7 +88,7 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
 
       {/* Insurance - Optional */}
       <div className="space-y-2">
-        <Label htmlFor="insurance" className="text-right block">
+        <Label htmlFor="insurance" className="text-right block text-sm sm:text-base">
           التأمين (اختياري)
         </Label>
         <div className="relative">

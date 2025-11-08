@@ -9,6 +9,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
+import { shareContent } from "@/components/shared/share-content"
 import { CoushIcon } from "../icons/coush"
 import { HeartIcon } from "../icons/heart"
 import { HeartFillIcon } from "../icons/heart-fill"
@@ -73,6 +74,17 @@ interface ListingCardProps {
       color: string
       text: string
     }
+    category?: {
+      name: {
+        ar: string
+        en: string
+      }
+    }
+    area?: number
+    bedrooms?: number
+    bathrooms?: number
+    latitude?: string | number
+    longitude?: string | number
   }
   locale?: string
   onFavoriteRemoved?: (listingId: number) => void
@@ -208,21 +220,28 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
     e.preventDefault() // Prevent navigation to listing details
     e.stopPropagation()
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: displayTitle,
-          text: getLocalizedText(listing.description),
-          url: window.location.origin + `/${locale || currentLocale}/listings/${listing.id}`,
-        })
-      } catch (error) {
-        console.error('Error sharing:', error)
-      }
-    } else {
-      // Fallback to copying URL
-      navigator.clipboard.writeText(window.location.origin + `/${locale || currentLocale}/listings/${listing.id}`)
-      toast.success(t('linkCopied'))
-    }
+    const listingUrl = window.location.origin + `/${locale || currentLocale}/listings/${listing.id}`
+    const imageUrl = mainImage && mainImage !== placeholderImage ? mainImage : undefined
+
+    await shareContent({
+      data: {
+        title: listing.title,
+        price: listing.price,
+        currency: listing.currency,
+        type: listing.type,
+        category: listing.category,
+        governorate: listing.governorate,
+        city: listing.city,
+        area: listing.area,
+        bedrooms: listing.bedrooms,
+        bathrooms: listing.bathrooms,
+        latitude: listing.latitude,
+        longitude: listing.longitude,
+        listingUrl,
+        imageUrl,
+        locale: locale || currentLocale,
+      },
+    })
   }
 
   const handleEdit = (listingId: number) => {

@@ -55,9 +55,10 @@ interface CityFormProps {
     urlEndpoint: string
     city?: City | null
     mode: "create" | "update"
+    defaultGovernorateId?: number
 }
 
-export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFormProps) {
+export function CityForm({ open, onOpenChange, urlEndpoint, city, mode, defaultGovernorateId }: CityFormProps) {
     const queryClient = useQueryClient()
 
     // Fetch governorates
@@ -71,7 +72,7 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFo
     const form = useForm<CityFormValues>({
         resolver: zodResolver(cityFormSchema),
         defaultValues: {
-            governorate_id: city?.governorate_id || 0,
+            governorate_id: city?.governorate_id || defaultGovernorateId || 0,
             name_ar: city?.name?.ar || "",
             name_en: city?.name?.en || "",
             place_id: city?.code || "",
@@ -82,8 +83,12 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFo
     // Create mutation
     const createMutation = useMutation({
         mutationFn: (data: any) => api.post(`/admin/cities`, data),
-        onSuccess: () => {
+        onSuccess: (response: any) => {
+            const createdCity = response.data || response
+            const governorateId = createdCity?.governorate_id || defaultGovernorateId
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
+            queryClient.invalidateQueries({ queryKey: ["cities", governorateId] })
+            queryClient.invalidateQueries({ queryKey: ["governorates"] })
             onOpenChange(false)
             form.reset()
         },
@@ -96,7 +101,10 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFo
     const updateMutation = useMutation({
         mutationFn: (data: any) => api.put(`/admin/cities/${city!.id}`, data),
         onSuccess: () => {
+            const governorateId = city?.governorate_id || defaultGovernorateId
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
+            queryClient.invalidateQueries({ queryKey: ["cities", governorateId] })
+            queryClient.invalidateQueries({ queryKey: ["governorates"] })
             onOpenChange(false)
         },
         onError: (error: any) => {
@@ -133,8 +141,16 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode }: CityFo
                 place_id: city.code || "",
                 availability: city.is_active ?? true,
             })
+        } else if (mode === "create" && defaultGovernorateId) {
+            form.reset({
+                governorate_id: defaultGovernorateId,
+                name_ar: "",
+                name_en: "",
+                place_id: "",
+                availability: true,
+            })
         }
-    }, [city, mode, form])
+    }, [city, mode, form, defaultGovernorateId])
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

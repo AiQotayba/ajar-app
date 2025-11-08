@@ -5,6 +5,7 @@ import type { Category } from "@/lib/types/category"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Info } from "lucide-react"
+import Images from "@/components/ui/image"
 
 interface CategoryHeaderProps {
 	category: Category
@@ -19,7 +20,7 @@ export function CategoryHeader({ category, onEdit, onDelete }: CategoryHeaderPro
 				? icon
 				: `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${icon}`
 			return (
-				<img
+				<Images
 					src={iconUrl}
 					alt=""
 					className="w-12 h-12 object-cover rounded-lg"

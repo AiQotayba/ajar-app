@@ -2,33 +2,19 @@
 
 import * as React from "react"
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Folder, Package, Star, Info, FolderTree, Edit, Trash2, Plus, Save, X } from "lucide-react"
+import { Folder, Package, Star, Info, FolderTree, Edit, Trash2, Plus, Sparkles, ArrowRight } from "lucide-react"
 import type { Category, CategoryProperty, CategoryFeature } from "@/lib/types/category"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { ImageUpload } from "@/components/ui/image-upload"
 import { api } from "@/lib/api"
 import { CategoryFormDrawer } from "./category-form-drawer"
 import { FeatureFormDrawer } from "./feature-form-drawer"
 import { PropertyFormDrawer } from "./property-form-drawer"
+import { ChildCategoryFormDrawer } from "./child-category-form-drawer"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -39,18 +25,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import Images from "@/components/ui/image"
 
-// Zod Schema for Child Category
-const childFormSchema = z.object({
-    name_ar: z.string().min(1, "الاسم بالعربية مطلوب"),
-    name_en: z.string().optional(),
-    description_ar: z.string().optional(),
-    description_en: z.string().optional(),
-    icon: z.string().optional(),
-    parent_id: z.number(),
-})
-
-type ChildFormValues = z.infer<typeof childFormSchema>
 
 interface CategoriesDetailSidebarProps {
     category: Category | null
@@ -60,64 +36,19 @@ interface CategoriesDetailSidebarProps {
 
 export function CategoriesDetailSidebar({ category, onEdit, onDelete }: CategoriesDetailSidebarProps) {
     const queryClient = useQueryClient()
+    
     const [isPropertyDrawerOpen, setIsPropertyDrawerOpen] = useState(false)
     const [isFeatureDrawerOpen, setIsFeatureDrawerOpen] = useState(false)
-    const [isChildFormOpen, setIsChildFormOpen] = useState(false)
+    const [isChildFormDrawerOpen, setIsChildFormDrawerOpen] = useState(false)
     const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+    const [isDeletePropertyDialogOpen, setIsDeletePropertyDialogOpen] = useState(false)
+    const [isDeleteFeatureDialogOpen, setIsDeleteFeatureDialogOpen] = useState(false)
     const [editingProperty, setEditingProperty] = useState<CategoryProperty | null>(null)
     const [editingFeature, setEditingFeature] = useState<CategoryFeature | null>(null)
     const [editingChild, setEditingChild] = useState<Category | null>(null)
-
-
-    // Child Form
-    const childForm = useForm<ChildFormValues>({
-        resolver: zodResolver(childFormSchema),
-        defaultValues: {
-            name_ar: "",
-            name_en: "",
-            description_ar: "",
-            description_en: "",
-            icon: "",
-            parent_id: category?.id || 0,
-        },
-    })
-
-
-    // Child Mutations
-    const createChildMutation = useMutation({
-        mutationFn: (data: any) => api.post(`/admin/categories`, {
-            name: { ar: data.name_ar, en: data.name_en || "" },
-            description: { ar: data.description_ar || "", en: data.description_en || "" },
-            parent_id: data.parent_id,
-            icon: data.icon || null,
-            properties_source: "parent_and_custom",
-            is_visible: true,
-        }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["categories"] })
-            toast.success("تم إنشاء الفئة الفرعية بنجاح")
-            setIsChildFormOpen(false)
-            childForm.reset()
-        },
-        onError: () => toast.error("فشل إنشاء الفئة الفرعية"),
-    })
-
-    const updateChildMutation = useMutation({
-        mutationFn: ({ id, data }: { id: number; data: any }) => api.put(`/admin/categories/${id}`, {
-            name: { ar: data.name_ar, en: data.name_en || "" },
-            description: { ar: data.description_ar || "", en: data.description_en || "" },
-            icon: data.icon || null,
-        }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["categories"] })
-            toast.success("تم تحديث الفئة الفرعية بنجاح")
-            setIsChildFormOpen(false)
-            setEditingChild(null)
-            childForm.reset()
-        },
-        onError: () => toast.error("فشل تحديث الفئة الفرعية"),
-    })
+    const [deletingProperty, setDeletingProperty] = useState<CategoryProperty | null>(null)
+    const [deletingFeature, setDeletingFeature] = useState<CategoryFeature | null>(null)
 
     const handleEditClick = () => {
         if (category) {
@@ -153,15 +84,59 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
         }
     }
 
+    // Delete Property Mutation
+    const deletePropertyMutation = useMutation({
+        mutationFn: (id: number) => api.delete(`/admin/properties/${id}`),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({ queryKey: ["categories"] })
+            toast.success(data?.message)
+            setIsDeletePropertyDialogOpen(false)
+            setDeletingProperty(null)
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message
+            toast.error(errorMessage)
+        },
+    })
 
-    const handleChildSubmit = (values: ChildFormValues) => {
-        if (!category) return
-        if (editingChild) {
-            updateChildMutation.mutate({ id: editingChild.id, data: values })
-        } else {
-            createChildMutation.mutate({ ...values, parent_id: category.id })
+    // Delete Feature Mutation
+    const deleteFeatureMutation = useMutation({
+        mutationFn: (id: number) => api.delete(`/admin/features/${id}`),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({ queryKey: ["categories"] })
+            toast.success(data?.message)
+            setIsDeleteFeatureDialogOpen(false)
+            setDeletingFeature(null)
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message
+            toast.error(errorMessage)
+        },
+    })
+
+    const handleDeleteProperty = (property: CategoryProperty) => {
+        setDeletingProperty(property)
+        setIsDeletePropertyDialogOpen(true)
+    }
+
+    const handleDeletePropertyConfirm = () => {
+        if (deletingProperty) {
+            deletePropertyMutation.mutate(deletingProperty.id)
         }
     }
+
+    const handleDeleteFeature = (feature: CategoryFeature) => {
+        setDeletingFeature(feature)
+        setIsDeleteFeatureDialogOpen(true)
+    }
+
+    const handleDeleteFeatureConfirm = () => {
+        if (deletingFeature) {
+            deleteFeatureMutation.mutate(deletingFeature.id)
+        }
+    }
+
+
 
     const handleEditProperty = (property: CategoryProperty) => {
         setEditingProperty(property)
@@ -185,46 +160,91 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
 
     const handleEditChild = (child: Category) => {
         setEditingChild(child)
-        childForm.reset({
-            name_ar: child.name.ar,
-            name_en: child.name.en,
-            description_ar: child.description?.ar || "",
-            description_en: child.description?.en || "",
-            icon: child.icon || "",
-            parent_id: category?.id || 0,
-        })
-        setIsChildFormOpen(true)
+        setIsChildFormDrawerOpen(true)
     }
 
-
-    const handleCloseChildForm = () => {
-        setIsChildFormOpen(false)
+    const handleAddChild = () => {
         setEditingChild(null)
-        childForm.reset({
-            name_ar: "",
-            name_en: "",
-            description_ar: "",
-            description_en: "",
-            icon: "",
-            parent_id: category?.id || 0,
-        })
+        setIsChildFormDrawerOpen(true)
     }
 
-    React.useEffect(() => {
-        if (category) {
-            childForm.setValue("parent_id", category.id)
-        }
-    }, [category, childForm])
+    const handleCloseChildFormDrawer = () => {
+        setIsChildFormDrawerOpen(false)
+        setEditingChild(null)
+    }
+
+    const handleCreateCategory = () => {
+        setIsCategoryFormOpen(true)
+    }
+
     if (!category) {
         return (
-            <aside className="col-span-1 lg:col-span-2 w-full border-r bg-card flex justify-center items-center lg:block" dir="rtl">
-                <div className="p-6 h-full">
-                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                        <Info className="w-16 h-16 mb-4 opacity-50" />
-                        <p className="text-sm">اختر فئة لعرض التفاصيل</p>
+            <>
+                <CategoryFormDrawer
+                    open={isCategoryFormOpen}
+                    onOpenChange={setIsCategoryFormOpen}
+                    category={null}
+                />
+                <aside className="col-span-1 lg:col-span-2 w-full border-r bg-card flex justify-center items-center lg:block overflow-y-auto my-6" dir="rtl">
+                    <div className="p-8 flex flex-col items-center justify-center">
+                        {/* Icon with gradient background */}
+                        <div className="relative mb-6">
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl blur-xl" />
+                            <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-6 border border-primary/20">
+                                <FolderTree className="w-16 h-16 text-primary" />
+                            </div>
+                        </div>
+
+                        {/* Title and Description */}
+                        <div className="text-center space-y-3 mb-8 max-w-md">
+                            <h3 className="text-xl font-bold text-foreground">لا توجد فئة محددة</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                اختر فئة من القائمة الجانبية لعرض تفاصيلها وإدارتها، أو أنشئ فئة جديدة للبدء
+                            </p>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+                            <Button
+                                onClick={handleCreateCategory}
+                                className="flex-1 gap-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                                size="lg"
+                            >
+                                <Plus className="w-5 h-5" />
+                                <span>إنشاء تصنيف جديد</span>
+                            </Button>
+                        </div>
+
+                        {/* Quick Tips */}
+                        <div className="mt-8 w-full max-w-md">
+                            <div className="bg-muted/50 rounded-xl p-4 border border-border/50">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <Sparkles className="w-5 h-5 text-primary" />
+                                    </div>
+                                    <div className="flex-1 space-y-2">
+                                        <h4 className="text-sm font-semibold text-foreground">نصائح سريعة</h4>
+                                        <ul className="text-xs text-muted-foreground space-y-1.5 list-none">
+                                            <li className="flex items-start gap-2">
+                                                <ArrowRight className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
+                                                <span>يمكنك إنشاء فئات رئيسية وفرعية</span>
+                                            </li>
+                                            <li className="flex items-start gap-2">
+                                                <ArrowRight className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
+                                                <span>أضف خصائص ومميزات لكل فئة</span>
+                                            </li>
+                                            <li className="flex items-start gap-2">
+                                                <ArrowRight className="w-3 h-3 mt-0.5 flex-shrink-0 text-primary" />
+                                                <span>رتب الفئات حسب الأهمية</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </aside>
+                </aside>
+            </>
         )
     }
 
@@ -234,7 +254,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                 ? icon
                 : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${icon}`
             return (
-                <img
+                <Images
                     src={iconUrl}
                     alt=""
                     className="w-4 h-4 object-cover rounded"
@@ -253,7 +273,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                 ? icon
                 : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${icon}`
             return (
-                <img
+                <Images
                     src={iconUrl}
                     alt=""
                     className="w-12 h-12 object-cover rounded-lg"
@@ -310,10 +330,16 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                         categoryId={category.id}
                         feature={editingFeature}
                     />
+                    <ChildCategoryFormDrawer
+                        open={isChildFormDrawerOpen}
+                        onOpenChange={handleCloseChildFormDrawer}
+                        parentId={category.id}
+                        child={editingChild}
+                    />
                 </>
             )}
 
-            {/* Delete Confirmation Dialog */}
+            {/* Delete Category Confirmation Dialog */}
             {category && (
                 <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                     <AlertDialogContent dir="rtl">
@@ -362,6 +388,86 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                     </AlertDialogContent>
                 </AlertDialog>
             )}
+
+            {/* Delete Property Confirmation Dialog */}
+            <AlertDialog open={isDeletePropertyDialogOpen} onOpenChange={setIsDeletePropertyDialogOpen}>
+                <AlertDialogContent dir="rtl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-destructive" />
+                            حذف الخاصية
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            هل أنت متأكد من حذف الخاصية "{deletingProperty?.name.ar || deletingProperty?.name.en}"؟
+                            هذا الإجراء لا يمكن التراجع عنه.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    {deletingProperty && (
+                        <div className="rounded-lg border bg-muted/50 p-3">
+                            <p className="text-sm font-medium">{deletingProperty.name.ar || deletingProperty.name.en}</p>
+                            {deletingProperty.description && (deletingProperty.description.ar || deletingProperty.description.en) && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {deletingProperty.description.ar || deletingProperty.description.en}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deletePropertyMutation.isPending}>
+                            إلغاء
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeletePropertyConfirm}
+                            disabled={deletePropertyMutation.isPending}
+                            className="bg-destructive text-white hover:bg-destructive/90"
+                        >
+                            {deletePropertyMutation.isPending ? "جاري الحذف..." : "حذف"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Delete Feature Confirmation Dialog */}
+            <AlertDialog open={isDeleteFeatureDialogOpen} onOpenChange={setIsDeleteFeatureDialogOpen}>
+                <AlertDialogContent dir="rtl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-destructive" />
+                            حذف المميزة
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            هل أنت متأكد من حذف المميزة "{deletingFeature?.name.ar || deletingFeature?.name.en}"؟
+                            هذا الإجراء لا يمكن التراجع عنه.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    {deletingFeature && (
+                        <div className="rounded-lg border bg-muted/50 p-3">
+                            <p className="text-sm font-medium">{deletingFeature.name.ar || deletingFeature.name.en}</p>
+                            {deletingFeature.description && (deletingFeature.description.ar || deletingFeature.description.en) && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {deletingFeature.description.ar || deletingFeature.description.en}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteFeatureMutation.isPending}>
+                            إلغاء
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteFeatureConfirm}
+                            disabled={deleteFeatureMutation.isPending}
+                            className="bg-destructive text-white hover:bg-destructive/90"
+                        >
+                            {deleteFeatureMutation.isPending ? "جاري الحذف..." : "حذف"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
 
             <aside className="col-span-1 lg:col-span-2 w-full overflow-auto border-r bg-card hidden lg:flex flex-col" dir="rtl">
                 {/* Header */}
@@ -492,8 +598,17 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 onClick={() => handleEditProperty(property)}
+                                                                className="h-7 w-7 p-0"
                                                             >
                                                                 <Edit className="w-3 h-3" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteProperty(property)}
+                                                                className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -540,23 +655,36 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                             {category.features.map((feature: CategoryFeature) => (
                                                 <div
                                                     key={feature.id}
-                                                    className="border rounded-lg p-2 bg-muted/30 hover:bg-muted/50 transition-colors text-center relative group"
+                                                    className="border rounded-lg flex flex-row gap-4 items-center justify-start p-2 bg-muted/30 hover:bg-muted/50 transition-colors text-center relative group"
                                                 >
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="absolute top-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        onClick={() => handleEditFeature(feature)}
-                                                    >
-                                                        <Edit className="w-3 h-3" />
-                                                    </Button>
+                                                    <div className="absolute top-1 left-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-7 w-7 p-0"
+                                                            onClick={() => handleEditFeature(feature)}
+                                                        >
+                                                            <Edit className="w-3 h-3" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={() => handleDeleteFeature(feature)}
+                                                        >
+                                                            <Trash2 className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
                                                     {feature.icon && (
                                                         <div className="flex justify-center mb-2">
-                                                            <img
+                                                            <Images
                                                                 src={feature.icon.startsWith('http')
                                                                     ? feature.icon
                                                                     : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${feature.icon}`}
                                                                 alt=""
+                                                                fill={false}
+                                                                width={20}
+                                                                height={20}
                                                                 className="w-6 h-6 object-cover"
                                                                 onError={(e) => {
                                                                     e.currentTarget.style.display = 'none'
@@ -582,129 +710,15 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                             {/* Children Tab */}
                             <TabsContent value="children" className="mt-0">
                                 <div className="space-y-4">
-                                    {/* Form */}
-                                    {isChildFormOpen && (
-                                        <Form {...childForm}>
-                                            <form onSubmit={childForm.handleSubmit(handleChildSubmit)} className="border rounded-lg p-4 bg-muted/30 space-y-4">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <h4 className="text-sm font-semibold">
-                                                        {editingChild ? "تعديل فئة فرعية" : "إضافة فئة فرعية جديدة"}
-                                                    </h4>
-                                                    <Button
-                                                        type="button"
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={handleCloseChildForm}
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </Button>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <FormField
-                                                        control={childForm.control}
-                                                        name="name_ar"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>الاسم (عربي)</FormLabel>
-                                                                <FormControl>
-                                                                    <Input {...field} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={childForm.control}
-                                                        name="name_en"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>الاسم (إنجليزي)</FormLabel>
-                                                                <FormControl>
-                                                                    <Input {...field} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <FormField
-                                                        control={childForm.control}
-                                                        name="description_ar"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>الوصف (عربي)</FormLabel>
-                                                                <FormControl>
-                                                                    <Textarea {...field} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={childForm.control}
-                                                        name="description_en"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>الوصف (إنجليزي)</FormLabel>
-                                                                <FormControl>
-                                                                    <Textarea {...field} />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                </div>
-
-                                                <FormField
-                                                    control={childForm.control}
-                                                    name="icon"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>أيقونة الفئة الفرعية</FormLabel>
-                                                            <FormControl>
-                                                                <ImageUpload
-                                                                    value={field.value || ""}
-                                                                    onChange={field.onChange}
-                                                                    folder="listings"
-                                                                    aspectRatio="square"
-                                                                    maxSize={2}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-
-                                                <Button
-                                                    type="submit"
-                                                    className="w-full"
-                                                    disabled={createChildMutation.isPending || updateChildMutation.isPending}
-                                                >
-                                                    <Save className="w-4 h-4 mr-2" />
-                                                    {createChildMutation.isPending || updateChildMutation.isPending
-                                                        ? "جاري الحفظ..."
-                                                        : editingChild
-                                                            ? "تحديث"
-                                                            : "إضافة"}
-                                                </Button>
-                                            </form>
-                                        </Form>
-                                    )}
-
                                     {/* Add Button */}
-                                    {!isChildFormOpen && (
-                                        <Button
-                                            variant="outline"
-                                            className="w-full"
-                                            onClick={() => setIsChildFormOpen(true)}
-                                        >
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            إضافة فئة فرعية جديدة
-                                        </Button>
-                                    )}
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        onClick={handleAddChild}
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        إضافة فئة فرعية جديدة
+                                    </Button>
 
                                     {/* Children List */}
                                     {category.children && category.children.length > 0 ? (
@@ -715,11 +729,14 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                                     className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 text-sm hover:bg-muted/50 transition-colors group"
                                                 >
                                                     {child.icon && (
-                                                        <img
+                                                        <Images
                                                             src={child.icon.startsWith('http')
                                                                 ? child.icon
                                                                 : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${child.icon}`}
                                                             alt=""
+                                                            fill={false}
+                                                            width={20}
+                                                            height={20}
                                                             className="w-5 h-5 object-cover rounded"
                                                             onError={(e) => {
                                                                 e.currentTarget.style.display = 'none'
@@ -746,12 +763,10 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                             ))}
                                         </div>
                                     ) : (
-                                        !isChildFormOpen && (
-                                            <div className="text-center py-8">
-                                                <FolderTree className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-                                                <p className="text-sm text-muted-foreground">لا توجد فئات فرعية</p>
-                                            </div>
-                                        )
+                                        <div className="text-center py-8">
+                                            <FolderTree className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                                            <p className="text-sm text-muted-foreground">لا توجد فئات فرعية</p>
+                                        </div>
                                     )}
                                 </div>
                             </TabsContent>

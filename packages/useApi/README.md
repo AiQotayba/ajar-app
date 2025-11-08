@@ -151,7 +151,7 @@ const { data, isLoading, isError, error, execute, reset } = useApi(
   () => api.get<User>('/user/profile'),
   {
     immediate: true,
-    onSuccess: (data) => console.log('Success:', data),
+    onSuccess: (data) => "",
     onError: (error) => console.error('Error:', error)
   }
 );

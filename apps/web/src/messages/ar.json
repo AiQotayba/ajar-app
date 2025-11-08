@@ -121,13 +121,17 @@
     "officeEmail": "بريد المكتب الإلكتروني",
     "officeDescription": "وصف المكتب",
     "menuItems": {
+      "profile": "الملف الشخصي",
       "editAccount": "تعديل بيانات الحساب",
       "changePassword": "تغيير كلمة المرور",
       "myListings": "إعلاناتي",
       "notifications": "الإشعارات",
       "settings": "الإعدادات",
-      "logout": "تسجيل الخروج"
+      "logout": "تسجيل الخروج",
+      "login": "تسجيل الدخول",
+      "register": "إنشاء حساب"
     },
+    "walletBalance": "رصيد المحفظة",
     "validated": "مُتحقق",
     "firstNameRequired": "الاسم الأول مطلوب",
     "lastNameRequired": "الاسم الأخير مطلوب",
@@ -311,7 +315,19 @@
     "editListing": "تعديل الإعلان",
     "deleting": "جاري الحذف...",
     "favoritesError": "تحديث المفضلة",
-    "featured": "مميز"
+    "featured": "مميز",
+    "noResults": {
+      "title": "لا توجد نتائج",
+      "description": "لم نتمكن من العثور على أي إعلانات تطابق معايير البحث الخاصة بك. جرب تعديل الفلاتر أو مصطلحات البحث.",
+      "clearFilters": "مسح الفلاتر",
+      "backToHome": "العودة للرئيسية",
+      "suggestions": {
+        "title": "اقتراحات:",
+        "checkSpelling": "تحقق من الإملاء وحاول مرة أخرى",
+        "tryDifferentKeywords": "جرب كلمات مفتاحية مختلفة أو أكثر عمومية",
+        "reduceFilters": "قلل عدد الفلاتر المطبقة"
+      }
+    }
   },
   "search": {
     "title": "البحث",
@@ -399,5 +415,67 @@
     "allLocations": "جميع المواقع",
     "clearFilters": "مسح المرشحات",
     "activeFilters": "المرشحات النشطة"
+  },
+  "filters": {
+    "title": "فلترة حسب",
+    "all": "الكل",
+    "search": "بحث",
+    "searchPlaceholder": "ابحث عن عقار، موقع، أو مدينة...",
+    "propertyType": {
+      "title": "نوع العقار",
+      "sell": "بيع",
+      "rent": "إيجار"
+    },
+    "category": {
+      "title": "التصنيف",
+      "mainCategory": "التصنيف الرئيسي",
+      "subCategory": "التصنيف الفرعي",
+      "selectMainCategory": "اختر التصنيف الرئيسي",
+      "selectSubCategory": "اختر التصنيف الفرعي",
+      "selectCategory": "اختر التصنيف"
+    },
+    "location": {
+      "title": "الموقع",
+      "governorate": "المحافظة",
+      "city": "المدينة",
+      "selectGovernorate": "اختر المحافظة",
+      "selectCity": "اختر المدينة"
+    },
+    "price": {
+      "title": "السعر (شهرياً)",
+      "from": "من",
+      "to": "إلى"
+    },
+    "area": {
+      "title": "المساحة (م²)",
+      "from": "من",
+      "to": "إلى"
+    },
+    "additional": {
+      "title": "تفاصيل إضافية",
+      "rooms": "عدد الغرف",
+      "furnished": "المفروشات",
+      "furnishedOption": "مفروش",
+      "unfurnishedOption": "غير مفروش"
+    },
+    "properties": {
+      "title": "خصائص وميزات العقار",
+      "propertiesTitle": "خصائص العقار",
+      "featuresTitle": "مميزات العقار",
+      "clearAll": "مسح الكل",
+      "selectProperty": "اختر {property}",
+      "enterProperty": "أدخل {property}",
+      "from": "من",
+      "to": "إلى",
+      "selected": "مختار"
+    },
+    "actions": {
+      "reset": "إعادة تعيين",
+      "apply": "تطبيق الفلترة"
+    },
+    "badge": {
+      "activeFilter": "فلتر نشط",
+      "activeFilters": "{count} فلتر نشط"
+    }
   }
 }

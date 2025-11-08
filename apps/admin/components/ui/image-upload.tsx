@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api-client"
 import { toast } from "sonner"
+import Images from "./image"
 
 interface ImageUploadProps {
     value?: string
@@ -149,7 +150,7 @@ export function ImageUpload({
             >
                 {preview ? (
                     <>
-                        <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                        <Images src={preview} alt="Preview" className="h-full w-full object-cover" />
                         {!disabled && !isUploading && (
                             <Button
                                 type="button"

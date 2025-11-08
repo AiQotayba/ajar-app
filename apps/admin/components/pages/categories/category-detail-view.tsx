@@ -56,10 +56,11 @@ export function CategoryDetailView({
                         {category.icon && (
                             <div className="h-16 w-16 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden shrink-0">
                                 {category.icon.includes('/') || category.icon.includes('.') ? (
-                                    <img
+                                    <Image
                                         src={category.icon.startsWith('http') ? category.icon : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${category.icon}`}
                                         alt={category.name.ar}
                                         className="w-full h-full object-cover"
+                                        fill
                                     />
                                 ) : (
                                     <span className="text-3xl">{category.icon}</span>

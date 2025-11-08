@@ -4,6 +4,7 @@
  */
 import { Badge } from "@/components/ui/badge"
 import { useAdvancedFilters } from "@/hooks/use-advanced-filters"
+import { useTranslations } from "next-intl"
 
 interface FilterBadgeProps {
   className?: string
@@ -11,6 +12,7 @@ interface FilterBadgeProps {
 
 export function FilterBadge({ className }: FilterBadgeProps) {
   const { getActiveFiltersCount, hasActiveFilters } = useAdvancedFilters()
+  const t = useTranslations('filters.badge')
   const activeCount = getActiveFiltersCount()
 
   if (!hasActiveFilters) {
@@ -22,7 +24,7 @@ export function FilterBadge({ className }: FilterBadgeProps) {
       variant="secondary" 
       className={`bg-primary text-primary-foreground ${className}`}
     >
-      {activeCount} فلتر نشط
+      {t('activeFilters', { count: activeCount })}
     </Badge>
   )
 }

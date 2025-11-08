@@ -31,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { api } from "@/lib/api-client"
 import { toast } from "sonner"
 import type { Listing } from "@/lib/types/listing"
+import Images from "@/components/ui/image"
 
 interface ListingViewProps {
     open: boolean
@@ -149,7 +150,7 @@ export function ListingView({ open, onOpenChange, urlEndpoint, listing }: Listin
                                 {(listing.media || []).map((item, index) => (
                                     <CarouselItem key={item.id || index}>
                                         <div className="aspect-video bg-muted">
-                                            <img
+                                            <Images
                                                 src={item.full_url || item.url}
                                                 alt={listing.title?.ar || "صورة الإعلان"}
                                                 className="w-full h-full object-cover"

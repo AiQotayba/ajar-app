@@ -4,6 +4,7 @@ import * as React from "react"
 import { Image as ImageIcon } from "lucide-react"
 import type { TableColumn } from "@/components/table/table-core"
 import type { Slider } from "@/lib/types/slider"
+import Images from "@/components/ui/image"
 
 // Helper function to check slider status
 export const getSliderStatus = (slider: Slider) => {
@@ -34,7 +35,7 @@ export const slidersColumns: TableColumn<Slider>[] = [
             return (
                 <div className="relative h-16 w-24 rounded-lg overflow-hidden bg-muted group">
                     {imageUrl ? (
-                        <img
+                        <Images
                             src={imageUrl}
                             alt={row.title.ar}
                             className="h-full w-full object-cover transition-transform group-hover:scale-110"

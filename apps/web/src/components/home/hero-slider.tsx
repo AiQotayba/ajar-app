@@ -98,7 +98,7 @@ export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefin
         plugins={[plugin.current as any]}
         className="w-full pb-6"
       >
-        <CarouselContent className="rounded-3xl gap-4 mx-4 w-full px-2" >
+        <CarouselContent className="rounded-3xl gap-4 mx-4 w-full px-2 " classNameRoot="p-4" >
           {sliders.map((slide: Slider) => (
             <CarouselItem key={slide.id} className="basis-[95%] sm:basis-[90%] md:basis-[85%] lg:basis-[80%] xl:basis-[75%] mx-auto">
               <div
@@ -168,7 +168,7 @@ export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefin
       {/* Navigation Arrows (Hidden on mobile) */}
       <button
         onClick={() => carouselApi?.scrollPrev()}
-        className="absolute left-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all duration-300 opacity-0 group-hover:opacity-100"
+        className="absolute ltr:left-4 rtl:right-4 rtl:rotate-180 rotate-0 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all duration-300 opacity-0 group-hover:opacity-100"
         aria-label="Previous slide"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +178,7 @@ export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefin
 
       <button
         onClick={() => carouselApi?.scrollNext()}
-        className="absolute right-4 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all duration-300 opacity-0 group-hover:opacity-100"
+        className="absolute ltr:left-4 rtl:left-4 rtl:rotate-180 rotate-0 top-1/2 -translate-y-1/2 hidden lg:flex items-center justify-center w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all duration-300 opacity-0 group-hover:opacity-100"
         aria-label="Next slide"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

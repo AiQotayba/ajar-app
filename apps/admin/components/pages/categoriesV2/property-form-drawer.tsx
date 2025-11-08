@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Save } from "lucide-react"
+import { Save, Package } from "lucide-react"
 import type { CategoryProperty } from "@/lib/types/category"
 import {
 	Drawer,
@@ -29,7 +29,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Button } from "@/components/ui/button" 
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ImageUpload } from "@/components/ui/image-upload"
+import { X, Plus } from "lucide-react"
 import { api } from "@/lib/api"
 
 const propertyFormSchema = z.object({
@@ -37,11 +40,10 @@ const propertyFormSchema = z.object({
 	name_en: z.string().optional(),
 	description_ar: z.string().optional(),
 	description_en: z.string().optional(),
-	data_type: z.enum(["int", "float", "bool", "string", "select", "multi_select"]).default("string"),
-	is_filterable: z.boolean().default(false),
-	is_required: z.boolean().default(false),
-	is_visible: z.boolean().default(true),
-	is_searchable: z.boolean().default(false),
+	icon: z.string().min(1, "الأيقونة مطلوبة"),
+	type: z.enum(["int", "bool", "datetime", "enum"]).default("int"),
+	is_filter: z.boolean().default(false),
+	options: z.array(z.union([z.string(), z.number()])).default([]),
 	sort_order: z.number().default(0),
 	category_id: z.number(),
 })
@@ -57,6 +59,7 @@ interface PropertyFormDrawerProps {
 
 export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }: PropertyFormDrawerProps) {
 	const queryClient = useQueryClient()
+	const [newOptionValue, setNewOptionValue] = React.useState("")
 
 	const form = useForm<PropertyFormValues>({
 		resolver: zodResolver(propertyFormSchema),
@@ -65,11 +68,10 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 			name_en: property?.name.en || "",
 			description_ar: property?.description.ar || "",
 			description_en: property?.description.en || "",
-			data_type: (property?.type as any) || "string",
-			is_filterable: property?.is_filter || false,
-			is_required: false,
-			is_visible: true,
-			is_searchable: false,
+			icon: property?.icon || "",
+			type: (property?.type as any) || "int",
+			is_filter: property?.is_filter || false,
+			options: property?.options || [],
 			sort_order: property?.sort_order || 0,
 			category_id: categoryId,
 		},
@@ -82,11 +84,10 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 				name_en: property.name.en,
 				description_ar: property.description.ar || "",
 				description_en: property.description.en || "",
-				data_type: (property.type as any) || "string",
-				is_filterable: property.is_filter,
-				is_required: false,
-				is_visible: true,
-				is_searchable: false,
+				icon: property.icon || "",
+				type: (property.type as any) || "int",
+				is_filter: property.is_filter || false,
+				options: property.options || [],
 				sort_order: property.sort_order || 0,
 				category_id: categoryId,
 			})
@@ -96,59 +97,143 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 				name_en: "",
 				description_ar: "",
 				description_en: "",
-				data_type: "string",
-				is_filterable: false,
-				is_required: false,
-				is_visible: true,
-				is_searchable: false,
+				icon: "",
+				type: "int",
+				is_filter: false,
+				options: [],
 				sort_order: 0,
 				category_id: categoryId,
 			})
 		}
 	}, [property, categoryId, form])
 
+	const handleAddOption = () => {
+		if (!newOptionValue.trim()) return
+		
+		const currentOptions = form.getValues("options") || []
+		const valueToAdd = form.getValues("type") === "int"
+			? Number(newOptionValue)
+			: newOptionValue.trim()
+		
+		form.setValue("options", [...currentOptions, valueToAdd])
+		setNewOptionValue("")
+	}
+
+	const handleRemoveOption = (index: number) => {
+		const currentOptions = form.getValues("options") || []
+		form.setValue("options", currentOptions.filter((_, i) => i !== index))
+	}
+
 	const createMutation = useMutation({
-		mutationFn: (data: PropertyFormValues) => api.post('/admin/properties', {
-			name: { ar: data.name_ar, en: data.name_en || "" },
-			description: { ar: data.description_ar || "", en: data.description_en || "" },
-			category_id: data.category_id,
-			data_type: data.data_type,
-			is_filterable: data.is_filterable,
-			is_required: data.is_required,
-			is_visible: data.is_visible,
-			is_searchable: data.is_searchable,
-			sort_order: data.sort_order,
-		}),
-		onSuccess: () => {
+		mutationFn: (data: PropertyFormValues) => {
+			// Ensure icon is not empty
+			if (!data.icon || data.icon.trim() === "") {
+				throw new Error("الأيقونة مطلوبة")
+			}
+			// Ensure type is not empty
+			if (!data.type || data.type.trim() === "") {
+				throw new Error("النوع مطلوب")
+			}
+			return api.post('/admin/properties', {
+				name: { ar: data.name_ar, en: data.name_en || "" },
+				description: { ar: data.description_ar || "", en: data.description_en || "" },
+				category_id: data.category_id,
+				icon: data.icon.trim(),
+				type: data.type,
+				is_filter: data.is_filter,
+				options: data.options || [],
+			})
+		},
+		onSuccess: (data: any) => {
 			queryClient.invalidateQueries({ queryKey: ["categories"] })
-			toast.success("تم إنشاء الخاصية بنجاح")
+			toast.success(data?.message)
 			onOpenChange(false)
 			form.reset()
 		},
-		onError: () => toast.error("فشل إنشاء الخاصية"),
+		onError: (error: any) => {
+			const errorMessage = error?.message || error?.response?.data?.message || "فشل إنشاء الخاصية"
+			toast.error(errorMessage)
+			
+			// Set form errors if API returns validation errors
+			if (error?.response?.data?.errors) {
+				const errors = error.response.data.errors
+				Object.keys(errors).forEach((key) => {
+					if (key === "icon") {
+						form.setError("icon", {
+							type: "manual",
+							message: errors[key][0] || "الأيقونة مطلوبة"
+						})
+					}
+				})
+			}
+		},
 	})
 
 	const updateMutation = useMutation({
-		mutationFn: (data: PropertyFormValues) => api.put(`/admin/properties/${property!.id}`, {
-			name: { ar: data.name_ar, en: data.name_en || "" },
-			description: { ar: data.description_ar || "", en: data.description_en || "" },
-			data_type: data.data_type,
-			is_filterable: data.is_filterable,
-			is_required: data.is_required,
-			is_visible: data.is_visible,
-			is_searchable: data.is_searchable,
-			sort_order: data.sort_order,
-		}),
-		onSuccess: () => {
+		mutationFn: (data: PropertyFormValues) => {
+			// Ensure icon is not empty
+			if (!data.icon || data.icon.trim() === "") {
+				throw new Error("الأيقونة مطلوبة")
+			}
+			// Ensure type is not empty
+			if (!data.type || data.type.trim() === "") {
+				throw new Error("النوع مطلوب")
+			}
+			return api.put(`/admin/properties/${property!.id}`, {
+				name: { ar: data.name_ar, en: data.name_en || "" },
+				description: { ar: data.description_ar || "", en: data.description_en || "" },
+				icon: data.icon.trim(),
+				type: data.type,
+				is_filter: data.is_filter,
+				options: data.options || [],
+			})
+		},
+		onSuccess: (data: any) => {
 			queryClient.invalidateQueries({ queryKey: ["categories"] })
-			toast.success("تم تحديث الخاصية بنجاح")
+			toast.success(data?.message)
 			onOpenChange(false)
 			form.reset()
 		},
-		onError: () => toast.error("فشل تحديث الخاصية"),
+		onError: (error: any) => {
+			const errorMessage = error?.message || error?.response?.data?.message || "فشل تحديث الخاصية"
+			toast.error(errorMessage)
+			
+			// Set form errors if API returns validation errors
+			if (error?.response?.data?.errors) {
+				const errors = error.response.data.errors
+				Object.keys(errors).forEach((key) => {
+					if (key === "icon") {
+						form.setError("icon", {
+							type: "manual",
+							message: errors[key][0] || "الأيقونة مطلوبة"
+						})
+					}
+				})
+			}
+		},
 	})
 
 	const onSubmit = (values: PropertyFormValues) => {
+		// Validate icon before submission
+		if (!values.icon || values.icon.trim() === "") {
+			form.setError("icon", {
+				type: "manual",
+				message: "الأيقونة مطلوبة. يرجى رفع صورة للأيقونة"
+			})
+			toast.error("يرجى رفع صورة للأيقونة قبل الحفظ")
+			return
+		}
+
+		// Validate type before submission
+		if (!values.type) {
+			form.setError("type", {
+				type: "manual",
+				message: "النوع مطلوب"
+			})
+			toast.error("يرجى اختيار نوع الخاصية")
+			return
+		}
+
 		if (property) {
 			updateMutation.mutate(values)
 		} else {
@@ -162,20 +247,27 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 		<Drawer open={open} onOpenChange={onOpenChange} direction="left">
 			<DrawerContent className="w-full sm:max-w-lg" dir="rtl">
 				<DrawerHeader>
-					<DrawerTitle>{property ? "تعديل خاصية" : "إضافة خاصية جديدة"}</DrawerTitle>
-					<DrawerDescription>
-						{property ? "قم بتحديث بيانات الخاصية" : "أضف خاصية جديدة للفئة"}
-					</DrawerDescription>
+					<div className="flex items-center gap-3 mb-2">
+						<div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+							<Package className="h-5 w-5 text-primary" />
+						</div>
+						<div className="flex-1">
+							<DrawerTitle>{property ? "تعديل خاصية" : "إضافة خاصية جديدة"}</DrawerTitle>
+							<DrawerDescription className="mt-1">
+								{property ? "قم بتحديث بيانات الخاصية" : "أضف خاصية جديدة للفئة"}
+							</DrawerDescription>
+						</div>
+					</div>
 				</DrawerHeader>
 
 				<Form {...form}>
-					<form 
+					<form
 						onSubmit={(e) => {
 							e.preventDefault()
 							e.stopPropagation()
 							form.handleSubmit(onSubmit)(e)
-						}} 
-						className="px-4 space-y-4 pb-4" 
+						}}
+						className="px-4 space-y-4 pb-4"
 						noValidate
 					>
 						<div className="grid grid-cols-2 gap-4">
@@ -236,26 +328,55 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 							/>
 						</div>
 
+						<FormField
+							control={form.control}
+							name="icon"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>أيقونة الخاصية *</FormLabel>
+									<FormControl>
+										<ImageUpload
+											value={field.value || ""}
+											onChange={(value) => {
+												field.onChange(value)
+												// Clear error when icon is uploaded
+												if (value && value.trim() !== "") {
+													form.clearErrors("icon")
+												}
+											}}
+											folder="properties"
+											aspectRatio="square"
+											maxSize={2}
+										/>
+									</FormControl>
+									<FormMessage />
+									{!field.value && (
+										<p className="text-xs text-muted-foreground mt-1">
+											يرجى رفع صورة للأيقونة (مربعة، حجم أقصى 2 ميجابايت)
+										</p>
+									)}
+								</FormItem>
+							)}
+						/>
+
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
 								control={form.control}
-								name="data_type"
+								name="type"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>النوع</FormLabel>
+										<FormLabel>النوع *</FormLabel>
 										<Select onValueChange={field.onChange} value={field.value}>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue />
+													<SelectValue placeholder="اختر النوع" />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												<SelectItem value="string">نص</SelectItem>
 												<SelectItem value="int">رقم صحيح</SelectItem>
-												<SelectItem value="float">رقم عشري</SelectItem>
 												<SelectItem value="bool">نعم/لا</SelectItem>
-												<SelectItem value="select">قائمة منسدلة</SelectItem>
-												<SelectItem value="multi_select">قائمة متعددة</SelectItem>
+												<SelectItem value="datetime">تاريخ ووقت</SelectItem>
+												<SelectItem value="enum">قائمة خيارات</SelectItem>
 											</SelectContent>
 										</Select>
 										<FormMessage />
@@ -264,7 +385,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 							/>
 							<FormField
 								control={form.control}
-								name="is_filterable"
+								name="is_filter"
 								render={({ field }) => (
 									<FormItem className="flex items-center gap-2 pt-8">
 										<FormControl>
@@ -279,16 +400,83 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 							/>
 						</div>
 
-						<DrawerFooter>
-							<Button type="submit" disabled={isLoading} className="w-full">
-								<Save className="w-4 h-4 mr-2" />
-								{isLoading ? "جاري الحفظ..." : property ? "تحديث" : "إضافة"}
-							</Button>
+						{/* Options Field - Show for int and enum types */}
+						{form.watch("type") === "int" || form.watch("type") === "enum" ? (
+							<FormField
+								control={form.control}
+								name="options"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>
+											الخيارات {form.watch("type") === "enum" ? "(للنوع enum)" : "(قيم محتملة)"}
+										</FormLabel>
+										<div className="space-y-2">
+											<div className="flex gap-2">
+												<Input
+													value={newOptionValue}
+													onChange={(e) => setNewOptionValue(e.target.value)}
+													placeholder={
+														form.watch("type") === "int"
+															? "أدخل رقم"
+															: "أدخل خيار جديد"
+													}
+													type={form.watch("type") === "int" ? "number" : "text"}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") {
+															e.preventDefault()
+															handleAddOption()
+														}
+													}}
+												/>
+												<Button
+													type="button"
+													variant="outline"
+													size="icon"
+													onClick={handleAddOption}
+													disabled={!newOptionValue.trim()}
+												>
+													<Plus className="w-4 h-4" />
+												</Button>
+											</div>
+											{field.value && field.value.length > 0 && (
+												<div className="flex flex-wrap gap-2">
+													{field.value.map((option, index) => (
+														<Badge
+															key={index}
+															variant="secondary"
+															className="flex items-center gap-1 px-2 py-1"
+														>
+															<span>{String(option)}</span>
+															<Button
+																type="button"
+																variant="ghost"
+																size="sm"
+																className="h-4 w-4 p-0 hover:bg-destructive/10 hover:text-destructive"
+																onClick={() => handleRemoveOption(index)}
+															>
+																<X className="w-3 h-3" />
+															</Button>
+														</Badge>
+													))}
+												</div>
+											)}
+										</div>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						) : null}
+
+						<DrawerFooter className="grid grid-cols-2 gap-4">
 							<DrawerClose asChild>
 								<Button type="button" variant="outline">
 									إلغاء
 								</Button>
 							</DrawerClose>
+							<Button type="submit" disabled={isLoading} className="w-full">
+								<Save className="w-4 h-4 mr-2" />
+								{isLoading ? "جاري الحفظ..." : property ? "تحديث" : "إضافة"}
+							</Button>
 						</DrawerFooter>
 					</form>
 				</Form>

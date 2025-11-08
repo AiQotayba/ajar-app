@@ -5,6 +5,7 @@ import { useState } from "react"
 import { ChevronLeft, ChevronRight, Folder, FolderOpen, FolderTree } from "lucide-react"
 import type { Category as BaseCategory } from "@/lib/types/category"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 type Category = Pick<BaseCategory, "id" | "parent_id" | "icon"> & { name: { ar: string } }
 
@@ -104,11 +105,12 @@ export function CategoriesSidebar({ categories, selectedCategory, onSelectCatego
 		if (icon) {
 			const iconUrl = icon.startsWith('http') ? icon : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${icon}`
 			return (
-				<img
+				<Image
 					src={iconUrl}
 					alt=""
 					className="w-5 h-5 object-cover rounded flex-shrink-0 pointer-events-none"
 					draggable={false}
+					fill
 					onError={(e) => {
 						// إذا فشل تحميل الصورة، أخفها
 						e.currentTarget.style.display = 'none'

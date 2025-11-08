@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react"
+import { X, Loader2, Image as ImageIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
-import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { useTranslations, useLocale } from "next-intl"
 
 interface ImageUploadProps {
   value?: string
@@ -27,6 +27,8 @@ export function ImageUpload({
   aspectRatio = "landscape",
   maxSize = 5,
 }: ImageUploadProps) {
+  const locale = useLocale()
+  const t = useTranslations('common')
   const [isUploading, setIsUploading] = React.useState(false)
   const [progress, setProgress] = React.useState(0)
   const [preview, setPreview] = React.useState<string | null>(value || null)
@@ -45,14 +47,18 @@ export function ImageUpload({
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("يرجى اختيار ملف صورة صالح")
+      toast.error(locale === 'ar' ? "يرجى اختيار ملف صورة صالح" : "Please select a valid image file")
       return
     }
 
     // Validate file size
     const fileSizeMB = file.size / (1024 * 1024)
     if (fileSizeMB > maxSize) {
-      toast.error(`حجم الملف يجب أن يكون أقل من ${maxSize} ميجابايت`)
+      toast.error(
+        locale === 'ar' 
+          ? `حجم الملف يجب أن يكون أقل من ${maxSize} ميجابايت`
+          : `File size must be less than ${maxSize}MB`
+      )
       return
     }
 
@@ -72,32 +78,49 @@ export function ImageUpload({
       formData.append('image', file)
       formData.append('folder', folder)
 
-      const response = await api.post('/upload/image', formData, {
+      // Get token for authentication
+      const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ajar-backend.mystore.social/api/v1'
+
+      const response = await fetch(`${baseUrl}/general/upload-image`, {
+        method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Accept': 'application/json',
+          // Don't set Content-Type - browser will set it automatically with boundary
         },
       })
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
       // Get image_name (to save in DB) and build full URL for display
-      const imageName = response.data?.image_name || response.data?.path
-      
-      if (!response.isError && imageName) {
+      const imageName = data.data?.image_name || data.image_name || data.data?.path || data.path
+
+      if (imageName) {
         // Save the relative path (image_name) to form/database
         onChange(imageName)
-        
+
         // Build full URL for preview display
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
-        const fullImageUrl = `${baseUrl}/storage/${imageName}`
+        const storageBaseUrl = baseUrl.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
+        const fullImageUrl = `${storageBaseUrl}/storage/${imageName}`
         setPreview(fullImageUrl)
-        
-        toast.success("تم رفع الصورة بنجاح")
+
+        toast.success(locale === 'ar' ? "تم رفع الصورة بنجاح" : "Image uploaded successfully")
       } else {
         setPreview(null)
-        toast.error(response.message || "فشل رفع الصورة")
+        toast.error(locale === 'ar' ? "فشل رفع الصورة" : "Failed to upload image")
       }
     } catch (error: any) {
       setPreview(null)
-      toast.error(error?.message || "فشل رفع الصورة")
+      const errorMessage = error?.message || (locale === 'ar' ? "فشل رفع الصورة" : "Failed to upload image")
+      toast.error(errorMessage)
+      console.error('Image upload error:', error)
     } finally {
       setIsUploading(false)
       setProgress(0)
@@ -171,7 +194,9 @@ export function ImageUpload({
             {isUploading ? (
               <>
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">جاري الرفع... {progress}%</p>
+                <p className="text-sm text-muted-foreground">
+                  {locale === 'ar' ? `جاري الرفع... ${progress}%` : `Uploading... ${progress}%`}
+                </p>
               </>
             ) : (
               <>
@@ -179,8 +204,15 @@ export function ImageUpload({
                   <ImageIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">انقر لرفع صورة</p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG, WEBP (حد أقصى {maxSize}MB)</p>
+                  <p className="text-sm font-medium">
+                    {locale === 'ar' ? 'انقر لرفع صورة' : 'Click to upload image'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {locale === 'ar' 
+                      ? `PNG, JPG, WEBP (حد أقصى ${maxSize}MB)`
+                      : `PNG, JPG, WEBP (max ${maxSize}MB)`
+                    }
+                  </p>
                 </div>
               </>
             )}
@@ -204,4 +236,4 @@ export function ImageUpload({
       />
     </div>
   )
-}
+} 

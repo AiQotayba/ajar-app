@@ -48,13 +48,13 @@ export function BasicInfoStep({
   function Option({ className, classNameSub, text, onClick }: { className: string, classNameSub: any, text: string, onClick: () => void }) {
     return (
       <div
-        className={`p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 ${className}`}
+        className={`p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 ${className}`}
         onClick={onClick}
       >
-        <div className="text-center flex flex-row gap-4 items-center justify-start">
-          <div className={`w-4 h-4 text-2xl rounded-full border-primary border-3 text-white p-2 ${classNameSub}`}> </div>
+        <div className="text-center flex flex-row gap-2 sm:gap-4 items-center justify-start">
+          <div className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-2xl rounded-full border-primary border-2 sm:border-3 text-white p-1.5 sm:p-2 shrink-0 ${classNameSub}`}> </div>
           <div className="flex flex-col items-center justify-center">
-            <div className="font-semibold text-primary">{text}</div>
+            <div className="font-semibold text-primary text-sm sm:text-base">{text}</div>
           </div>
         </div>
       </div>
@@ -62,108 +62,68 @@ export function BasicInfoStep({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* Title Arabic */}
+
       <div className="space-y-2">
-        <Label htmlFor="title_ar" className="text-right block">
+        <Label htmlFor="title_ar" className="text-right block text-sm sm:text-base">
           العنوان <span className="text-destructive">*</span>
         </Label>
-        <Input
-          id="title[ar]"
-          {...register("title.ar", { required: "العنوان بالعربية مطلوب" })}
-          placeholder="اكتب عنواناً واضحاً بالعربية"
-          className="text-right"
-        />
-        {errors.title?.ar && (
-          <p className="text-xs text-destructive text-right">{errors.title.ar.message}</p>
-        )}
-        <Input
-          id="title[en]"
-          {...register("title.en")}
-          placeholder="Enter title in English"
-          className="text-left"
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="col-span-1">
+
+            <Input
+              id="title[ar]"
+              {...register("title.ar", { required: "العنوان بالعربية مطلوب" })}
+              placeholder="اكتب عنواناً واضحاً بالعربية"
+              className="text-right h-10 sm:h-11"
+            />
+            {errors.title?.ar && (
+              <p className="text-xs text-destructive text-right">{errors.title.ar.message}</p>
+            )}
+          </div>
+          <div className="col-span-1">
+
+            <Input
+              id="title[en]"
+              {...register("title.en")}
+              placeholder="اكتب عنواناً واضحاً بالإنجليزية"
+              className="text-left h-10 sm:h-11"
+            />
+            {errors.title?.en && (
+              <p className="text-xs text-destructive text-right">{errors.title.en.message}</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Description Arabic */}
       <div className="space-y-2">
-        <Label htmlFor="description_ar" className="text-right block">
+        <Label htmlFor="description_ar" className="text-right block text-sm sm:text-base">
           الوصف
         </Label>
-        <textarea
-          id="description[ar]"
-          {...register("description.ar")}
-          placeholder="اكتب وصفاً مفصلاً للعقار"
-          className="w-full p-3 border border-input rounded-md text-right resize-none"
-          rows={3}
-        />
-        <textarea
-          id="description[en]"
-          {...register("description.en")}
-          placeholder="Enter detailed description in English"
-          className="w-full p-3 border border-input rounded-md text-left resize-none"
-          rows={3}
-        />
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="col-span-1">
 
-      {/* Property Type - Group Select */}
-      <div className="space-y-2">
-        <Label className="text-right block text-lg font-semibold">
-          نوع العقار <span className="text-destructive">*</span>
-        </Label>
-        <div className="grid grid-cols-2 gap-3">
-          <Option
-            className={watch("type") === "sale" ? "border-primary bg-primary/5" : "border-gray-200"}
-            classNameSub={watch("type") === "sale" && "bg-primary"}
-            text="للبيع"
-            onClick={() => setValue("type", "sale")}
-          />
-          <Option
-            className={watch("type") === "rent" ? "border-primary bg-primary/5" : "border-gray-200"}
-            classNameSub={watch("type") === "rent" && "bg-primary"}
-            text="للإيجار"
-            onClick={() => setValue("type", "rent")}
-          />
-        </div>
-        {errors.type && (
-          <p className="text-xs text-destructive text-right">{errors.type.message}</p>
-        )}
-      </div>
+            <textarea
+              id="description[ar]"
+              {...register("description.ar")}
+              placeholder="اكتب وصفاً مفصلاً للعقار"
+              className="w-full p-2.5 sm:p-3 border border-input rounded-md text-right resize-none text-sm sm:text-base"
+              rows={3}
+            />
+          </div>
+          <div className="col-span-1">
 
-      {/* Availability Status - Group Select */}
-      <div className="space-y-2">
-        <Label className="text-right block text-lg font-semibold">
-          حالة التوفر <span className="text-destructive">*</span>
-        </Label>
-        <div className="grid grid-cols-2 gap-3">
-          <Option
-            className={watch("availability_status") === "available" ? "border-primary bg-primary/5" : "border-gray-200"}
-            classNameSub={watch("availability_status") === "available" && "bg-primary"}
-            text="متاح"
-            onClick={() => setValue("availability_status", "available")}
-          />
-          <Option
-            className={watch("availability_status") === "unavailable" ? "border-primary bg-primary/5" : "border-gray-200"}
-            classNameSub={watch("availability_status") === "unavailable" && "bg-primary"}
-            text="غير متاح"
-            onClick={() => setValue("availability_status", "unavailable")}
-          />
-          <Option
-            className={watch("availability_status") === "rented" ? "border-primary bg-primary/5" : "border-gray-200"}
-            classNameSub={watch("availability_status") === "rented" && "bg-primary"}
-            text="مؤجر"
-            onClick={() => setValue("availability_status", "rented")}
-          />
-          <Option
-            className={watch("availability_status") === "solded" ? "border-primary bg-primary/5" : "border-gray-200"}
-            classNameSub={watch("availability_status") === "solded" && "bg-primary"}
-            text="مباع"
-            onClick={() => setValue("availability_status", "solded")}
-          />
+            <textarea
+              id="description[en]"
+              {...register("description.en")}
+              placeholder="Enter detailed description in English"
+              className="w-full p-2.5 sm:p-3 border border-input rounded-md text-left resize-none text-sm sm:text-base"
+              rows={3}
+            />
+          </div>
         </div>
-        {errors.availability_status && (
-          <p className="text-xs text-destructive text-right">{errors.availability_status.message}</p>
-        )}
       </div>
 
       {/* Main Category */}
@@ -247,13 +207,74 @@ export function BasicInfoStep({
         </div>
       )}
 
+
+      {/* Property Type - Group Select */}
+      <div className="space-y-2">
+        <Label className="text-right block text-base sm:text-lg font-semibold">
+          نوع العقار <span className="text-destructive">*</span>
+        </Label>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <Option
+            className={watch("type") === "sale" ? "border-primary bg-primary/5" : "border-gray-200"}
+            classNameSub={watch("type") === "sale" && "bg-primary"}
+            text="للبيع"
+            onClick={() => setValue("type", "sale")}
+          />
+          <Option
+            className={watch("type") === "rent" ? "border-primary bg-primary/5" : "border-gray-200"}
+            classNameSub={watch("type") === "rent" && "bg-primary"}
+            text="للإيجار"
+            onClick={() => setValue("type", "rent")}
+          />
+        </div>
+        {errors.type && (
+          <p className="text-xs text-destructive text-right">{errors.type.message}</p>
+        )}
+      </div>
+
+      {/* Availability Status - Group Select */}
+      <div className="space-y-2">
+        <Label className="text-right block text-base sm:text-lg font-semibold">
+          حالة التوفر <span className="text-destructive">*</span>
+        </Label>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <Option
+            className={watch("availability_status") === "available" ? "border-primary bg-primary/5" : "border-gray-200"}
+            classNameSub={watch("availability_status") === "available" && "bg-primary"}
+            text="متاح"
+            onClick={() => setValue("availability_status", "available")}
+          />
+          <Option
+            className={watch("availability_status") === "unavailable" ? "border-primary bg-primary/5" : "border-gray-200"}
+            classNameSub={watch("availability_status") === "unavailable" && "bg-primary"}
+            text="غير متاح"
+            onClick={() => setValue("availability_status", "unavailable")}
+          />
+          <Option
+            className={watch("availability_status") === "rented" ? "border-primary bg-primary/5" : "border-gray-200"}
+            classNameSub={watch("availability_status") === "rented" && "bg-primary"}
+            text="مؤجر"
+            onClick={() => setValue("availability_status", "rented")}
+          />
+          <Option
+            className={watch("availability_status") === "solded" ? "border-primary bg-primary/5" : "border-gray-200"}
+            classNameSub={watch("availability_status") === "solded" && "bg-primary"}
+            text="مباع"
+            onClick={() => setValue("availability_status", "solded")}
+          />
+        </div>
+        {errors.availability_status && (
+          <p className="text-xs text-destructive text-right">{errors.availability_status.message}</p>
+        )}
+      </div>
+
       {/* Properties */}
       {availableProperties.length > 0 && (
-        <div className="space-y-4">
-          <Label className="text-right block text-lg font-semibold">
+        <div className="space-y-3 sm:space-y-4">
+          <Label className="text-right block text-base sm:text-lg font-semibold">
             خصائص العقار
           </Label>
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 gap-2 sm:gap-3">
             {availableProperties.map((property) => (
               <div key={property.id} className="space-y-2">
                 <Label htmlFor={`property_${property.id}`} className="text-right block">
@@ -339,11 +360,11 @@ export function BasicInfoStep({
 
       {/* Features */}
       {availableFeatures.length > 0 && (
-        <div className="space-y-4">
-          <Label className="text-right block text-lg font-semibold">
+        <div className="space-y-3 sm:space-y-4">
+          <Label className="text-right block text-base sm:text-lg font-semibold">
             مميزات العقار
           </Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             {availableFeatures.map((feature) => (
               <div key={feature.id} className="flex items-center space-x-2 gap-4 space-x-reverse p-3 border rounded-lg hover:bg-gray-50">
                 <Checkbox

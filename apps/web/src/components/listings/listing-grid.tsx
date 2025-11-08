@@ -28,7 +28,6 @@ export function ListingGrid({
 }: ListingGridProps) {
   const locale = useLocale()
   if (isLoading) return <LoadingSkeleton />
-  console.log(data);
 
   return (
     <div className="space-y-6">

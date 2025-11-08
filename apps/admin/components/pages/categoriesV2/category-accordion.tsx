@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Folder, FolderOpen, ChevronRight } from "lucide-react"
 import type { Category } from "@/lib/types/category"
 import { cn } from "@/lib/utils"
+import Images from "@/components/ui/image"
 
 interface CategoriesAccordionProps {
 	categories: Category[]
@@ -15,13 +16,16 @@ interface CategoriesAccordionProps {
 export function CategoriesAccordion({ categories, onSelectCategory, selectedCategory }: CategoriesAccordionProps) {
 	const renderCategoryIcon = (icon: string | null | undefined, hasChildren: boolean) => {
 		if (icon) {
-			const iconUrl = icon.startsWith('http') 
-				? icon 
+			const iconUrl = icon.startsWith('http')
+				? icon
 				: `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${icon}`
 			return (
-				<img
+				<Images
 					src={iconUrl}
 					alt=""
+					fill={false}
+					width={20}
+					height={20}
 					className="w-5 h-5 object-cover rounded flex-shrink-0"
 					onError={(e) => {
 						e.currentTarget.style.display = 'none'
@@ -30,7 +34,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 			)
 		}
 		return hasChildren ? (
-			<FolderOpen className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
+			<FolderOpen className="w-5 h-5 text-primary flex-shrink-0" />
 		) : (
 			<Folder className="w-5 h-5 text-slate-500 dark:text-slate-400 flex-shrink-0" />
 		)
@@ -44,9 +48,9 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 		// للفئات الفرعية (level > 0)، نستخدم عرض بسيط بدون Accordion
 		if (level > 0) {
 			const [isExpanded, setIsExpanded] = React.useState(false)
-			
+
 			return (
-				<div 
+				<div
 					className={cn(
 						"border rounded-lg mb-2 transition-colors",
 						isSelected && "bg-primary/5 border-primary/20"
@@ -67,7 +71,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 					>
 						<div className="flex items-center gap-2 flex-1 text-right">
 							{hasChildren && (
-								<ChevronRight 
+								<ChevronRight
 									className={cn(
 										"w-4 h-4 text-muted-foreground transition-transform",
 										isExpanded && "rotate-90"

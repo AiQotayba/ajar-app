@@ -1,10 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { PinGreenIcon, PinIcon, PinRedIcon } from '@/components/icons/pin'
 import { useRouter } from 'next/navigation'
 import { MinusIcon, PlusIcon } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 
 interface MapViewProps {
   hasPermission: boolean
@@ -49,8 +51,6 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
-  const [mapData, setMapData] = useState<MapData[]>([])
-  const [loading, setLoading] = useState(false)
   const [currentZoom, setCurrentZoom] = useState(12)
   const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null)
   const [propertyType, setPropertyType] = useState<'all' | 'rent' | 'sell'>('all')
@@ -99,9 +99,6 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
             setCurrentZoom(map.getZoom() || 12)
           }
         })
-
-        // Load initial data
-        loadMapData()
       }
     }
 
@@ -116,18 +113,16 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
     }
   }, [hasPermission])
 
-  // Load map data when bounds or property type changes
-  useEffect(() => {
-    if (currentBounds && mapInstanceRef.current) {
-      loadMapData()
-    }
-  }, [currentBounds, propertyType])
+  // React Query for map data
+  const {
+    data: mapDataResponse,
+    isLoading: loading,
+    isFetching,
+  } = useQuery({
+    queryKey: ['map-listings', currentBounds, propertyType, currentZoom],
+    queryFn: async () => {
+      if (!currentBounds) return null
 
-  const loadMapData = async () => {
-    if (!currentBounds) return
-
-    setLoading(true)
-    try {
       const params = new URLSearchParams({
         map_mode: '1',
         north: currentBounds.north.toString(),
@@ -144,21 +139,22 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
         params.append('property_type', propertyType)
       }
 
-      const response = await fetch(`https://ajar-backend.mystore.social/api/v1/user/listings?${params}`)
-      const data = await response.json()
+      const response = await api.get(`/user/listings?${params.toString()}`)
 
-      if (data.success) {
-        setMapData(data.data)
-        updateMarkers(data.data)
+      if (response.isError) {
+        throw new Error(response.message || 'Failed to load map data')
       }
-    } catch (error) {
-      console.error('Error loading map data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
-  const updateMarkers = (data: MapData[]) => {
+      return response.data as MapData[]
+    },
+    enabled: !!currentBounds && !!mapInstanceRef.current,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+    retry: 2,
+  })
+
+  const updateMarkers = useCallback((data: MapData[]) => {
     // Clear existing markers
     markersRef.current.forEach(marker => marker.setMap(null))
     markersRef.current = []
@@ -230,7 +226,14 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
         markersRef.current.push(marker)
       }
     })
-  }
+  }, [propertyType, t, router])
+
+  // Update markers when map data changes
+  useEffect(() => {
+    if (mapDataResponse && mapInstanceRef.current) {
+      updateMarkers(mapDataResponse)
+    }
+  }, [mapDataResponse, updateMarkers])
 
   const handleZoomIn = () => {
     if (mapInstanceRef.current) {
@@ -263,12 +266,12 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
       {/* Map Container */}
       <div ref={mapRef} className="w-full h-full" />
 
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="absolute inset-0 bg-white/50 flex items-center h-screen/80 justify-center">
-          <div className="bg-white rounded-lg p-4 shadow-lg">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-            <p className="mt-2 text-sm text-gray-600">{t('loading')}</p>
+      {/* Loading Indicator - Top Right Corner */}
+      {(loading || isFetching) && (
+        <div className="absolute top-4 right-4 z-10">
+          <div className="bg-white rounded-lg p-3 shadow-lg flex items-center gap-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-emerald-600 border-t-transparent"></div>
+            <p className="text-sm text-gray-600 font-medium">{t('loading')}</p>
           </div>
         </div>
       )}

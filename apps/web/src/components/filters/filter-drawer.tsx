@@ -10,7 +10,7 @@ import { X, Search } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { useAdvancedFilters } from "@/hooks/use-advanced-filters"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useState, useEffect } from "react"
 import { PropertyFilters } from "./property-filters"
 import { CollapsibleFilterBox } from "./collapsible-filter-box"
@@ -73,6 +73,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
     handleReset
   } = useAdvancedFilters()
   const locale = useLocale() as 'ar' | 'en'
+  const t = useTranslations('filters')
 
   // Search state for mobile/tablet - sync with filters
   const [searchQuery, setSearchQuery] = useState(filters.searchQuery)
@@ -101,7 +102,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
           {/* Header */}
           <SheetHeader className="px-6 pt-6 pb-4 border-b">
             <div className="flex items-center justify-between">
-              <SheetTitle className="text-xl font-bold">فلترة حسب</SheetTitle>
+              <SheetTitle className="text-xl font-bold">{t('title')}</SheetTitle>
               <Button
                 variant="ghost"
                 size="icon"
@@ -122,7 +123,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                   </div>
                   <input
                     type="text"
-                    placeholder={locale === 'ar' ? "ابحث عن عقار، موقع، أو مدينة..." : "Search for property, location, or city..."}
+                    placeholder={t('searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="focus:border-primary focus:outline-none h-12 pr-14 placeholder:text-primary/80 px-5 transition-all w-full rounded-2xl"
@@ -137,7 +138,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                   onClick={handleSearch}
                   className="h-12 px-6 rounded-2xl text-base font-semibold bg-emerald-600 hover:bg-emerald-700"
                 >
-                  {locale === 'ar' ? 'بحث' : 'Search'}
+                  {t('search')}
                 </Button>
               </div>
             </div>
@@ -148,34 +149,34 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
             <div className="space-y-4">
               {/* Property Type */}
               <CollapsibleFilterBox
-                title="نوع العقار"
+                title={t('propertyType.title')}
                 defaultExpanded={true}
-                badge={filters.propertyType !== 'بيع' ? 1 : 0}
+                badge={filters.propertyType !== (locale === 'ar' ? 'بيع' : 'sell') ? 1 : 0}
               >
                 <Select value={filters.propertyType} onValueChange={(value) => handleFilterChange('propertyType', value)}>
                   <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="بيع">بيع</SelectItem>
-                    <SelectItem value="إيجار">إيجار</SelectItem>
+                    <SelectItem value={locale === 'ar' ? 'بيع' : 'sell'}>{t('propertyType.sell')}</SelectItem>
+                    <SelectItem value={locale === 'ar' ? 'إيجار' : 'rent'}>{t('propertyType.rent')}</SelectItem>
                   </SelectContent>
                 </Select>
               </CollapsibleFilterBox>
 
               {/* Category Selection */}
               <CollapsibleFilterBox
-                title="التصنيف"
+                title={t('category.title')}
                 defaultExpanded={true}
                 badge={filters.propertyCategory ? 1 : 0}
               >
                 <div className="space-y-3">
                   {/* Main Category */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">التصنيف الرئيسي</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('category.mainCategory')}</Label>
                     <Select value={filters.propertyCategory} onValueChange={handleCategoryChange}>
                       <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
-                        <SelectValue placeholder="اختر التصنيف الرئيسي" />
+                        <SelectValue placeholder={t('category.selectMainCategory')} />
                       </SelectTrigger>
                       <SelectContent>
                         {categories.map((category) => (
@@ -190,13 +191,13 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                   {/* Sub Category - Only show if main category is selected and subcategories exist */}
                   {filters.propertyCategory && availableSubCategories.length > 0 && (
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-muted-foreground">التصنيف الفرعي</Label>
+                      <Label className="text-sm font-medium text-muted-foreground">{t('category.subCategory')}</Label>
                       <Select
                         value={filters.selectedSubCategory?.id.toString() || ''}
                         onValueChange={handleSubCategoryChange}
                       >
                         <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
-                          <SelectValue placeholder="اختر التصنيف الفرعي" />
+                          <SelectValue placeholder={t('category.selectSubCategory')} />
                         </SelectTrigger>
                         <SelectContent>
                           {availableSubCategories.map((subCategory) => (
@@ -213,19 +214,19 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
 
               {/* Location */}
               <CollapsibleFilterBox
-                title="الموقع"
+                title={t('location.title')}
                 defaultExpanded={true}
                 badge={(filters.governorate_id ? 1 : 0) + (filters.city_id ? 1 : 0)}
               >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">المحافظة</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('location.governorate')}</Label>
                     <Select value={filters.governorate_id} onValueChange={(value) => {
                       handleFilterChange('governorate_id', value)
                       handleFilterChange('city_id', '') // Reset city when governorate changes
                     }}>
                       <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
-                        <SelectValue placeholder="اختر المحافظة" />
+                        <SelectValue placeholder={t('location.selectGovernorate')} />
                       </SelectTrigger>
                       <SelectContent>
                         {governorates.map((governorate: any) => (
@@ -240,14 +241,14 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                   {/* Only show city selector if there are cities available */}
                   {cities.length > 0 && (
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-muted-foreground">المدينة</Label>
+                      <Label className="text-sm font-medium text-muted-foreground">{t('location.city')}</Label>
                       <Select
                         value={filters.city_id}
                         onValueChange={(value) => handleFilterChange('city_id', value)}
                         disabled={!filters.governorate_id}
                       >
                         <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
-                          <SelectValue placeholder="اختر المدينة" />
+                          <SelectValue placeholder={t('location.selectCity')} />
                         </SelectTrigger>
                         <SelectContent>
                           {cities.map((city: any) => (
@@ -264,13 +265,13 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
 
               {/* Price Range */}
               <CollapsibleFilterBox
-                title="السعر (شهرياً)"
+                title={t('price.title')}
                 defaultExpanded={false}
                 badge={(filters.priceFrom ? 1 : 0) + (filters.priceTo ? 1 : 0)}
               >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">من</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('price.from')}</Label>
                     <Input
                       type="number"
                       placeholder="0"
@@ -280,7 +281,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">إلى</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('price.to')}</Label>
                     <Input
                       type="number"
                       placeholder="100000"
@@ -294,13 +295,13 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
 
               {/* Area Range */}
               <CollapsibleFilterBox
-                title="المساحة (م²)"
+                title={t('area.title')}
                 defaultExpanded={false}
                 badge={(filters.areaFrom ? 1 : 0) + (filters.areaTo ? 1 : 0)}
               >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">من</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('area.from')}</Label>
                     <Input
                       type="number"
                       placeholder="0"
@@ -310,7 +311,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">إلى</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('area.to')}</Label>
                     <Input
                       type="number"
                       placeholder="1000"
@@ -324,13 +325,13 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
 
               {/* Additional Filters */}
               <CollapsibleFilterBox
-                title="تفاصيل إضافية"
+                title={t('additional.title')}
                 defaultExpanded={false}
                 badge={(filters.rooms ? 1 : 0) + (filters.furnished !== 'furnished' ? 1 : 0)}
               >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">عدد الغرف</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('additional.rooms')}</Label>
                     <Input
                       type="number"
                       placeholder="5"
@@ -340,14 +341,14 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-muted-foreground">المفروشات</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">{t('additional.furnished')}</Label>
                     <Select value={filters.furnished} onValueChange={(value) => handleFilterChange('furnished', value)}>
                       <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="furnished">مفروش</SelectItem>
-                        <SelectItem value="unfurnished">غير مفروش</SelectItem>
+                        <SelectItem value="furnished">{t('additional.furnishedOption')}</SelectItem>
+                        <SelectItem value="unfurnished">{t('additional.unfurnishedOption')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -360,7 +361,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
           {(filters.availableProperties.length > 0 || filters.availableFeatures.length > 0) && (
             <div className="px-6 pb-4">
               <CollapsibleFilterBox
-                title="خصائص وميزات العقار"
+                title={t('properties.title')}
                 defaultExpanded={false}
                 badge={Object.keys(filters.selectedProperties).length + filters.selectedFeatures.length}
               >
@@ -392,10 +393,10 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
               onClick={handleReset}
               className="h-14 rounded-2xl text-base font-semibold bg-transparent"
             >
-              إعادة تعيين
+              {t('actions.reset')}
             </Button>
             <Button onClick={handleApplyFilters} className="h-14 rounded-2xl text-base font-semibold">
-              تطبيق الفلترة
+              {t('actions.apply')}
             </Button>
           </div>
         </div>

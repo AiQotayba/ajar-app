@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface Category {
   id: number
@@ -33,6 +33,7 @@ export function CategoryHierarchy({
   className 
 }: CategoryHierarchyProps) {
   const locale = useLocale() as 'ar' | 'en'
+  const t = useTranslations('filters.properties')
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set())
 
   const toggleExpanded = (categoryId: number) => {
@@ -89,7 +90,7 @@ export function CategoryHierarchy({
           
           {isSelected && (
             <Badge variant="secondary" className="text-xs">
-              مختار
+              {t('selected')}
             </Badge>
           )}
         </div>

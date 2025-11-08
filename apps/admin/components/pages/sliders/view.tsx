@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Slider } from "@/lib/types/slider"
 import { getSliderStatus } from "./columns"
+import Images from "@/components/ui/image"
 
 interface SliderViewProps {
     open: boolean
@@ -83,7 +84,7 @@ export function SliderView({ open, onOpenChange, urlEndpoint, slider }: SliderVi
                         <h3 className="text-sm font-medium text-muted-foreground">الصورة</h3>
                         <div className="relative w-full h-64 rounded-lg overflow-hidden bg-muted">
                             {imageUrl ? (
-                                <img
+                                <Images
                                     src={imageUrl}
                                     alt={slider.title.ar}
                                     className="h-full w-full object-cover"

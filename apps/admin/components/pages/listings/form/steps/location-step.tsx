@@ -79,10 +79,10 @@ export function LocationStep({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* Governorate */}
       <div className="space-y-2">
-        <Label htmlFor="governorate_id" className="text-right block">
+        <Label htmlFor="governorate_id" className="text-right block text-sm sm:text-base">
           المحافظة <span className="text-destructive">*</span>
         </Label>
         <Select
@@ -107,7 +107,7 @@ export function LocationStep({
 
       {/* City - Optional */}
       <div className="space-y-2">
-        <Label htmlFor="city_id" className="text-right block">
+        <Label htmlFor="city_id" className="text-right block text-sm sm:text-base">
           المدينة (اختياري)
         </Label>
         <Select
@@ -132,12 +132,12 @@ export function LocationStep({
       </div>
 
       {/* Interactive Map */}
-      <div className="space-y-4">
-        <Label className="text-right block">
+      <div className="space-y-3 sm:space-y-4">
+        <Label className="text-right block text-sm sm:text-base">
           الموقع على الخريطة <span className="text-destructive">*</span>
         </Label>
         {/* Map Container */}
-        <div className="">
+        <div className="w-full overflow-hidden rounded-lg">
           <LocationPickerMap
             initialLat={validatedCoords.lat}
             initialLng={validatedCoords.lng}

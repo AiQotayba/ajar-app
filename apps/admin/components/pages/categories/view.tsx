@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import type { Category } from "@/lib/types/category"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Images from "@/components/ui/image"
 
 interface CategoryViewProps {
 	open: boolean
@@ -34,7 +35,10 @@ export function CategoryView({ open, onOpenChange, category }: CategoryViewProps
 							{category.icon && (
 								<div className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary/10 overflow-hidden">
 									{category.icon.includes('/') || category.icon.includes('.') ? (
-										<img src={category.icon.startsWith('http') ? category.icon : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${category.icon}`} alt={category.name.ar} className="w-full h-full object-cover" />
+										<Images
+											src={category.icon.startsWith('http') ? category.icon : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${category.icon}`}
+											className="w-full h-full object-cover"
+										/>
 									) : (
 										<span className="text-xl">{category.icon}</span>
 									)}

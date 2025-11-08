@@ -3,7 +3,7 @@
  * مكون عرض خصائص العقار كفلاتر
  */
 import { useState } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -70,6 +70,7 @@ export function PropertyFilters({
   className
 }: PropertyFiltersProps) {
   const locale = useLocale() as 'ar' | 'en'
+  const t = useTranslations('filters.properties')
   const [expandedProperties, setExpandedProperties] = useState<Set<number>>(new Set())
 
   const togglePropertyExpanded = (propertyId: number) => {
@@ -125,7 +126,7 @@ export function PropertyFilters({
                 onValueChange={(value) => onPropertyChange(property.id, value)}
               >
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder={`اختر ${property.name[locale]}`} />
+                  <SelectValue placeholder={t('selectProperty', { property: property.name[locale] })} />
                 </SelectTrigger>
                 <SelectContent>
                   {property.options.map((option, index) => (
@@ -139,7 +140,7 @@ export function PropertyFilters({
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   type="number"
-                  placeholder="من"
+                  placeholder={t('from')}
                   value={selectedProperties[property.id]?.split('-')[0] || ''}
                   onChange={(e) => {
                     const currentValue = selectedProperties[property.id] || ''
@@ -151,7 +152,7 @@ export function PropertyFilters({
                 />
                 <Input
                   type="number"
-                  placeholder="إلى"
+                  placeholder={t('to')}
                   value={selectedProperties[property.id]?.split('-')[1] || ''}
                   onChange={(e) => {
                     const currentValue = selectedProperties[property.id] || ''
@@ -165,7 +166,7 @@ export function PropertyFilters({
             ) : (
               <Input
                 type="text"
-                placeholder={`أدخل ${property.name[locale]}`}
+                placeholder={t('enterProperty', { property: property.name[locale] })}
                 value={selectedProperties[property.id] || ''}
                 onChange={(e) => onPropertyChange(property.id, e.target.value)}
                 className="h-10"
@@ -215,14 +216,14 @@ export function PropertyFilters({
       {properties.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">خصائص العقار</Label>
+            <Label className="text-base font-semibold">{t('propertiesTitle')}</Label>
             <Button
               variant="ghost"
               size="sm"
               onClick={onReset}
               className="text-destructive hover:text-destructive"
             >
-              مسح الكل
+              {t('clearAll')}
             </Button>
           </div>
           
@@ -235,7 +236,7 @@ export function PropertyFilters({
       {/* Features */}
       {features.length > 0 && (
         <div className="space-y-3">
-          <Label className="text-base font-semibold">مميزات العقار</Label>
+          <Label className="text-base font-semibold">{t('featuresTitle')}</Label>
           
           <div className="grid grid-cols-2 gap-2">
             {features.map(renderFeatureFilter)}

@@ -16,6 +16,7 @@ import {
   LogOut,
   Menu,
   X,
+  Bell,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { authApi } from "@/lib/auth"
@@ -69,6 +70,11 @@ const menuItems: MenuItem[] = [
     icon: Users,
     label: "المستخدمين",
     href: "/users",
+  },
+  {
+    icon: Bell,
+    label: "الإشعارات",
+    href: "/notifications",
   },
 ]
 

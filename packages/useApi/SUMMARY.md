@@ -63,14 +63,13 @@ import { createApi } from '@ajar/use-api-lib';
 const api = createApi({
   baseUrl: 'https://api.example.com',
   getToken: () => localStorage.getItem('token'),
-  showToast: (message, type) => console.log(`${type}: ${message}`),
+  showToast: (message, type) =>  "",
   getLang: () => 'ar',
 });
 
 // Simple GET request
 const response = await api.get('/users');
-if (!response.isError) {
-  console.log('Users:', response.data);
+if (!response.isError) { 
 }
 ```
 

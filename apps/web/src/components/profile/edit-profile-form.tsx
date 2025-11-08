@@ -12,7 +12,10 @@ import { useTranslations, useLocale } from "next-intl"
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import '@/styles/phone-input.css'
-import { Phone } from "lucide-react"
+import { Phone, Camera } from "lucide-react"
+import { ImageUpload } from "@/components/listings/form/components/image-upload"
+import Image from "next/image"
+import { useAuth } from "@/hooks/use-auth"
 
 interface User {
   id: number
@@ -40,21 +43,25 @@ export function EditProfileForm() {
   const t = useTranslations('profile')
   const locale = useLocale()
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
-  
+  const { refreshUser } = useAuth()
   // Form state
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     phone: '',
-    email: ''
+    email: '',
+    avatar: ''
   })
-  
+
   const [errors, setErrors] = useState({
     first_name: '',
     last_name: '',
     phone: '',
-    email: ''
+    email: '',
+    avatar: ''
   })
+
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
 
   // Fetch user data
   const {
@@ -65,11 +72,11 @@ export function EditProfileForm() {
     queryKey: ['user-profile'],
     queryFn: async () => {
       const response = await api.get('/user/me')
-      
+
       if (response.isError) {
         throw new Error(response.message || 'Failed to fetch user profile')
       }
-      
+
       return response.data as User
     },
     retry: 2,
@@ -84,8 +91,17 @@ export function EditProfileForm() {
         first_name: userData.first_name || '',
         last_name: userData.last_name || '',
         phone: userData.phone || '',
-        email: userData.email || ''
+        email: userData.email || '',
+        avatar: userData.avatar || ''
       })
+
+      // Set avatar preview
+      if (userData.avatar_url) {
+        setAvatarPreview(userData.avatar_url)
+      } else if (userData.avatar) {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
+        setAvatarPreview(`${baseUrl}/storage/${userData.avatar}`)
+      }
     }
   }, [userData])
 
@@ -96,18 +112,32 @@ export function EditProfileForm() {
       if (response.isError) {
         throw new Error(response.message || t('updateError'))
       }
-      return response.data
+      return response
     },
-    onSuccess: () => {
-      // Invalidate and refetch user profile
+    onSuccess: (data: any) => {
+      console.log(data);
+      
+      refreshUser()
+      toast.success(data.message)
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
-      toast.success(t('updateSuccess'))
       router.back()
     },
     onError: (error: Error) => {
       toast.error(error.message || t('updateError'))
     }
   })
+
+  // Handle avatar change
+  const handleAvatarChange = (imageName: string) => {
+    setFormData(prev => ({ ...prev, avatar: imageName }))
+    // Update preview
+    if (imageName) {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
+      setAvatarPreview(`${baseUrl}/storage/${imageName}`)
+    } else {
+      setAvatarPreview(null)
+    }
+  }
 
   // Validation function
   const validateForm = () => {
@@ -136,14 +166,14 @@ export function EditProfileForm() {
       newErrors.email = t('invalidEmail')
     }
 
-    setErrors(newErrors)
+    setErrors({ ...newErrors, avatar: '' })
     return !Object.values(newErrors).some(error => error !== '')
   }
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
@@ -200,16 +230,71 @@ export function EditProfileForm() {
     )
   }
 
+  // Helper function to get initials from name
+  const getInitials = (name: string) => {
+    if (!name) return locale === 'ar' ? 'م' : 'U'
+    const words = name.trim().split(' ')
+    if (words.length === 1) {
+      return words[0].charAt(0).toUpperCase()
+    }
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
+  }
+  const openFileInput = () => {
+    const fileInput = document.querySelector('[type="file"]') as HTMLInputElement
+    if (fileInput) {
+      fileInput.click()
+    }
+  }
   return (
     <div className="min-h-screen max-w-2xl mx-auto bg-background" dir={direction}>
       <form onSubmit={handleSubmit} className="p-6 space-y-6" dir={direction}>
+        {/* Avatar Upload */}
+        <div className="flex flex-col items-center space-y-4 pb-6 border-b">
+          <Label className="text-base font-semibold mb-2">
+            {t('clickToAdd')}
+          </Label>
+          <div className="relative group *:cursor-pointer">
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20 transition-all group-hover:border-primary/40">
+              {avatarPreview ? (
+                <Image
+                  src={avatarPreview}
+                  alt={userData?.full_name || 'User'}
+                  width={128}
+                  height={128}
+                  onClick={openFileInput}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-primary flex items-center justify-center">
+                  <span className="text-4xl font-bold text-primary-foreground">
+                    {getInitials(userData?.full_name || '')}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="absolute bottom-0 right-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg border-2 border-background transition-all group-hover:scale-110">
+              <Camera className="h-5 w-5 text-primary-foreground" onClick={openFileInput} />
+            </div>
+          </div>
+          <div className="w-full max-w-xs">
+            <ImageUpload
+              value={formData.avatar}
+              onChange={handleAvatarChange}
+              folder="listings"
+              aspectRatio="square"
+              maxSize={5}
+              className="w-full hidden"
+            />
+          </div>
+        </div>
+
         {/* First Name */}
         <div className="space-y-2">
           <Label htmlFor="first_name" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
             {t('firstName')}
           </Label>
-          <Input 
-            id="first_name" 
+          <Input
+            id="first_name"
             value={formData.first_name}
             onChange={(e) => handleInputChange('first_name', e.target.value)}
             className={`h-14 rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.first_name ? 'border-destructive' : ''}`}
@@ -225,8 +310,8 @@ export function EditProfileForm() {
           <Label htmlFor="last_name" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
             {t('lastName')}
           </Label>
-          <Input 
-            id="last_name" 
+          <Input
+            id="last_name"
             value={formData.last_name}
             onChange={(e) => handleInputChange('last_name', e.target.value)}
             className={`h-14 rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.last_name ? 'border-destructive' : ''}`}
@@ -263,9 +348,9 @@ export function EditProfileForm() {
           <Label htmlFor="email" className={direction === 'rtl' ? 'text-right block' : 'text-left block'}>
             {t('email')} ({t('optional')})
           </Label>
-          <Input 
-            id="email" 
-            type="email" 
+          <Input
+            id="email"
+            type="email"
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
             className={`h-14 rounded-2xl ${direction === 'rtl' ? 'text-right' : 'text-left'} ${errors.email ? 'border-destructive' : ''}`}
@@ -277,7 +362,7 @@ export function EditProfileForm() {
         </div>
 
         {/* Save Button */}
-        <Button 
+        <Button
           type="submit"
           className="w-full h-14 text-lg rounded-2xl mt-8"
           disabled={updateProfileMutation.isPending}

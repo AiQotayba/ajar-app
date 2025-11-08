@@ -121,13 +121,17 @@
     "officeEmail": "Office Email",
     "officeDescription": "Office Description",
     "menuItems": {
+      "profile": "Profile",
       "editAccount": "Edit Account",
       "changePassword": "Change Password",
       "myListings": "My Listings",
       "notifications": "Notifications",
       "settings": "Settings",
-      "logout": "Sign Out"
+      "logout": "Sign Out",
+      "login": "Sign In",
+      "register": "Create Account"
     },
+    "walletBalance": "Wallet Balance",
     "validated": "Verified",
     "firstNameRequired": "First name is required",
     "lastNameRequired": "Last name is required",
@@ -278,7 +282,7 @@
   },
   "property": {
     "title": "Properties",
-    "addProperty": "Add Property",
+    "addProperty": "Add listing",
     "editProperty": "Edit Property",
     "propertyDetails": "Property Details",
     "propertyType": "Property Type",
@@ -311,7 +315,19 @@
     "editListing": "Edit listing",
     "deleting": "Deleting...",
     "favoritesError": "update favorites",
-    "featured": "Featured"
+    "featured": "Featured",
+    "noResults": {
+      "title": "No Results Found",
+      "description": "We couldn't find any properties matching your search criteria. Try adjusting your filters or search terms.",
+      "clearFilters": "Clear Filters",
+      "backToHome": "Back to Home",
+      "suggestions": {
+        "title": "Suggestions:",
+        "checkSpelling": "Check your spelling and try again",
+        "tryDifferentKeywords": "Try different or more general keywords",
+        "reduceFilters": "Reduce the number of filters applied"
+      }
+    }
   },
   "search": {
     "title": "Search",
@@ -399,5 +415,67 @@
     "allLocations": "All Locations",
     "clearFilters": "Clear filters",
     "activeFilters": "active filters"
+  },
+  "filters": {
+    "title": "Filter By",
+    "all": "All",
+    "search": "Search",
+    "searchPlaceholder": "Search for property, location, or city...",
+    "propertyType": {
+      "title": "Property Type",
+      "sell": "Sell",
+      "rent": "Rent"
+    },
+    "category": {
+      "title": "Category",
+      "mainCategory": "Main Category",
+      "subCategory": "Sub Category",
+      "selectMainCategory": "Select main category",
+      "selectSubCategory": "Select sub category",
+      "selectCategory": "Select category"
+    },
+    "location": {
+      "title": "Location",
+      "governorate": "Governorate",
+      "city": "City",
+      "selectGovernorate": "Select governorate",
+      "selectCity": "Select city"
+    },
+    "price": {
+      "title": "Price (Monthly)",
+      "from": "From",
+      "to": "To"
+    },
+    "area": {
+      "title": "Area (m²)",
+      "from": "From",
+      "to": "To"
+    },
+    "additional": {
+      "title": "Additional Details",
+      "rooms": "Number of Rooms",
+      "furnished": "Furnished",
+      "furnishedOption": "Furnished",
+      "unfurnishedOption": "Unfurnished"
+    },
+    "properties": {
+      "title": "Property Properties & Features",
+      "propertiesTitle": "Property Properties",
+      "featuresTitle": "Property Features",
+      "clearAll": "Clear All",
+      "selectProperty": "Select {property}",
+      "enterProperty": "Enter {property}",
+      "from": "From",
+      "to": "To",
+      "selected": "Selected"
+    },
+    "actions": {
+      "reset": "Reset",
+      "apply": "Apply Filters"
+    },
+    "badge": {
+      "activeFilter": "active filter",
+      "activeFilters": "{count} active filters"
+    }
   }
 }

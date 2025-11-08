@@ -283,7 +283,7 @@ export const transformFormDataToAPI = (formData: any): CreateListingRequest => {
     governorate_id: parseInt(formData.governorate_id),
     city_id: formData.city_id ? parseInt(formData.city_id) : null,
     price: formData.price,
-    currency: "JOD", // Default currency
+    currency: "USD", // Default currency
     latitude: formData.latitude?.toString() || null,
     longitude: formData.longitude?.toString() || null,
     type: formData.type,

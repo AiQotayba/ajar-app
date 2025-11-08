@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
@@ -32,6 +32,7 @@ interface Category {
 export function CategoryFilter({ data, isLoading }: { data: Category[] | undefined, isLoading: boolean }) {
   const [activeCategory, setActiveCategory] = useState<Category | undefined>(undefined)
   const locale = useLocale()
+  const t = useTranslations('filters')
   const router = useRouter()
   const searchParams = useSearchParams()
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
@@ -109,7 +110,7 @@ export function CategoryFilter({ data, isLoading }: { data: Category[] | undefin
               whitespace-nowrap transition-all !flex-0 cursor-pointer
             "
           >
-            {locale === 'ar' ? 'الكل' : 'All'}
+            {t('all')}
           </TabsTrigger>
           
           {data.map((category) => (

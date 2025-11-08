@@ -127,9 +127,9 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
                 is_visible: data.is_visible,
             })
         },
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
-            toast.success("تم إنشاء التصنيف بنجاح")
+            toast.success(data?.message)
             onOpenChange(false)
             form.reset()
         },
@@ -150,9 +150,9 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
                 is_visible: data.is_visible,
             })
         },
-        onSuccess: () => {
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
-            toast.success("تم تحديث التصنيف بنجاح")
+            toast.success(data?.message)
             onOpenChange(false)
         },
         onError: () => {
