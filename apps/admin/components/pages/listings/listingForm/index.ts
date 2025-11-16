@@ -1,7 +1,7 @@
+export { ListingForm } from "./listing-form"
 export * from "./types"
 export * from "./components"
 export * from "./steps/basic-info-step"
 export * from "./steps/location-step"
 export * from "./steps/images-step"
 export * from "./steps/price-step"
-export { ListingForm } from "./listing-form"

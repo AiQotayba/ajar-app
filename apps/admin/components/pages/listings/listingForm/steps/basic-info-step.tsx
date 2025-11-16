@@ -1,6 +1,7 @@
 "use client"
 
-import { useFormContext } from "react-hook-form"
+import * as React from "react"
+import { useFormContext, Controller } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -39,11 +40,7 @@ export function BasicInfoStep({
   onSubSubCategoryChange,
   showNavigation = true
 }: BasicInfoStepProps) {
-  const { register, watch, setValue, formState: { errors } } = useFormContext<ListingFormData>()
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onNext()
-  }
+  const { register, watch, setValue, control, formState: { errors } } = useFormContext<ListingFormData>()
 
   function Option({ className, classNameSub, text, onClick }: { className: string, classNameSub: any, text: string, onClick: () => void }) {
     return (
@@ -62,7 +59,7 @@ export function BasicInfoStep({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Title Arabic */}
 
       <div className="space-y-2">
@@ -131,25 +128,31 @@ export function BasicInfoStep({
         <Label htmlFor="main_category" className="text-right block">
           التصنيف الرئيسي <span className="text-destructive">*</span>
         </Label>
-        <Select
-          dir="rtl"
-          value={watch("category_id")}
-          onValueChange={(value) => {
-            setValue("category_id", value)
-            onCategoryChange?.(value)
-          }}
-        >
-          <SelectTrigger id="main_category" className="text-right">
-            <SelectValue placeholder="اختر التصنيف الرئيسي" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id.toString()}>
-                {category.name.ar}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Controller
+          name="category_id"
+          control={control}
+          render={({ field }) => (
+            <Select
+              dir="rtl"
+              value={field.value || ""}
+              onValueChange={(value) => {
+                field.onChange(value)
+                onCategoryChange?.(value)
+              }}
+            >
+              <SelectTrigger id="main_category" className="text-right">
+                <SelectValue placeholder="اختر التصنيف الرئيسي" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    {category.name.ar}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
         {errors.category_id && (
           <p className="text-xs text-destructive text-right">{errors.category_id.message}</p>
         )}
@@ -161,24 +164,31 @@ export function BasicInfoStep({
           <Label htmlFor="sub_category" className="text-right block">
             التصنيف الفرعي
           </Label>
-          <Select
-            dir="rtl"
-            value={selectedSubCategory?.id.toString() || ""}
-            onValueChange={(value) => {
-              onSubCategoryChange?.(value)
-            }}
-          >
-            <SelectTrigger id="sub_category" className="text-right">
-              <SelectValue placeholder="اختر التصنيف الفرعي" />
-            </SelectTrigger>
-            <SelectContent>
-              {subCategories.map((category) => (
-                <SelectItem key={category.id} value={category.id.toString()}>
-                  {category.name.ar}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Controller
+            name="sub_category_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                dir="rtl"
+                value={field.value || ""}
+                onValueChange={(value) => {
+                  field.onChange(value)
+                  onSubCategoryChange?.(value)
+                }}
+              >
+                <SelectTrigger id="sub_category" className="text-right">
+                  <SelectValue placeholder="اختر التصنيف الفرعي" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name.ar}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       )}
 
@@ -188,22 +198,31 @@ export function BasicInfoStep({
           <Label htmlFor="sub_sub_category" className="text-right block">
             التصنيف الفرعي للفرعي
           </Label>
-          <Select
-            dir="rtl"
-            value={selectedSubSubCategory?.id.toString() || ""}
-            onValueChange={(value) => onSubSubCategoryChange?.(value)}
-          >
-            <SelectTrigger id="sub_sub_category" className="text-right">
-              <SelectValue placeholder="اختر التصنيف الفرعي للفرعي" />
-            </SelectTrigger>
-            <SelectContent>
-              {subSubCategories.map((category) => (
-                <SelectItem key={category.id} value={category.id.toString()}>
-                  {category.name.ar}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Controller
+            name="sub_sub_category_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                dir="rtl"
+                value={field.value || ""}
+                onValueChange={(value) => {
+                  field.onChange(value)
+                  onSubSubCategoryChange?.(value)
+                }}
+              >
+                <SelectTrigger id="sub_sub_category" className="text-right">
+                  <SelectValue placeholder="اختر التصنيف الفرعي للفرعي" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subSubCategories.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name.ar}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       )}
 
@@ -275,85 +294,88 @@ export function BasicInfoStep({
             خصائص العقار
           </Label>
           <div className="grid grid-cols-1 gap-2 sm:gap-3">
-            {availableProperties.map((property) => (
-              <div key={property.id} className="space-y-2">
-                <Label htmlFor={`property_${property.id}`} className="text-right block">
-                  {property.name.ar}
-                </Label>
-                {(property.type === 'text' || property.type === 'string') && (
-                  <Input
-                    id={`property_${property.id}`}
-                    value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
-                    onChange={(e) => {
-                      const newProperties = [...(watch("properties") || [])]
-                      const existingIndex = newProperties.findIndex(p => p.id === property.id)
-                      if (existingIndex >= 0) {
-                        newProperties[existingIndex] = { ...newProperties[existingIndex], value: e.target.value }
-                      } else {
-                        newProperties.push({ id: property.id, value: e.target.value })
-                      }
-                      setValue("properties", newProperties)
-                    }}
-                    placeholder={`أدخل ${property.name.ar}`}
-                    className="text-right"
-                  />
-                )}
-                {(property.type === 'number' || property.type === 'int' || property.type === 'float') && (
-                  <Input
-                    id={`property_${property.id}`}
-                    type="number"
-                    step={property.type === 'float' ? "any" : "1"}
-                    value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
-                    onChange={(e) => {
-                      const newProperties = [...(watch("properties") || [])]
-                      const existingIndex = newProperties.findIndex(p => p.id === property.id)
-                      if (existingIndex >= 0) {
-                        newProperties[existingIndex] = { ...newProperties[existingIndex], value: e.target.value }
-                      } else {
-                        newProperties.push({ id: property.id, value: e.target.value })
-                      }
-                      setValue("properties", newProperties)
-                    }}
-                    placeholder={`أدخل ${property.name.ar}`}
-                    className="text-right"
-                  />
-                )}
-                {(property.type === 'select' || (property.options && property.options.length > 0)) && (
-                  <Select
-                    dir="rtl"
-                    value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
-                    onValueChange={(value) => {
-                      const newProperties = [...(watch("properties") || [])]
-                      const existingIndex = newProperties.findIndex(p => p.id === property.id)
-                      if (existingIndex >= 0) {
-                        newProperties[existingIndex] = { ...newProperties[existingIndex], value }
-                      } else {
-                        newProperties.push({ id: property.id, value })
-                      }
-                      setValue("properties", newProperties)
-                    }}
-                  >
-                    <SelectTrigger className="text-right">
-                      <SelectValue placeholder={`اختر ${property.name.ar}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {property.options && property.options.length > 0 ? (
-                        property.options.map((option, index) => (
-                          <SelectItem key={index} value={option.ar}>
-                            {option.ar}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <>
-                          <SelectItem value="yes">نعم</SelectItem>
-                          <SelectItem value="no">لا</SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
-            ))}
+            {availableProperties.map((property) => {
+              return (
+                <div key={property.id} className="space-y-2">
+                  <Label htmlFor={`property_${property.id}`} className="text-right block">
+                    {property.name.ar}
+                  </Label>
+                  {((property.type === 'text' || property.type === 'string') && property.options === null) && (
+                    <Input
+                      id={`property_${property.id}`}
+                      value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
+                      onChange={(e) => {
+                        const newProperties = [...(watch("properties") || [])]
+                        const existingIndex = newProperties.findIndex(p => p.id === property.id)
+                        if (existingIndex >= 0) {
+                          newProperties[existingIndex] = { ...newProperties[existingIndex], value: e.target.value }
+                        } else {
+                          newProperties.push({ id: property.id, value: e.target.value })
+                        }
+                        setValue("properties", newProperties)
+                      }}
+                      placeholder={`أدخل ${property.name.ar}`}
+                      className="text-right"
+                    />
+                  )}
+                  {((property.type === 'number' || property.type === 'int' || property.type === 'float') && property.options === null) && (
+                    <Input
+                      id={`property_${property.id}`}
+                      type="number"
+                      step={property.type === 'float' ? "any" : "1"}
+                      value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
+                      onChange={(e) => {
+                        const newProperties = [...(watch("properties") || [])]
+                        const existingIndex = newProperties.findIndex(p => p.id === property.id)
+                        if (existingIndex >= 0) {
+                          newProperties[existingIndex] = { ...newProperties[existingIndex], value: e.target.value }
+                        } else {
+                          newProperties.push({ id: property.id, value: e.target.value })
+                        }
+                        setValue("properties", newProperties)
+                      }}
+                      placeholder={`أدخل ${property.name.ar}`}
+                      className="text-right"
+                    />
+                  )}
+                  {(property.type === 'select' || property.type === "bool" || property.options !== null) && (
+                    <Select
+                      dir="rtl"
+                      value={watch("properties")?.find(p => p.id === property.id)?.value || ""}
+                      onValueChange={(value) => {
+                        const newProperties = [...(watch("properties") || [])]
+                        const existingIndex = newProperties.findIndex(p => p.id === property.id)
+                        if (existingIndex >= 0) {
+                          newProperties[existingIndex] = { ...newProperties[existingIndex], value }
+                        } else {
+                          newProperties.push({ id: property.id, value })
+                        }
+                        setValue("properties", newProperties)
+                      }}
+                    >
+                      <SelectTrigger className="text-right">
+                        <SelectValue placeholder={`اختر ${property.name.ar}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {property.options && property.options.length > 0 ? (
+                          property.options.map((option, index) => (
+                            <SelectItem key={index} value={option.ar}>
+                              {option.ar}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <>
+                            <SelectItem value="yes">نعم</SelectItem>
+                            <SelectItem value="no">لا</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              )
+            }
+            )}
           </div>
         </div>
       )}
@@ -401,11 +423,11 @@ export function BasicInfoStep({
 
       {/* Submit Button - Only show if navigation is enabled */}
       {showNavigation && (
-        <Button type="submit" className="w-full h-12 text-base font-bold rounded-xl">
+        <Button type="button" onClick={onNext} className="w-full h-12 text-base font-bold rounded-xl">
           التالي
         </Button>
       )}
-    </form>
+    </div>
   )
 }
 

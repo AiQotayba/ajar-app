@@ -67,9 +67,14 @@ export function Footer({ className }: FooterProps) {
           {isRTL ? "  في سوريا" : "  in Syria"}
           <span className="text-xl px-2">🇸🇾</span>
         </p>
-        <div className="flex flex-col md:flex-row items-center justify-center">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-2">
+          <Link href={`/${locale}/policy`} className="text-gray-600 hover:text-emerald-400 transition-colors"> {isRTL ? "سياسة الخصوصية" : "Privacy Policy"}</Link>
+          .
+          <Link href={`/${locale}/terms`} className="text-gray-600 hover:text-emerald-400 transition-colors"> {isRTL ? "الشروط والأحكام" : "Terms and Conditions"}</Link>
+          {/* <Link href={`/${locale}/contact`} className="text-gray-600 hover:text-emerald-400 transition-colors"> {isRTL ? "اتصل بنا" : "Contact Us"}</Link> */}
+          {/* <Link href={`/${locale}/faq`} className="text-gray-600 hover:text-emerald-400 transition-colors"> {isRTL ? "الأسئلة الشائعة" : "FAQ"}</Link> */}
           {/* Copyright */}
-          <div className="text-sm text-gray-400 mb-4 md:mb-0">
+          <div className="text-sm text-gray-400 mb-4 md:mb-0 ltr:ml-4 rtl:mr-4">
             © 2025 <Link href={`/${locale}`} className="text-gray-600 hover:text-emerald-400 transition-colors"> {isRTL ? "أجار" : "Ajar"}</Link>. {isRTL ? "جميع الحقوق محفوظة" : "All rights reserved"}.
           </div>
         </div>

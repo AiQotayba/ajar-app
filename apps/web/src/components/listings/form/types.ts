@@ -17,11 +17,18 @@ export const listingFormSchema = z.object({
     z.string().min(1, "التصنيف مطلوب"), 
     z.number().positive("التصنيف مطلوب"),
     z.null(),
-    z.undefined()
+    z.undefined(),
+    z.string().length(0) // Allow empty string
   ]).transform(val => {
-    if (val === null || val === undefined) return ""
+    if (val === null || val === undefined || val === "") return ""
     return typeof val === 'string' ? val : val.toString()
-  }).refine(val => val !== "", "التصنيف مطلوب"),
+  }).optional(),
+  sub_category_id: z.union([z.string(), z.number(), z.null(), z.undefined()]).optional().transform(val => 
+    val === null || val === undefined || val === "" ? undefined : (typeof val === 'string' ? val : val?.toString())
+  ),
+  sub_sub_category_id: z.union([z.string(), z.number(), z.null(), z.undefined()]).optional().transform(val => 
+    val === null || val === undefined || val === "" ? undefined : (typeof val === 'string' ? val : val?.toString())
+  ),
   properties: z.array(z.object({
     id: z.number(),
     value: z.string()
@@ -33,11 +40,12 @@ export const listingFormSchema = z.object({
     z.string().min(1, "المحافظة مطلوبة"), 
     z.number().positive("المحافظة مطلوبة"),
     z.null(),
-    z.undefined()
+    z.undefined(),
+    z.string().length(0) // Allow empty string
   ]).transform(val => {
-    if (val === null || val === undefined) return ""
+    if (val === null || val === undefined || val === "") return ""
     return typeof val === 'string' ? val : val.toString()
-  }).refine(val => val !== "", "المحافظة مطلوبة"),
+  }).optional(),
   city_id: z.union([z.string(), z.number(), z.null()]).optional().transform(val => 
     val === null ? undefined : (typeof val === 'string' ? val : val?.toString())
   ),
@@ -45,24 +53,55 @@ export const listingFormSchema = z.object({
   longitude: z.number().min(-180).max(180, "خط الطول غير صحيح"),
   
   // Step 3: Images - Support both File objects and string URLs
-  media: z.array(z.union([
+  images: z.array(z.union([
     z.instanceof(File),
-    z.string().min(1, "رابط الصورة مطلوب"),
+    z.string().min(5, "رابط الصورة مطلوب"),
     z.object({
       url: z.string().min(1, "رابط الصورة مطلوب"),
       type: z.string().optional(),
       source: z.string().optional(),
       sort_order: z.number().optional()
     }).transform(obj => obj.url)
-  ])).min(1, "يجب رفع صورة واحدة على الأقل").default([]),
+  ])).min(5, "يجب رفع 5 صور على الأقل"),
   cover_image_index: z.number().default(0),
   
   // Step 4: Price
   price: z.number().min(0, "السعر يجب أن يكون أكبر من أو يساوي صفر"),
-  payment_frequency: z.string().optional(),
+  pay_every: z.string().optional(), // monthly, yearly, one-time
   insurance: z.union([z.number(), z.null()]).optional().transform(val => 
     val === null ? undefined : val
   ),
+  
+  // Admin specific fields
+  status: z.enum(["draft", "active", "inactive", "pending", "rejected"]).optional(),
+  is_featured: z.boolean().optional().default(false),
+})
+.refine((data) => {
+  // Category validation: Either category_id or sub_category_id or sub_sub_category_id must be provided
+  const hasCategory = data.category_id && data.category_id !== ""
+  const hasSubCategory = data.sub_category_id && data.sub_category_id !== ""
+  const hasSubSubCategory = data.sub_sub_category_id && data.sub_sub_category_id !== ""
+  
+  if (!hasCategory && !hasSubCategory && !hasSubSubCategory) {
+    return false
+  }
+  return true
+}, {
+  message: "يجب اختيار تصنيف واحد على الأقل (رئيسي أو فرعي)",
+  path: ["category_id"],
+})
+.refine((data) => {
+  // Governorate validation: Either governorate_id or city_id must be provided
+  const hasGovernorate = data.governorate_id && data.governorate_id !== ""
+  const hasCity = data.city_id && data.city_id !== ""
+  
+  if (!hasGovernorate && !hasCity) {
+    return false
+  }
+  return true
+}, {
+  message: "يجب اختيار محافظة أو مدينة",
+  path: ["governorate_id"],
 })
 
 export type ListingFormData = z.infer<typeof listingFormSchema>
@@ -92,7 +131,7 @@ export interface Property {
     en: string | null
   }
   icon?: string | null
-  type: 'text' | 'number' | 'select' | 'string' | 'int' | 'float'
+  type: 'text' | 'number' | 'select' | 'string' | 'int' | 'float' | 'bool'
   is_filter?: boolean
   options?: Array<{
     ar: string
@@ -136,47 +175,3 @@ export interface City {
   }
   governorate_id: number
 }
-
-// Form Step Configuration
-export interface FormStep {
-  id: number
-  title: string
-  description: string
-  fields: string[]
-  api?: string
-}
-
-export const FORM_STEPS: FormStep[] = [
-  {
-    id: 1,
-    title: "البيانات الأساسية",
-    description: "معلومات العقار الأساسية",
-    fields: ["title_ar", "title_en", "description_ar", "description_en", "type", "availability_status", "category_id", "properties", "features"],
-    api: "GET /user/categories"
-  },
-  {
-    id: 2,
-    title: "الموقع",
-    description: "موقع العقار الجغرافي",
-    fields: ["governorate_id", "city_id", "latitude", "longitude"],
-    api: "GET /user/governorates"
-  },
-  {
-    id: 3,
-    title: "الصور",
-    description: "صور العقار",
-    fields: ["media", "cover_image_index"]
-  },
-  {
-    id: 4,
-    title: "السعر والتوفر",
-    description: "معلومات السعر والتوفر",
-    fields: ["price", "currency", "availability_status", "status"]
-  },
-  {
-    id: 5,
-    title: "المراجعة",
-    description: "مراجعة البيانات قبل الإرسال",
-    fields: []
-  }
-]

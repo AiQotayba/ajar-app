@@ -25,8 +25,8 @@ export interface Listing {
   availability_status: "available" | "unavailable" | "rented" | "solded"
   available_from: string | null
   available_until: string | null
-  type: "rent" | "sale"
-  pay_every: number | null
+  type: "rent" | "sale" 
+  pay_every: "monthly" | "quarterly" | "semi_annually" | "annually" | null
   insurance: number | null
   is_featured: boolean
   views_count: number

@@ -67,7 +67,7 @@ export const listingFormSchema = z.object({
   
   // Step 4: Price
   price: z.number().min(0, "السعر يجب أن يكون أكبر من أو يساوي صفر"),
-  payment_frequency: z.string().optional(),
+  pay_every: z.string().optional(), // monthly, yearly, one-time
   insurance: z.union([z.number(), z.null()]).optional().transform(val => 
     val === null ? undefined : val
   ),
@@ -131,7 +131,7 @@ export interface Property {
     en: string | null
   }
   icon?: string | null
-  type: 'text' | 'number' | 'select' | 'string' | 'int' | 'float'
+  type: 'text' | 'number' | 'select' | 'string' | 'int' | 'float' | 'bool'
   is_filter?: boolean
   options?: Array<{
     ar: string

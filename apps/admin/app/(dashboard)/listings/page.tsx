@@ -7,17 +7,13 @@ import { Plus, Building2 } from "lucide-react"
 import { TableCore } from "@/components/table/table-core"
 import type { Listing } from "@/lib/types/listing"
 import { ListingActionsDialog } from "@/components/listings/listing-actions-dialog"
-import { DeleteListingDialog } from "@/components/listings/delete-listing-dialog"
 import { PageHeader } from "@/components/dashboard/page-header"
-import { listingsColumns, listingsFilters, ListingForm } from "@/components/pages/listings"
+import { listingsColumns, listingsFilters } from "@/components/pages/listings"
 import { api } from "@/lib/api"
 
 export default function ListingsPage() {
-  const router = useRouter()
+  const { push } = useRouter()
   const queryClient = useQueryClient()
-  const [formOpen, setFormOpen] = React.useState(false)
-  const [selectedListing, setSelectedListing] = React.useState<Listing | null>(null)
-  const [formMode, setFormMode] = React.useState<"create" | "update">("create")
   const urlEndpoint = "/admin/listings"
 
   const [actionDialog, setActionDialog] = React.useState<{
@@ -29,15 +25,6 @@ export default function ListingsPage() {
     action: null,
     open: false,
   })
-
-  const [deleteDialog, setDeleteDialog] = React.useState<{
-    listing: Listing | null
-    open: boolean
-  }>({
-    listing: null,
-    open: false,
-  })
-
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status, reason }: { id: number; status: Listing["status"]; reason?: string }) =>
@@ -61,20 +48,6 @@ export default function ListingsPage() {
     }
   }
 
-  const handleView = (listing: Listing) => {
-    router.push(`/listings/${listing.id}`)
-  }
-
-  const handleEdit = (listing: Listing) => {
-    setSelectedListing(listing)
-    setFormMode("update")
-    setFormOpen(true)
-  }
-
-  const handleCreate = () => {
-    router.push("/listings/create")
-  }
-
   return (
     <div className="space-y-4 md:space-y-6">
       <PageHeader
@@ -85,7 +58,7 @@ export default function ListingsPage() {
           {
             label: "إضافة إعلان جديد",
             icon: Plus,
-            onClick: handleCreate,
+            onClick: () => push("/listings/create"),
           }
         ]}
       />
@@ -97,8 +70,8 @@ export default function ListingsPage() {
         enableDragDrop={true}
         enableActions={true}
         actions={{
-          onView: handleView,
-          onEdit: handleEdit,
+          onView: (listing: Listing) => push(`/listings/${listing.id}`),
+          onEdit: (listing: Listing) => push(`/listings/${listing.id}/edit`),
         }}
         enableView={true}
         enableEdit={true}
@@ -119,14 +92,6 @@ export default function ListingsPage() {
         onConfirm={handleStatusUpdate}
       />
 
-      {/* Listing Form Dialog */}
-      <ListingForm
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        urlEndpoint={urlEndpoint}
-        listing={selectedListing}
-        mode={formMode}
-      />
     </div>
   )
 }

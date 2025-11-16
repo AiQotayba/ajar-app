@@ -44,11 +44,13 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [isDeletePropertyDialogOpen, setIsDeletePropertyDialogOpen] = useState(false)
     const [isDeleteFeatureDialogOpen, setIsDeleteFeatureDialogOpen] = useState(false)
+    const [isDeleteChildDialogOpen, setIsDeleteChildDialogOpen] = useState(false)
     const [editingProperty, setEditingProperty] = useState<CategoryProperty | null>(null)
     const [editingFeature, setEditingFeature] = useState<CategoryFeature | null>(null)
     const [editingChild, setEditingChild] = useState<Category | null>(null)
     const [deletingProperty, setDeletingProperty] = useState<CategoryProperty | null>(null)
     const [deletingFeature, setDeletingFeature] = useState<CategoryFeature | null>(null)
+    const [deletingChild, setDeletingChild] = useState<Category | null>(null)
 
     const handleEditClick = () => {
         if (category) {
@@ -133,6 +135,32 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
     const handleDeleteFeatureConfirm = () => {
         if (deletingFeature) {
             deleteFeatureMutation.mutate(deletingFeature.id)
+        }
+    }
+
+    // Delete Child Category Mutation
+    const deleteChildMutation = useMutation({
+        mutationFn: (id: number) => api.delete(`/admin/categories/${id}`),
+        onSuccess: (data: any) => {
+            queryClient.invalidateQueries({ queryKey: ["categories"] })
+            toast.success(data?.message || "تم حذف الفئة الفرعية بنجاح")
+            setIsDeleteChildDialogOpen(false)
+            setDeletingChild(null)
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || "فشل حذف الفئة الفرعية"
+            toast.error(errorMessage)
+        },
+    })
+
+    const handleDeleteChild = (child: Category) => {
+        setDeletingChild(child)
+        setIsDeleteChildDialogOpen(true)
+    }
+
+    const handleDeleteChildConfirm = () => {
+        if (deletingChild) {
+            deleteChildMutation.mutate(deletingChild.id)
         }
     }
 
@@ -256,7 +284,9 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
             return (
                 <Images
                     src={iconUrl}
-                    alt=""
+                    alt="" 
+                    width={20}
+                    height={20}
                     className="w-4 h-4 object-cover rounded"
                     onError={(e) => {
                         e.currentTarget.style.display = 'none'
@@ -276,7 +306,10 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                 <Images
                     src={iconUrl}
                     alt=""
-                    className="w-12 h-12 object-cover rounded-lg"
+                    fill={false}
+                    width={20}
+                    height={20}
+                    className="w-5 h-5 object-cover rounded"
                     onError={(e) => {
                         e.currentTarget.style.display = 'none'
                     }}
@@ -464,6 +497,56 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                             className="bg-destructive text-white hover:bg-destructive/90"
                         >
                             {deleteFeatureMutation.isPending ? "جاري الحذف..." : "حذف"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Delete Child Category Confirmation Dialog */}
+            <AlertDialog open={isDeleteChildDialogOpen} onOpenChange={setIsDeleteChildDialogOpen}>
+                <AlertDialogContent dir="rtl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <Trash2 className="w-5 h-5 text-destructive" />
+                            حذف الفئة الفرعية
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            هل أنت متأكد من حذف الفئة الفرعية "{deletingChild?.name.ar || deletingChild?.name.en}"؟
+                            هذا الإجراء لا يمكن التراجع عنه.
+                            {deletingChild && deletingChild.listings_count > 0 && (
+                                <span className="block mt-2 text-destructive font-semibold">
+                                    تحذير: هذه الفئة تحتوي على {deletingChild.listings_count} إعلان. سيتم حذفها أيضاً.
+                                </span>
+                            )}
+                            {deletingChild && deletingChild.children && deletingChild.children.length > 0 && (
+                                <span className="block mt-2 text-destructive font-semibold">
+                                    تحذير: هذه الفئة تحتوي على {deletingChild.children.length} فئة فرعية. سيتم حذفها أيضاً.
+                                </span>
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    {deletingChild && (
+                        <div className="rounded-lg border bg-muted/50 p-3">
+                            <p className="text-sm font-medium">{deletingChild.name.ar || deletingChild.name.en}</p>
+                            {deletingChild.description && (deletingChild.description.ar || deletingChild.description.en) && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {deletingChild.description.ar || deletingChild.description.en}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteChildMutation.isPending}>
+                            إلغاء
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteChildConfirm}
+                            disabled={deleteChildMutation.isPending}
+                            className="bg-destructive text-white hover:bg-destructive/90"
+                        >
+                            {deleteChildMutation.isPending ? "جاري الحذف..." : "حذف"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -758,6 +841,14 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                                         >
                                                             <Edit className="w-3 h-3" />
                                                         </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={() => handleDeleteChild(child)}
+                                                        >
+                                                            <Trash2 className="w-3 h-3" />
+                                                        </Button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -774,14 +865,14 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
 
                         {/* Metadata */}
                         <div className="pt-4 mt-6 border-t">
-                            <div className="space-y-2 text-xs text-muted-foreground">
+                            <div className="space-y-2 text-xs text-muted-foreground *:" dir="rtl">
                                 <div className="flex justify-between">
                                     <span>تاريخ الإنشاء:</span>
-                                    <span>{new Date(category.created_at).toLocaleDateString('ar-SA')}</span>
+                                    <span>{new Date(category.created_at).toLocaleDateString('en-US')}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>آخر تحديث:</span>
-                                    <span>{new Date(category.updated_at).toLocaleDateString('ar-SA')}</span>
+                                    <span>{new Date(category.updated_at).toLocaleDateString('en-US')}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>ترتيب العرض:</span>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface SuccessModalProps {
     open: boolean
@@ -19,10 +20,11 @@ export function SuccessModal({
     isEditing = false
 }: SuccessModalProps) {
     const router = useRouter()
+    const t = useTranslations('listingForm.success')
 
     const handleClose = () => {
         onClose()
-        router.push("/")
+        router.push("/my-listings")
     }
 
     return (
@@ -38,13 +40,10 @@ export function SuccessModal({
                     {/* Success Message */}
                     <div className="space-y-2">
                         <h2 className="text-2xl font-bold">
-                            {isEditing ? "تم تحديث الإعلان بنجاح" : "تم إرسال طلبك بنجاح"}
+                            {isEditing ? t('editTitle') : t('title')}
                         </h2>
                         <p className="text-sm text-muted-foreground leading-relaxed px-4">
-                            {isEditing
-                                ? "تم تحديث الإعلان بنجاح. يمكنك الآن رؤية التعديلات في قائمة إعلاناتك."
-                                : "تم إرسال طلبك بنجاح، وسيقوم فريقنا بمراجعته والتأكد من مطابقته للمعايير. ستتلقى إشعاراً فور اعتماد الطلب ليظهر ضمن الإعلانات المتاحة للمستخدمين."
-                            }
+                            {isEditing ? t('editMessage') : t('message')}
                         </p>
                     </div>
 
@@ -52,7 +51,7 @@ export function SuccessModal({
                     <div className="flex flex-col gap-3 w-full">
                         {!isEditing && (
                             <Button onClick={onCreateAnother} className="w-full h-12 text-base font-bold rounded-xl">
-                                إرسال إعلان آخر
+                                {t('createAnother')}
                             </Button>
                         )}
                         <Button
@@ -60,7 +59,7 @@ export function SuccessModal({
                             variant="outline"
                             className="w-full h-12 text-base font-bold rounded-xl bg-transparent"
                         >
-                            {isEditing ? "العودة للإعلانات" : "إغلاق"}
+                            {isEditing ? t('backToListings') : t('close')}
                         </Button>
                     </div>
                 </div>

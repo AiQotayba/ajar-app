@@ -16,10 +16,16 @@ import { LocationStep } from "./steps/location-step"
 import { ImagesStep } from "./steps/images-step"
 import { PriceStep } from "./steps/price-step"
 import { SuccessModal } from "./components/success-modal"
+import type { Listing } from "@/lib/types/listing"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useTranslations } from "next-intl"
 
-// STEPS will be defined inside component to use translations
+const STEPS = [
+    { id: 1, label: "البيانات الأساسية", key: "basic" },
+    { id: 2, label: "الموقع", key: "location" },
+    { id: 3, label: "الصور", key: "images" },
+    { id: 4, label: "السعر", key: "price" },
+    { id: 5, label: "التقييم", key: "review" },
+]
 
 interface ListingFormProps {
     listingId?: number | null
@@ -48,16 +54,7 @@ const validateCoordinates = (lat: any, lng: any): { lat: number; lng: number } =
 export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFormProps) {
     const router = useRouter()
     const queryClient = useQueryClient()
-    const t = useTranslations('listingForm')
     const isEditMode = mode === "edit"
-
-    // Define steps with translations
-    const STEPS = [
-        { id: 1, label: t('steps.basic'), key: "basic" },
-        { id: 2, label: t('steps.location'), key: "location" },
-        { id: 3, label: t('steps.images'), key: "images" },
-        { id: 4, label: t('steps.price'), key: "price" },
-    ]
 
     const [currentStep, setCurrentStep] = React.useState(1)
     const [showSuccess, setShowSuccess] = React.useState(false)
@@ -76,12 +73,12 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
 
     const validatedCoords = validateCoordinates(34.8021, 36.7570)
 
-    // Fetch listing data for editing
+    // Fetch listing data for editing (must be before useMemo)
     const { data: listingData, isLoading: isLoadingListing } = useQuery({
-        queryKey: ['user-listing', listingId],
+        queryKey: ['admin-listing', listingId],
         queryFn: async () => {
             if (!listingId) return null
-            const response = await api.get(`/user/listings/${listingId}`)
+            const response = await api.get(`/admin/listings/${listingId}`)
             if (response.isError) {
                 throw new Error(response.message)
             }
@@ -96,19 +93,25 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     // Compute default values based on listing data (for edit mode)
     const defaultValues = React.useMemo(() => {
         if (isEditMode && listing && !isLoadingListing) {
-            // Handle category hierarchy
-            let categoryId = listing.category?.id?.toString() || ""
+            // Handle category hierarchy: if category has parent_id, set category_id to parent_id
+            let categoryId = listing.category.id?.toString() || ""
             let subCategoryId = (listing as any).sub_category_id?.toString() || ""
             let subSubCategoryId = (listing as any).sub_sub_category_id?.toString() || ""
 
             // Check if the category has a parent_id (it's a sub-category)
             if (listing.category?.parent_id) {
+                // Category is a sub-category, so:
+                // - category_id should be the parent_id
+                // - sub_category_id should be the current category_id
                 categoryId = listing.category.parent_id.toString()
                 subCategoryId = listing.category_id?.toString() || ""
+
+                // If there was already a sub_category_id, it becomes sub_sub_category_id
                 if ((listing as any).sub_category_id) {
                     subSubCategoryId = (listing as any).sub_category_id.toString()
                 }
             } else if (listing.category_id) {
+                // Category is a main category (no parent_id)
                 categoryId = listing.category_id.toString()
                 subCategoryId = (listing as any).sub_category_id?.toString() || ""
                 subSubCategoryId = (listing as any).sub_sub_category_id?.toString() || ""
@@ -127,7 +130,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                     value: typeof prop.value === 'object' ? prop.value?.ar || prop.value?.en || "" : prop.value || ""
                 })) || [],
                 features: listing.features?.map((f: any) => f.id?.toString() || f.toString()) || [],
-                governorate_id: listing.governorate?.id?.toString() || "",
+                governorate_id: listing.governorate.id?.toString() || "",
                 city_id: listing.city?.id?.toString() || "",
                 latitude: listing.latitude ? parseFloat(listing.latitude.toString()) : validatedCoords.lat,
                 longitude: listing.longitude ? parseFloat(listing.longitude.toString()) : validatedCoords.lng,
@@ -165,7 +168,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         }
     }, [isEditMode, listing, isLoadingListing, validatedCoords])
 
-    // Initialize React Hook Form
+    // Initialize React Hook Form with dynamic default values
     const methods = useForm<ListingFormData>({
         resolver: zodResolver(listingFormSchema),
         defaultValues: defaultValues as any,
@@ -177,18 +180,22 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     // Track if form has been reset to prevent infinite loops
     const hasResetRef = React.useRef<string | null>(null)
 
+    // Reset the ref when listingId changes
     React.useEffect(() => {
         hasResetRef.current = null
     }, [listingId])
 
-    // Load listing data side effects
+    // Load listing data side effects (preview URLs, location state) and reset form
     React.useEffect(() => {
         if (isEditMode && listing && !isLoadingListing) {
             const listingKey = `${listingId}-${listing.id}`
             
+            // Only reset if we haven't reset for this specific listing
             if (hasResetRef.current !== listingKey) {
                 console.info("📥 [LOAD LISTING] Setting up form with listing data:", listing)
 
+                // Reset form with computed default values
+                // This ensures Select components get the correct values
                 reset(defaultValues as any, {
                     keepDefaultValues: false,
                     keepValues: false,
@@ -213,9 +220,9 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
 
     // Queries
     const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-        queryKey: ['user-categories'],
+        queryKey: ['admin-categories'],
         queryFn: async () => {
-            const response = await api.get("/user/categories")
+            const response = await api.get("/admin/categories")
             if (response.isError) {
                 throw new Error(response.message)
             }
@@ -229,9 +236,9 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     })
 
     const { data: governorates = [] } = useQuery({
-        queryKey: ['user-governorates'],
+        queryKey: ['admin-governorates'],
         queryFn: async () => {
-            const response = await api.get("/user/governorates")
+            const response = await api.get("/admin/governorates")
             if (response.isError) {
                 throw new Error(response.message)
             }
@@ -243,13 +250,14 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     const selectedGovernorateId = watch("governorate_id")
 
     const { data: cities = [] } = useQuery({
-        queryKey: ['user-cities', selectedGovernorateId],
+        queryKey: ['admin-cities', selectedGovernorateId],
         queryFn: async () => {
             if (selectedGovernorateId) {
-                const governorate = governorates.find((g: Governorate) => g.id.toString() === selectedGovernorateId)
-                if (governorate && governorate.cities) {
-                    return governorate.cities
+                const response = await api.get(`/admin/cities?governorate_id=${selectedGovernorateId}`)
+                if (response.isError) {
+                    throw new Error(response.message)
                 }
+                return response.data?.data || response.data || []
             }
             return []
         },
@@ -257,14 +265,15 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         refetchOnWindowFocus: false,
     })
 
-    // Watch form values
+    // Watch form values to get the correct category hierarchy
     const formCategoryId = watch("category_id")
     const formSubCategoryId = watch("sub_category_id")
     const formSubSubCategoryId = watch("sub_sub_category_id")
 
-    // Load category hierarchy
+    // Load category hierarchy after categories are loaded and listing data is available
     React.useEffect(() => {
         if (isEditMode && listing && !isLoadingListing && categories.length > 0) {
+            // Get category values from form (they should already be set via defaultValues)
             const categoryIdToLoad = formCategoryId || ""
             const subCategoryIdToLoad = formSubCategoryId || ""
             const subSubCategoryIdToLoad = formSubSubCategoryId || ""
@@ -273,17 +282,21 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 categoryIdToLoad,
                 subCategoryIdToLoad,
                 subSubCategoryIdToLoad,
+                currentSelected: selectedCategory?.id?.toString(),
             })
 
+            // Load category hierarchy only if not already loaded
             if (categoryIdToLoad && categoryIdToLoad !== selectedCategory?.id?.toString()) {
                 handleCategoryChange(categoryIdToLoad)
             }
             if (subCategoryIdToLoad && subCategoryIdToLoad !== selectedSubCategory?.id?.toString()) {
+                // Wait a bit for subCategories to load
                 setTimeout(() => {
                     handleSubCategoryChange(subCategoryIdToLoad)
                 }, 300)
             }
             if (subSubCategoryIdToLoad && subSubCategoryIdToLoad !== selectedSubSubCategory?.id?.toString()) {
+                // Wait a bit for subSubCategories to load
                 setTimeout(() => {
                     handleSubSubCategoryChange(subSubCategoryIdToLoad)
                 }, 500)
@@ -310,10 +323,10 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             if (category.features) setAvailableFeatures(category.features)
         } else {
             try {
-                const response = await api.get(`/user/categories?parent_id=${categoryId}`)
+                const response = await api.get(`/admin/categories?parent_id=${categoryId}`)
                 if (!response.isError && response.data) {
                     setSubCategories(response.data)
-                    const catResponse = await api.get(`/user/categories/${categoryId}`)
+                    const catResponse = await api.get(`/admin/categories/${categoryId}`)
                     if (!catResponse.isError && catResponse.data) {
                         if (catResponse.data.properties) setAvailableProperties(catResponse.data.properties)
                         if (catResponse.data.features) setAvailableFeatures(catResponse.data.features)
@@ -353,7 +366,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             setSubSubCategories(subCategory.children)
         } else {
             try {
-                const response = await api.get(`/user/categories?parent_id=${subCategoryId}`)
+                const response = await api.get(`/admin/categories?parent_id=${subCategoryId}`)
                 if (!response.isError && response.data) {
                     setSubSubCategories(response.data)
                 } else {
@@ -377,7 +390,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             setAvailableProperties(subSubCategory.properties)
         } else {
             try {
-                const response = await api.get(`/user/categories/${subSubCategoryId}/properties`)
+                const response = await api.get(`/admin/categories/${subSubCategoryId}/properties`)
                 if (!response.isError && response.data) {
                     setAvailableProperties(response.data)
                 } else {
@@ -393,7 +406,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             setAvailableFeatures(subSubCategory.features)
         } else {
             try {
-                const response = await api.get(`/user/categories/${subSubCategoryId}/features`)
+                const response = await api.get(`/admin/categories/${subSubCategoryId}/features`)
                 if (!response.isError && response.data) {
                     setAvailableFeatures(response.data)
                 } else {
@@ -415,29 +428,28 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
 
     // Step navigation
     const handleNext = async () => {
+        // Validate current step fields
         const stepFields: Record<number, any[]> = {
             1: ["title", "type", "availability_status", "category_id"],
             2: ["governorate_id", "latitude", "longitude"],
             3: ["images"],
             4: ["price"],
+            5: ["review"],
         }
 
         const fieldsToValidate = stepFields[currentStep] || []
         const isValid = await trigger(fieldsToValidate as any)
 
         if (!isValid) {
-            toast.error(t('actions.completeRequiredFields'))
+            toast.error("يرجى إكمال جميع الحقول المطلوبة")
             return
         }
 
         if (currentStep < STEPS.length) {
-            if (currentStep === 3) {
-                setTimeout(() => {
-                    setCurrentStep(currentStep + 1)
-                }, 1000)
-            } else {
+            if (currentStep == 3) setTimeout(() => {
                 setCurrentStep(currentStep + 1)
-            }
+            }, 1000)
+            else setCurrentStep(currentStep + 1)
         }
     }
 
@@ -449,6 +461,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
 
     // Transform form data to API format
     const transformFormDataToAPI = (formData: ListingFormData) => {
+        // Transform properties from {id, value} to {property_id, value, sort_order}
         const transformedProperties = formData.properties?.map((prop, index) => {
             let value: any
             if (typeof prop.value === 'object' && prop.value !== null) {
@@ -472,11 +485,12 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             }
         }) || []
 
+        // Transform images to media format
         const images = formData.images || []
 
         if (images.length === 0) {
             console.error("❌ [TRANSFORM] No images found in form data")
-            throw new Error(t('validation.imagesRequired'))
+            throw new Error("يجب رفع صورة واحدة على الأقل")
         }
 
         const transformedImages = images
@@ -484,7 +498,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             .map((image, index) => {
                 if (image instanceof File) {
                     console.warn("⚠️ [TRANSFORM] Found File object in images")
-                    throw new Error(t('actions.uploadImagesFirst'))
+                    throw new Error("يجب رفع الصور أولاً قبل الإرسال")
                 } else if (typeof image === 'string' && image.trim() !== '') {
                     return {
                         type: "image",
@@ -511,9 +525,10 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
 
         if (transformedImages.length === 0) {
             console.error("❌ [TRANSFORM] No valid images after transformation")
-            throw new Error(t('validation.imagesRequired'))
+            throw new Error("يجب رفع صورة واحدة على الأقل")
         }
 
+        // Destructure to remove images and add media
         const { images: _, ...restFormData } = formData
 
         return {
@@ -534,33 +549,42 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
             const transformedData = transformFormDataToAPI(data)
-            const result = await api.post(`/user/listings`, transformedData)
+            const result = await api.post(`/admin/listings`, transformedData)
             return result
         },
         onSuccess: (data) => {
-            
-            queryClient.invalidateQueries({ queryKey: ["user-listings"] })
+            queryClient.invalidateQueries({ queryKey: ["table-data", "/admin/listings"] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
+            queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
+            queryClient.refetchQueries({ queryKey: ["table-data", "/admin/listings"] })
+
             setShowSuccess(true)
             setIsLoading(false)
             onSuccess?.()
         },
         onError: (error: any) => {
-            let errorMessage = t('actions.createError')
-            
-            // Try to extract error message from various possible locations
-            const responseData = error?.response?.data || error?.data || {}
-            
-            // First, try to get the main message
-            if (responseData.message) {
-                errorMessage = responseData.message
+            let errorMessage = "فشل إنشاء الإعلان"
+            if (error?.data?.message) {
+                errorMessage = error.data.message
             } else if (error?.message) {
                 errorMessage = error.message
+            } else if (error?.response?.data?.message) {
+                errorMessage = error.response.data.message
             }
-            
-            // Then, try to get specific field errors
-            if (responseData.errors && typeof responseData.errors === 'object') {
-                const errors = responseData.errors
+
+            if (error?.data?.errors) {
+                const errors = error.data.errors
+                const errorKeys = Object.keys(errors)
+                if (errorKeys.length > 0) {
+                    const firstError = errors[errorKeys[0]]
+                    if (Array.isArray(firstError) && firstError.length > 0) {
+                        errorMessage = firstError[0]
+                    } else if (typeof firstError === 'string') {
+                        errorMessage = firstError
+                    }
+                }
+            } else if (error?.errors) {
+                const errors = error.errors
                 const errorKeys = Object.keys(errors)
                 if (errorKeys.length > 0) {
                     const firstError = errors[errorKeys[0]]
@@ -572,10 +596,8 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 }
             }
 
-            console.error("❌ [CREATE ERROR] Listing creation failed:", error)
             toast.error(errorMessage)
             setIsLoading(false)
-            // Stop the process - don't continue with success flow
         },
     })
 
@@ -585,33 +607,43 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             if (!listingId) throw new Error("Listing ID is required")
 
             const transformedData = transformFormDataToAPI(data)
-            const result = await api.put(`/user/listings/${listingId}`, transformedData)
+            const result = await api.put(`/admin/listings/${listingId}`, transformedData)
             return result
         },
         onSuccess: (data) => {
-            queryClient.invalidateQueries({ queryKey: ["user-listings"] })
+            queryClient.invalidateQueries({ queryKey: ["table-data", "/admin/listings"] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
-            queryClient.invalidateQueries({ queryKey: ["user-listing", listingId] })
+            queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
+            queryClient.invalidateQueries({ queryKey: ["admin-listing", listingId] })
+            queryClient.refetchQueries({ queryKey: ["table-data", "/admin/listings"] })
+
             setShowSuccess(true)
             setIsLoading(false)
             onSuccess?.()
         },
         onError: (error: any) => {
-            let errorMessage = t('actions.updateError')
-            
-            // Try to extract error message from various possible locations
-            const responseData = error?.response?.data || error?.data || {}
-            
-            // First, try to get the main message
-            if (responseData.message) {
-                errorMessage = responseData.message
+            let errorMessage = "فشل تحديث الإعلان"
+            if (error?.data?.message) {
+                errorMessage = error.data.message
             } else if (error?.message) {
                 errorMessage = error.message
+            } else if (error?.response?.data?.message) {
+                errorMessage = error.response.data.message
             }
-            
-            // Then, try to get specific field errors
-            if (responseData.errors && typeof responseData.errors === 'object') {
-                const errors = responseData.errors
+
+            if (error?.data?.errors) {
+                const errors = error.data.errors
+                const errorKeys = Object.keys(errors)
+                if (errorKeys.length > 0) {
+                    const firstError = errors[errorKeys[0]]
+                    if (Array.isArray(firstError) && firstError.length > 0) {
+                        errorMessage = firstError[0]
+                    } else if (typeof firstError === 'string') {
+                        errorMessage = firstError
+                    }
+                }
+            } else if (error?.errors) {
+                const errors = error.errors
                 const errorKeys = Object.keys(errors)
                 if (errorKeys.length > 0) {
                     const firstError = errors[errorKeys[0]]
@@ -623,10 +655,8 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 }
             }
 
-            console.error("❌ [UPDATE ERROR] Listing update failed:", error)
             toast.error(errorMessage)
             setIsLoading(false)
-            // Stop the process - don't continue with success flow
         },
     })
 
@@ -638,37 +668,35 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         if (!isValid) {
             const validationErrors = methods.formState.errors
             console.error("❌ [VALIDATION ERRORS] Form validation failed:", validationErrors)
-            toast.error(t('actions.formErrors'))
+            toast.error("يرجى تصحيح الأخطاء في النموذج")
             return
         }
 
         setIsLoading(true)
         try {
-            if (currentStep === 4) {
+            if (currentStep == 4) {
                 if (isEditMode) {
-                    await updateMutation.mutateAsync(data)
+                    return await updateMutation.mutateAsync(data)
                 } else {
-                    await createMutation.mutateAsync(data)
+                    return await createMutation.mutateAsync(data)
                 }
             }
 
             setIsLoading(false)
         } catch (error: any) {
-            // Error handling is done in mutation onError handlers
-            // This catch is just to prevent unhandled promise rejection
             console.error("❌ [SUBMISSION ERROR] Form submission error:", error)
+            const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء حفظ الإعلان"
+            toast.error(errorMessage)
             setIsLoading(false)
-            // Stop the process - don't continue with success flow
-            // The mutation's onError handler will show the toast and handle the error
         }
     }
 
     const handleClose = () => {
         setShowSuccess(false)
         if (isEditMode && listingId) {
-            router.push(`/my-listings/${listingId}`)
+            router.push(`/listings/${listingId}`)
         } else {
-            router.push("/my-listings")
+            router.push("/listings")
         }
     }
 
@@ -678,12 +706,12 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         setPreviewUrls([])
         setCurrentStep(1)
         methods.reset()
-        router.push("/my-listings/create")
+        router.push("/listings/create")
     }
 
     const handleEditAnother = () => {
         setShowSuccess(false)
-        router.push("/my-listings")
+        router.push("/listings")
     }
 
     const renderStep = () => {
@@ -765,11 +793,9 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             <div className="max-w-4xl mx-auto">
                 <Card className="w-full">
                     <CardContent className="py-12 text-center">
-                        <p className="text-gray-600 mb-4">
-                            {t('form.listingNotFound')}
-                        </p>
-                        <Button onClick={() => router.push("/my-listings")}>
-                            {t('navigation.backToList')}
+                        <p className="text-gray-600 mb-4">لم يتم العثور على الإعلان المطلوب</p>
+                        <Button onClick={() => router.push("/listings")}>
+                            العودة للقائمة
                         </Button>
                     </CardContent>
                 </Card>
@@ -783,10 +809,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 <Card className="w-full">
                     <CardHeader className="px-4 sm:px-6 pb-4 sm:pb-6">
                         <CardTitle className="text-lg sm:text-xl mb-3 sm:mb-4">
-                            {isEditMode 
-                                ? t('form.editListingForm')
-                                : t('form.createListingForm')
-                            }
+                            {isEditMode ? "نموذج تعديل الإعلان" : "نموذج إنشاء الإعلان"}
                         </CardTitle>
                         <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
                             <StepIndicator steps={STEPS} currentStep={currentStep} />
@@ -808,20 +831,20 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                                             variant="outline"
                                             className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base font-bold rounded-xl order-2 sm:order-1"
                                         >
-                                            {t('navigation.previous')}
+                                            السابق
                                         </Button>
                                     )}
-                                    {currentStep === 4 ? (
+                                    {currentStep == 4 ? (
                                         <Button
                                             type="submit"
                                             disabled={isLoading}
                                             className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base font-bold rounded-xl order-1 sm:order-2"
                                         >
                                             {isLoading
-                                                ? t('actions.saving')
+                                                ? "جاري الحفظ..."
                                                 : isEditMode
-                                                    ? t('actions.save')
-                                                    : t('actions.create')
+                                                    ? "حفظ التعديلات"
+                                                    : "إنشاء الإعلان"
                                             }
                                         </Button>
                                     ) : (
@@ -830,7 +853,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                                             onClick={handleNext}
                                             className="w-full sm:flex-1 h-11 sm:h-12 text-sm sm:text-base font-bold rounded-xl order-1 sm:order-2"
                                         >
-                                            {t('navigation.next')}
+                                            التالي
                                         </Button>
                                     )}
                                 </div>

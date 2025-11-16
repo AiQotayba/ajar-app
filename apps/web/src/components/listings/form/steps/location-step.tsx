@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LocationPickerMap } from "../components/location-picker-map"
+import { useLocale, useTranslations } from "next-intl"
 import type { ListingFormData, Governorate, City } from "../types"
 
 interface LocationStepProps {
@@ -28,7 +29,8 @@ export function LocationStep({
   showNavigation = true
 }: LocationStepProps) {
   const { register, watch, setValue, formState: { errors } } = useFormContext<ListingFormData>()
-  const [isMapOpen, setIsMapOpen] = useState(false)
+  const locale = useLocale() as "ar" | "en"
+  const t = useTranslations('listingForm.location')
   const [selectedAddress, setSelectedAddress] = useState("")
 
   // Helper function to validate coordinates
@@ -61,18 +63,12 @@ export function LocationStep({
     setValue("longitude", validatedCoords.lng)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onNext()
-  }
-
   const handleLocationSelectInternal = (lat: number, lng: number, address?: string) => {
     setValue("latitude", lat)
     setValue("longitude", lng)
     if (address) {
       setSelectedAddress(address)
     }
-    setIsMapOpen(false)
 
     // Call parent handler if provided
     if (onLocationSelect) {
@@ -81,79 +77,81 @@ export function LocationStep({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Governorate */}
       <div className="space-y-2">
-        <Label htmlFor="governorate_id" className="text-right block">
-          المحافظة <span className="text-destructive">*</span>
+        <Label htmlFor="governorate_id" className="text-start block text-sm sm:text-base">
+          {t('governorate')} <span className="text-destructive">*</span>
         </Label>
         <Select
           value={watch("governorate_id")}
           onValueChange={(value) => setValue("governorate_id", value)}
+          dir="rtl"
         >
-          <SelectTrigger id="governorate_id" className="text-right">
-            <SelectValue placeholder="اختر المحافظة" />
+          <SelectTrigger id="governorate_id" className="text-start">
+            <SelectValue placeholder={t('selectGovernorate')} />
           </SelectTrigger>
           <SelectContent>
             {governorates.map((governorate) => (
               <SelectItem key={governorate.id} value={governorate.id.toString()}>
-                {governorate.name["ar"]}
+                {governorate.name[locale]}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         {errors.governorate_id && (
-          <p className="text-xs text-destructive text-right">{errors.governorate_id.message}</p>
+          <p className="text-xs text-destructive text-start">{errors.governorate_id.message}</p>
         )}
       </div>
 
       {/* City - Optional */}
       <div className="space-y-2">
-        <Label htmlFor="city_id" className="text-right block">
-          المدينة (اختياري)
+        <Label htmlFor="city_id" className="text-start block text-sm sm:text-base">
+          {t('city')}
         </Label>
         <Select
           value={watch("city_id")}
           onValueChange={(value) => setValue("city_id", value)}
           disabled={!watch("governorate_id")}
+          dir="rtl"
         >
-          <SelectTrigger id="city_id" className="text-right">
-            <SelectValue placeholder="اختر المدينة (اختياري)" />
+          <SelectTrigger id="city_id" className="text-start">
+            <SelectValue placeholder={t('selectCity')} />
           </SelectTrigger>
           <SelectContent>
             {cities.map((city) => (
               <SelectItem key={city.id} value={city.id.toString()}>
-                {city.name["ar"]}
+                {city.name[locale]}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         {errors.city_id && (
-          <p className="text-xs text-destructive text-right">{errors.city_id.message}</p>
+          <p className="text-xs text-destructive text-start">{errors.city_id.message}</p>
         )}
       </div>
 
       {/* Interactive Map */}
-      <div className="space-y-4">
-        <Label className="text-right block">
-          الموقع على الخريطة <span className="text-destructive">*</span>
+      <div className="space-y-3 sm:space-y-4">
+        <Label className="text-start block text-sm sm:text-base">
+          {t('mapLocation')} <span className="text-destructive">*</span>
         </Label>
         {/* Map Container */}
-        <div className=" ">
+        <div className="w-full overflow-hidden rounded-lg">
           <LocationPickerMap
             initialLat={validatedCoords.lat}
             initialLng={validatedCoords.lng}
             onLocationSelect={handleLocationSelectInternal}
-            onClose={() => { }} // لا نحتاج إغلاق لأنها ليست popup
-            showControls={true} // إظهار أدوات التحكم
+            onClose={() => { }}
+            showControls={true}
           />
         </div>
         {errors.latitude && (
-          <p className="text-xs text-destructive text-right">{errors.latitude.message}</p>
+          <p className="text-xs text-destructive text-start">{errors.latitude.message}</p>
         )}
         {selectedAddress && (
-          <p className="text-sm text-muted-foreground text-right">
-            العنوان المحدد: {selectedAddress}
+          <p className="text-sm text-muted-foreground text-start">
+            {t('selectedAddress', { address: selectedAddress })}
           </p>
         )}
       </div>
@@ -167,16 +165,17 @@ export function LocationStep({
             variant="outline"
             className="flex-1 h-12 text-base font-bold rounded-xl bg-transparent"
           >
-            السابق
+            {t('previous')}
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={onNext}
             className="flex-1 h-12 text-base font-bold rounded-xl"
           >
-            التالي
+            {t('next')}
           </Button>
         </div>
       )}
-    </form>
+    </div>
   )
 }

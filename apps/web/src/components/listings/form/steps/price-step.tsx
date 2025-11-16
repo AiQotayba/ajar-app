@@ -4,8 +4,8 @@ import { useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DollarSign } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { ListingFormData } from "../types"
 
 interface PriceStepProps {
@@ -16,20 +16,16 @@ interface PriceStepProps {
 
 export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceStepProps) {
   const { register, watch, setValue, formState: { errors } } = useFormContext<ListingFormData>()
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onNext()
-  }
+  const t = useTranslations('listingForm.price')
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Price Section */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-primary" />
-          <Label className="text-lg font-semibold text-right">
-            السعر (بالدولار الأمريكي)
+          <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+          <Label className="text-base sm:text-lg font-semibold text-start">
+            {t('price')}
           </Label>
         </div>
         
@@ -37,46 +33,46 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
           <Input
             id="price"
             type="number"
-            step="0.01"
+            step="1"
             value={watch("price") || ""}
             onChange={(e) => setValue("price", parseFloat(e.target.value) || 0)}
-            placeholder="0.00"
-            className="text-right text-lg h-14 pl-8"
+            placeholder={t('pricePlaceholder')}
+            className="text-start text-lg h-14 pl-8"
           />
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
             $
           </div>
         </div>
         {errors.price && (
-          <p className="text-xs text-destructive text-right">{errors.price.message}</p>
+          <p className="text-xs text-destructive text-start">{errors.price.message}</p>
         )}
       </div>
 
       {/* Payment Frequency - Only for Rent */}
       {watch("type") === "rent" && (
-        <div className="space-y-4">
-          <Label className="text-lg font-semibold text-right block">
-            دورية الدفع (للإيجار)
+        <div className="space-y-3 sm:space-y-4">
+          <Label className="text-base sm:text-lg font-semibold text-start block">
+            {t('paymentFrequency')}
           </Label>
           
           <div className="space-y-3">
             {[
-              { value: "monthly", label: "شهرياً" },
-              { value: "quarterly", label: "كل 3 أشهر" },
-              { value: "semi_annually", label: "كل 6 أشهر" },
-              { value: "annually", label: "سنوياً" }
+              { value: "monthly", label: t('monthly') },
+              { value: "quarterly", label: t('quarterly') },
+              { value: "semi_annually", label: t('semiAnnually') },
+              { value: "annually", label: t('annually') }
             ].map((option) => (
-              <div key={option.value} className="flex items-center space-x-2 space-x-reverse">
+              <div key={option.value} className="flex items-center gap-2 space-x-2 space-x-reverse">
                 <input
                   type="radio"
-                  id={`payment_frequency_${option.value}`}
+                  id={`pay_every_${option.value}`}
                   value={option.value}
-                  checked={watch("payment_frequency") === option.value}
-                  onChange={(e) => setValue("payment_frequency", e.target.value)}
+                  checked={watch("pay_every") === option.value}
+                  onChange={(e) => setValue("pay_every", e.target.value)}
                   className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                 />
                 <Label 
-                  htmlFor={`payment_frequency_${option.value}`} 
+                  htmlFor={`pay_every_${option.value}`} 
                   className="cursor-pointer text-sm flex-1"
                 >
                   {option.label}
@@ -84,30 +80,28 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
               </div>
             ))}
           </div>
-          {/* Payment frequency errors handled by form validation */}
         </div>
       )}
 
       {/* Insurance - Optional */}
       <div className="space-y-2">
-        <Label htmlFor="insurance" className="text-right block">
-          التأمين (اختياري)
+        <Label htmlFor="insurance" className="text-start block text-sm sm:text-base">
+          {t('insurance')}
         </Label>
         <div className="relative">
           <Input
             id="insurance"
             type="number"
-            step="0.01"
+            step="1"
             value={watch("insurance") || ""}
             onChange={(e) => setValue("insurance", parseFloat(e.target.value) || 0)}
-            placeholder="0.00"
-            className="text-right text-lg h-14 pl-8"
+            placeholder={t('insurancePlaceholder')}
+            className="text-start text-lg h-14 pl-8"
           />
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
             $
           </div>
         </div>
-        {/* Insurance errors handled by form validation */}
       </div>
 
       {/* Navigation Buttons - Only show if navigation is enabled */}
@@ -119,16 +113,17 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
             variant="outline"
             className="flex-1 h-12 text-base font-bold rounded-xl bg-transparent"
           >
-            السابق
+            {t('previous')}
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={onNext}
             className="flex-1 h-12 text-base font-bold rounded-xl"
           >
-            التالي
+            {t('next')}
           </Button>
         </div>
       )}
-    </form>
+    </div>
   )
 }

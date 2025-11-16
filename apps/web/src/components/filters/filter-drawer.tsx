@@ -136,7 +136,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                 </div>
                 <Button
                   onClick={handleSearch}
-                  className="h-12 px-6 rounded-2xl text-base font-semibold bg-emerald-600 hover:bg-emerald-700"
+                  className="h-12 !justify-between px-6 rounded-2xl text-base font-semibold bg-emerald-600 hover:bg-emerald-700"
                 >
                   {t('search')}
                 </Button>
@@ -154,7 +154,7 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
                 badge={filters.propertyType !== (locale === 'ar' ? 'بيع' : 'sell') ? 1 : 0}
               >
                 <Select value={filters.propertyType} onValueChange={(value) => handleFilterChange('propertyType', value)}>
-                  <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20">
+                  <SelectTrigger className="h-12 rounded-xl bg-primary/5 border-primary/20 ">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -16,13 +16,8 @@ interface PriceStepProps {
 export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceStepProps) {
   const { register, watch, setValue, formState: { errors } } = useFormContext<ListingFormData>()
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onNext()
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Price Section */}
       <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
@@ -36,10 +31,10 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
           <Input
             id="price"
             type="number"
-            step="0.01"
+            step="1"
             value={watch("price") || ""}
             onChange={(e) => setValue("price", parseFloat(e.target.value) || 0)}
-            placeholder="0.00"
+            placeholder="100"
             className="text-right text-lg h-14 pl-8"
           />
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -65,17 +60,17 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
               { value: "semi_annually", label: "كل 6 أشهر" },
               { value: "annually", label: "سنوياً" }
             ].map((option) => (
-              <div key={option.value} className="flex items-center space-x-2 space-x-reverse">
+              <div key={option.value} className="flex items-center gap-2 space-x-2 space-x-reverse">
                 <input
                   type="radio"
-                  id={`payment_frequency_${option.value}`}
+                  id={`pay_every_${option.value}`}
                   value={option.value}
-                  checked={watch("payment_frequency") === option.value}
-                  onChange={(e) => setValue("payment_frequency", e.target.value)}
+                  checked={watch("pay_every") === option.value}
+                  onChange={(e) => setValue("pay_every", e.target.value)}
                   className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                 />
                 <Label 
-                  htmlFor={`payment_frequency_${option.value}`} 
+                  htmlFor={`pay_every_${option.value}`} 
                   className="cursor-pointer text-sm flex-1"
                 >
                   {option.label}
@@ -95,10 +90,10 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
           <Input
             id="insurance"
             type="number"
-            step="0.01"
+            step="1"
             value={watch("insurance") || ""}
             onChange={(e) => setValue("insurance", parseFloat(e.target.value) || 0)}
-            placeholder="0.00"
+            placeholder="100"
             className="text-right text-lg h-14 pl-8"
           />
           <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -119,14 +114,15 @@ export function PriceStep({ onNext, onPrevious, showNavigation = true }: PriceSt
             السابق
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={onNext}
             className="flex-1 h-12 text-base font-bold rounded-xl"
           >
             التالي
           </Button>
         </div>
       )}
-    </form>
+    </div>
   )
 }
 

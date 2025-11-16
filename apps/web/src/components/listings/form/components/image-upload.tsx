@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { useTranslations, useLocale } from "next-intl"
+import { useTranslations } from "next-intl"
 
 interface ImageUploadProps {
   value?: string
@@ -27,8 +27,7 @@ export function ImageUpload({
   aspectRatio = "landscape",
   maxSize = 5,
 }: ImageUploadProps) {
-  const locale = useLocale()
-  const t = useTranslations('common')
+  const t = useTranslations('common.imageUpload')
   const [isUploading, setIsUploading] = React.useState(false)
   const [progress, setProgress] = React.useState(0)
   const [preview, setPreview] = React.useState<string | null>(value || null)
@@ -47,18 +46,14 @@ export function ImageUpload({
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error(locale === 'ar' ? "يرجى اختيار ملف صورة صالح" : "Please select a valid image file")
+      toast.error(t('invalidFile'))
       return
     }
 
     // Validate file size
     const fileSizeMB = file.size / (1024 * 1024)
     if (fileSizeMB > maxSize) {
-      toast.error(
-        locale === 'ar' 
-          ? `حجم الملف يجب أن يكون أقل من ${maxSize} ميجابايت`
-          : `File size must be less than ${maxSize}MB`
-      )
+      toast.error(t('fileSizeError', { maxSize }))
       return
     }
 
@@ -111,14 +106,14 @@ export function ImageUpload({
         const fullImageUrl = `${storageBaseUrl}/storage/${imageName}`
         setPreview(fullImageUrl)
 
-        toast.success(locale === 'ar' ? "تم رفع الصورة بنجاح" : "Image uploaded successfully")
+        toast.success(t('uploadSuccess'))
       } else {
         setPreview(null)
-        toast.error(locale === 'ar' ? "فشل رفع الصورة" : "Failed to upload image")
+        toast.error(t('uploadError'))
       }
     } catch (error: any) {
       setPreview(null)
-      const errorMessage = error?.message || (locale === 'ar' ? "فشل رفع الصورة" : "Failed to upload image")
+      const errorMessage = error?.message || t('uploadError')
       toast.error(errorMessage)
       console.error('Image upload error:', error)
     } finally {
@@ -195,7 +190,7 @@ export function ImageUpload({
               <>
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="text-sm text-muted-foreground">
-                  {locale === 'ar' ? `جاري الرفع... ${progress}%` : `Uploading... ${progress}%`}
+                  {t('uploading', { progress })}
                 </p>
               </>
             ) : (
@@ -205,13 +200,10 @@ export function ImageUpload({
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium">
-                    {locale === 'ar' ? 'انقر لرفع صورة' : 'Click to upload image'}
+                    {t('clickToUpload')}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {locale === 'ar' 
-                      ? `PNG, JPG, WEBP (حد أقصى ${maxSize}MB)`
-                      : `PNG, JPG, WEBP (max ${maxSize}MB)`
-                    }
+                    {t('fileTypes', { maxSize })}
                   </p>
                 </div>
               </>

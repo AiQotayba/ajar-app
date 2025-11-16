@@ -386,7 +386,8 @@ export function ImagesStep({
             السابق
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={onNext}
             disabled={media.length === 0 || uploading}
             className="flex-1 h-12 text-base font-bold rounded-xl"
           >

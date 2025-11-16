@@ -147,7 +147,7 @@ export function ListingForm({
             images: mediaUrls,
             cover_image_index: coverImageIndex,
             price: listing.price || 0,
-            payment_frequency: listing.pay_every?.toString() || "",
+            pay_every: listing.pay_every?.toString() || "",
             insurance: listing.insurance || 0,
             status: listing.status as "draft" | "active" | "inactive" | "pending" | "rejected" || "in_review",
             is_featured: listing.is_featured || false,
@@ -183,7 +183,7 @@ export function ListingForm({
             images: initialFormData?.images || [],
             cover_image_index: initialFormData?.cover_image_index || 0,
             price: initialFormData?.price || 0,
-            payment_frequency: initialFormData?.payment_frequency || "",
+            pay_every: initialFormData?.pay_every || "",
             insurance: initialFormData?.insurance || 0,
             status: initialFormData?.status || "draft",
             is_featured: initialFormData?.is_featured || false,
@@ -235,7 +235,7 @@ export function ListingForm({
                 images: [],
                 cover_image_index: 0,
                 price: 0,
-                payment_frequency: "",
+                pay_every: "",
                 insurance: 0,
                 status: "draft",
                 is_featured: false,
@@ -325,12 +325,85 @@ export function ListingForm({
         }
     }, [listing, setValue])
 
+    // Transform form data to API format
+    const transformFormDataToAPI = (formData: ListingFormData) => {
+        // Transform properties from {id, value} to {property_id, value, sort_order}
+        const transformedProperties = formData.properties?.map((prop, index) => {
+            // Convert value to JSON format as required by database
+            // If value is already an object, use it as is
+            // If value is a string, convert it to JSON object with ar and en keys
+            let value: any
+            if (typeof prop.value === 'object' && prop.value !== null) {
+                value = prop.value
+            } else if (typeof prop.value === 'string') {
+                // Convert string to JSON object format: {"ar": "value", "en": ""}
+                value = {
+                    ar: prop.value,
+                    en: prop.value // Use same value for English, or empty string if preferred
+                }
+            } else {
+                // Fallback: convert to string first, then to object
+                value = {
+                    ar: String(prop.value || ""),
+                    en: String(prop.value || "")
+                }
+            }
+
+            return {
+                property_id: prop.id,
+                value: value,
+                sort_order: index + 1
+            }
+        }) || []
+
+        // Transform images to media format if needed
+        const transformedImages = formData.images?.map((image, index) => {
+            if (image instanceof File) {
+                // For new file uploads, return the File object
+                return image
+            } else if (typeof image === 'string') {
+                // For existing images (URLs), return as media object
+                return {
+                    type: "image",
+                    url: image,
+                    source: "file",
+                    sort_order: index + 1
+                }
+            } else {
+                // Already in correct format
+                return image
+            }
+        }) || []
+
+        // Destructure to remove images and add media
+        const { images, ...restFormData } = formData
+        
+        return {
+            ...restFormData,
+            properties: transformedProperties,
+            media: transformedImages,
+            // Ensure category IDs are numbers
+            category_id: formData.category_id ? Number(formData.category_id) : undefined,
+            sub_category_id: formData.sub_category_id ? Number(formData.sub_category_id) : undefined,
+            sub_sub_category_id: formData.sub_sub_category_id ? Number(formData.sub_sub_category_id) : undefined,
+            governorate_id: formData.governorate_id ? Number(formData.governorate_id) : undefined,
+            city_id: formData.city_id ? Number(formData.city_id) : undefined,
+            // Convert latitude and longitude to strings as required by API
+            latitude: formData.latitude?.toString() || "",
+            longitude: formData.longitude?.toString() || "",
+        }
+    }
+
     // Mutations
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
             console.group("📤 [CREATE MUTATION] Creating listing")
-            console.info("📦 [PAYLOAD] Data being sent to API:", data)
-            const result = await api.post(`/admin/listings`, data)
+            console.info("📦 [FORM DATA] Raw form data:", data)
+            
+            const transformedData = transformFormDataToAPI(data)
+            console.info("📦 [PAYLOAD] Transformed data being sent to API:", transformedData)
+            
+            const result = await api.post(`/admin/listings`, transformedData)
             console.info("✅ [RESPONSE] API response:", result)
             console.groupEnd()
             return result
@@ -373,8 +446,12 @@ export function ListingForm({
             
             console.group("📤 [UPDATE MUTATION] Updating listing")
             console.info("🆔 [LISTING ID] Listing ID:", listing.id)
-            console.info("📦 [PAYLOAD] Data being sent to API:", data)
-            const result = await api.put(`/admin/listings/${listing.id}`, data)
+            console.info("📦 [FORM DATA] Raw form data:", data)
+            
+            const transformedData = transformFormDataToAPI(data)
+            console.info("📦 [PAYLOAD] Transformed data being sent to API:", transformedData)
+            
+            const result = await api.put(`/admin/listings/${listing.id}`, transformedData)
             console.info("✅ [RESPONSE] API response:", result)
             console.groupEnd()
             return result
@@ -1128,14 +1205,14 @@ export function ListingForm({
                                                 <div key={option.value} className="flex items-center space-x-2 space-x-reverse">
                                                     <input
                                                         type="radio"
-                                                        id={`payment_frequency_${option.value}`}
+                                                        id={`pay_every_${option.value}`}
                                                         value={option.value}
-                                                        checked={watch("payment_frequency") === option.value}
-                                                        onChange={(e) => setValue("payment_frequency", e.target.value)}
+                                                        checked={watch("pay_every") === option.value}
+                                                        onChange={(e) => setValue("pay_every", e.target.value)}
                                                         className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
                                                     />
                                                     <Label
-                                                        htmlFor={`payment_frequency_${option.value}`}
+                                                        htmlFor={`pay_every_${option.value}`}
                                                         className="cursor-pointer text-sm flex-1"
                                                     >
                                                         {option.label}

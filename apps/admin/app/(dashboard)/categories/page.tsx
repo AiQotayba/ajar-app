@@ -9,11 +9,11 @@ import type { Category } from "@/lib/types/category"
 import { CategoriesAccordion, CategoriesDetailSidebar, CategoryFormDrawer } from "@/components/pages/categoriesV2"
 import { api } from "@/lib/api"
 
-export default function TestPage() {
+export default function CategoriesPage() {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
-    const { data: categories, isLoading } = useQuery({
+    const { data: categories, isLoading, refetch } = useQuery({
         queryKey: ["categories"],
         queryFn: async () => {
             const response = await api.get<{ data: Category[] }>('/admin/categories')
@@ -23,7 +23,6 @@ export default function TestPage() {
 
     const handleSelectCategory = (category: Category | null) => {
         setSelectedCategory(category)
-        console.info("✅ Selected category:", category?.name.ar || category?.name.en)
     }
 
     // Categories Skeleton Component
@@ -48,21 +47,20 @@ export default function TestPage() {
 
     return (
         <div className="flex h-full flex-col">
-            <div className="border-b p-6">
-                <PageHeader
-                    title="إدارة التصنيفات"
-                    description="نظم وحدّث تصنيفات العقارات الخاصة بك. يمكنك إضافة تصنيفات جديدة، تعديل الموجودة، أو حذفها حسب الحاجة"
-                    icon={FolderTree}
-                    actions={[
-                        {
-                            label: "إضافة تصنيف",
-                            onClick: () => setIsCreateDialogOpen(true),
-                            icon: Plus,
-                            variant: "default",
-                        },
-                    ]}
-                />
-            </div>
+            <PageHeader
+                title="إدارة التصنيفات"
+                description="نظم وحدّث تصنيفات العقارات الخاصة بك. يمكنك إضافة تصنيفات جديدة، تعديل الموجودة، أو حذفها حسب الحاجة"
+                icon={FolderTree}
+                actions={[
+                    {
+                        label: "إضافة تصنيف",
+                        onClick: () => setIsCreateDialogOpen(true),
+                        icon: Plus,
+                        variant: "default",
+                    },
+                ]}
+                className="!p-6 mb-6"
+            />
 
             <CategoryFormDrawer
                 open={isCreateDialogOpen}
@@ -70,13 +68,18 @@ export default function TestPage() {
                 category={null}
             />
 
-            <div className=" overflow-hidden grid grid-cols-1 lg:grid-cols-3 h-full">
+            <div className=" overflow-hidden grid grid-cols-1 lg:grid-cols-3 h-full rounded-2xl bg-white shadow-md">
                 {/* Sidebar على اليسار */}
                 {/* المحتوى الرئيسي - Accordion */}
                 <div className="col-span-1 overflow-auto bg-muted/30 p-6">
                     {isLoading
                         ? <CategoriesSkeleton />
-                        : <CategoriesAccordion categories={categories?.data as any || []} onSelectCategory={handleSelectCategory} selectedCategory={selectedCategory} />
+                        : <CategoriesAccordion 
+                            categories={categories?.data as any || []} 
+                            onSelectCategory={handleSelectCategory} 
+                            selectedCategory={selectedCategory}
+                            onReorder={refetch}
+                        />
                     }
                 </div>
                 <CategoriesDetailSidebar

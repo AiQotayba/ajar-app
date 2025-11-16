@@ -2,28 +2,28 @@
 
 - dashboard
   - categories
-    - sorting drag drop
-  - properties
-    <!-- - edit property -->
-    <!-- - delete property -->
-    - sorting drag drop
-  - features
-    - sorting drag drop
+    - sorting drag drop - error when drag and drop`
+    - properties
+      - edit property
+      - delete property
   - reponsvie: عندما نكون وضع موبايل ونعود سطح مكتب يصبح هناك خلل في التصميم
-  - notifications
-  - dashboard integration api
   - listings
-    - view in one page
-    - add image cover
     - form
-      - set default governorate_id and city_id and category_id and properties and features
-        - يجب ان يتم اختيارهم في الوضع التعديل بشكل افتراضي
-      - sorting images
-      - update listing images
+      - step 1: basic info
+        - properties
+          - قيمة الخصائص عند الارسال
+            {
+            "property_id": 1,
+            "value": "4", // قيمة الخصائص مثال {"ar "العربية", "en":"الانجليزية"}
+            "sort_order": 1
+            }
+@[all](44)
 
-- web
-  - home page
-    - 
-  - map 
-    - cancel token
-    - اذا كان api لم ينتهي من الرد قم بالغائه واطلب طلب جديد لاننا نستخدمه مع فلاتر 
+# next
+
+- notifications
+- dashboard integration api
+- dashboard listings
+  - form
+    - sorting images
+    - update listing images

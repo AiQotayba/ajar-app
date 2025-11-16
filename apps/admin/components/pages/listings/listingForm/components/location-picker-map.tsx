@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MapPin, Search, Navigation, Loader } from "lucide-react"
 import { toast } from "sonner"
-import { useTranslations } from "next-intl"
 
 // Google Maps type declarations
 declare global {
@@ -105,7 +104,6 @@ export function LocationPickerMap({
   showControls = true,
   height = "400px"
 }: LocationPickerMapProps) {
-  const t = useTranslations('listingForm.location')
   const mapRef = useRef<HTMLDivElement>(null)
   const [map, setMap] = useState<any>(null)
   const [marker, setMarker] = useState<any>(null)
@@ -185,7 +183,7 @@ export function LocationPickerMap({
           position: initialPosition,
           map: mapInstance,
           draggable: true,
-          title: t('markerTitle'),
+          title: "موقع العقار",
           icon: markerIcon,
         })
 
@@ -240,7 +238,7 @@ export function LocationPickerMap({
         await getAddressFromCoordinates(validatedCoords.lat, validatedCoords.lng)
       } catch (error: any) {
         console.error("❌ Error loading map:", error)
-        setLoadError(error.message || t('mapLoadError'))
+        setLoadError(error.message || "فشل تحميل الخريطة")
         setIsLoading(false)
       }
     }
@@ -293,7 +291,7 @@ export function LocationPickerMap({
   // Handle search
   const handleSearch = useCallback(() => {
     if (!searchQuery.trim() || !window.google || !window.google.maps) {
-      toast.error(t('searchEmptyError'))
+      toast.error("يرجى إدخال عنوان للبحث")
       return
     }
 
@@ -322,7 +320,7 @@ export function LocationPickerMap({
         }
 
         onLocationSelect(lat, lng, address)
-        toast.success(t('searchSuccess'))
+        toast.success("تم العثور على الموقع")
 
         // Reset flag after a short delay
         setTimeout(() => {
@@ -330,19 +328,19 @@ export function LocationPickerMap({
         }, 100)
       } else {
         console.error("❌ Geocoding failed:", status)
-        toast.error(t('searchError'))
+        toast.error("لم يتم العثور على الموقع. يرجى المحاولة مرة أخرى")
       }
     })
-  }, [searchQuery, onLocationSelect, marker, map, t])
+  }, [searchQuery, onLocationSelect, marker, map])
 
   // Handle get current location
   const handleGetCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      toast.error(t('geolocationNotSupported'))
+      toast.error("المتصفح لا يدعم تحديد الموقع")
       return
     }
 
-    toast.info(t('gettingLocation'))
+    toast.info("جاري تحديد موقعك...")
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const lat = position.coords.latitude
@@ -362,7 +360,7 @@ export function LocationPickerMap({
 
         // Get address using reverse geocoding
         await getAddressFromCoordinates(lat, lng)
-        toast.success(t('locationSuccess'))
+        toast.success("تم تحديد موقعك بنجاح")
 
         // Reset flag after a short delay
         setTimeout(() => {
@@ -371,10 +369,10 @@ export function LocationPickerMap({
       },
       (error) => {
         console.error("❌ Geolocation error:", error)
-        toast.error(t('locationError'))
+        toast.error("فشل تحديد موقعك. يرجى المحاولة مرة أخرى")
       }
     )
-  }, [marker, map, getAddressFromCoordinates, t])
+  }, [marker, map, getAddressFromCoordinates])
 
   // Error state
   if (loadError) {
@@ -397,7 +395,7 @@ export function LocationPickerMap({
           <div className="flex gap-2">
             <Input
               type="text"
-              placeholder={t('searchPlaceholder')}
+              placeholder="ابحث عن عنوان..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -416,17 +414,17 @@ export function LocationPickerMap({
               disabled={isSearching || isLoading || !searchQuery.trim()}
             >
               <Search className="h-4 w-4 ml-2" />
-              {isSearching ? t('searching') : t('searchButton')}
+              {isSearching ? "جاري البحث..." : "بحث"}
             </Button>
             <Button
               type="button"
               onClick={handleGetCurrentLocation}
               variant="outline"
-              title={t('currentLocation')}
+              title="الموقع الحالي"
               disabled={isLoading}
             >
               <Navigation className="h-4 w-4 ml-2" />
-              {t('currentLocation')}
+              الموقع الحالي
             </Button>
           </div>
         </div>

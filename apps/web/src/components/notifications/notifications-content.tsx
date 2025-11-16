@@ -10,20 +10,24 @@ import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"
 
 interface Notification {
-  id: string
-  title: {
-    ar: string
-    en: string
-  }
-  message: {
-    ar: string
-    en: string
-  }
-  created_at: string
-  read_at?: string
+  id: number
+  title: string
+  message: string
+  notificationable_id?: number | null
+  notificationable_type?: string | null
+  read_at?: string | null
   is_read: boolean
-  type?: string
   metadata?: Record<string, any>
+  user?: {
+    id: number
+    first_name: string
+    last_name: string
+    full_name: string
+    email: string
+    avatar_url?: string
+  } | null
+  created_at: string
+  updated_at: string
 }
 
 export function NotificationsContent() {
@@ -48,7 +52,8 @@ export function NotificationsContent() {
         throw new Error(response.message || 'Failed to fetch notifications')
       }
 
-      return response.data || []
+      // API returns { success: true, data: Notification[], meta: {...} }
+      return response.data?.data || response.data || []
     },
     retry: 2,
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -57,7 +62,7 @@ export function NotificationsContent() {
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
-    mutationFn: async (notificationId: string) => {
+    mutationFn: async (notificationId: number) => {
       const response = await api.post(`/user/notifications/${notificationId}/read`)
 
       if (response.isError) {
@@ -112,11 +117,6 @@ export function NotificationsContent() {
     })
   }
 
-  // Helper function to get localized text
-  const getLocalizedText = (text: { ar: string; en: string }) => {
-    return text[locale as keyof typeof text] || text.ar
-  }
-
   const groupedNotifications = notifications.reduce(
     (acc: Record<string, Notification[]>, notification: Notification) => {
       const dateLabel = formatNotificationDate(notification.created_at)
@@ -130,7 +130,7 @@ export function NotificationsContent() {
   )
 
   // Handle mark as read
-  const handleMarkAsRead = (notificationId: string) => {
+  const handleMarkAsRead = (notificationId: number) => {
     markAsReadMutation.mutate(notificationId)
   }
 
@@ -147,12 +147,12 @@ export function NotificationsContent() {
           <p className="text-muted-foreground mb-4">
             {error?.message || t('loadError')}
           </p>
-          <button
+          <Button
             onClick={() => refetch()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            variant="default"
           >
             {t('retry')}
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -164,15 +164,18 @@ export function NotificationsContent() {
         {/* Empty State */}
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
           <div className="relative w-80 h-80 mb-8">
-            <div className="absolute inset-0 bg-muted/30 rounded-[4rem]" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative">
-                <Bell className="h-32 w-32 text-primary" strokeWidth={1.5} />
-                <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold">!</span>
+                <div className="absolute inset-0 bg-muted/30 rounded-[4rem]" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative">
+                    <Bell className="h-32 w-32 text-primary" strokeWidth={1.5} />
+                    <div className={cn(
+                      "absolute -top-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center",
+                      direction === 'rtl' ? "-right-2" : "-left-2"
+                    )}>
+                      <span className="text-primary-foreground font-bold">!</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
             {/* Decorative elements */}
             <div className="absolute top-20 left-12 text-muted-foreground/30 text-2xl">▲</div>
             <div className="absolute top-32 right-16 text-muted-foreground/30 text-xl">▶</div>
@@ -193,7 +196,7 @@ export function NotificationsContent() {
       <header className="flex items-center justify-between p-4 border-b">
         <Link href="/">
           <Button variant="outline" size="icon" className="rounded-2xl bg-transparent">
-            <ChevronLeft className={cn("h-5 w-5", direction === 'rtl' ? "rotate-0" : "rotate-180")} />
+            <ChevronLeft className={cn("h-5 w-5", direction === 'ltr' ? "rotate-0" : "rotate-180")} />
           </Button>
         </Link>
         <h1 className="text-xl font-semibold">{t('title')}</h1>
@@ -203,7 +206,7 @@ export function NotificationsContent() {
       <div className="p-6 space-y-6">
         {Object.entries(groupedNotifications).map(([dateLabel, items]: any) => (
           <div key={dateLabel} className="space-y-3" dir={direction}>
-            <h2 className="text-right font-semibold text-lg">{dateLabel}</h2>
+            <h2 className={cn("font-semibold text-lg", direction === 'rtl' ? "text-right" : "text-left")}>{dateLabel}</h2>
             {items.map((notification: Notification) => (
               <div
                 key={notification.id}
@@ -213,19 +216,21 @@ export function NotificationsContent() {
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <h3 className="font-bold text-lg">
-                    {getLocalizedText(notification.title)}
+                    {notification.title}
                   </h3>
                   <span className="text-sm text-muted-foreground">
                     {formatNotificationTime(notification.created_at)}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                  {getLocalizedText(notification.message)}
+                  {notification.message}
                 </p>
                 <div className="flex items-center justify-between">
                   {!notification.is_read && (
-                    <button
-                      className="text-primary font-medium text-sm hover:text-primary/80 transition-colors"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-primary font-medium p-2 text-sm hover:text-primary/80 transition-colors h-auto"
                       onClick={(e) => {
                         e.stopPropagation()
                         handleMarkAsRead(notification.id)
@@ -233,7 +238,7 @@ export function NotificationsContent() {
                       disabled={markAsReadMutation.isPending}
                     >
                       {markAsReadMutation.isPending ? t('updating') : t('markRead')}
-                    </button>
+                    </Button>
                   )}
                   <div className="flex gap-1">
                     <div className={`w-2 h-2 rounded-full ${notification.is_read ? "bg-muted" : "bg-primary"}`} />
@@ -254,12 +259,8 @@ function NotificationsContentSkeleton({ direction }: { direction: 'rtl' | 'ltr' 
     <div className="min-h-screen bg-background pb-24" dir={direction}>
       {/* Header Skeleton */}
       <header className="flex items-center justify-between p-4 border-b">
-        <div className="w-10 h-10 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl animate-pulse relative overflow-hidden">
-          <div className="absolute inset-0 animate-shimmer opacity-50" />
-        </div>
-        <div className="h-6 w-24 bg-gradient-to-r from-gray-100 to-gray-200 rounded animate-pulse relative overflow-hidden">
-          <div className="absolute inset-0 animate-shimmer opacity-50" />
-        </div>
+        <div className="w-10 h-10 bg-muted rounded-2xl animate-pulse" />
+        <div className="h-6 w-24 bg-muted rounded animate-pulse" />
         <div className="w-10" />
       </header>
 
@@ -268,39 +269,35 @@ function NotificationsContentSkeleton({ direction }: { direction: 'rtl' | 'ltr' 
         {Array.from({ length: 2 }).map((_, groupIndex) => (
           <div key={groupIndex} className="space-y-3" dir={direction}>
             {/* Date Label Skeleton */}
-            <div className="h-6 w-32 bg-gradient-to-r from-gray-100 to-gray-200 rounded animate-pulse relative overflow-hidden">
-              <div className="absolute inset-0 animate-shimmer opacity-50" />
-            </div>
+            <div className={cn("h-6 w-32 bg-muted rounded animate-pulse", direction === 'rtl' ? "ml-auto" : "mr-auto")} />
             
             {/* Notification Items Skeleton */}
             {Array.from({ length: 3 }).map((_, itemIndex) => (
               <div
                 key={itemIndex}
-                className="relative p-4 rounded-2xl border bg-card animate-pulse overflow-hidden"
+                className="relative p-4 rounded-2xl border bg-card animate-pulse"
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   {/* Title Skeleton */}
                   <div className="flex-1 space-y-2">
-                    <div className="h-5 w-3/4 bg-gradient-to-r from-gray-100 to-gray-200 rounded" />
+                    <div className="h-5 w-3/4 bg-muted rounded" />
                   </div>
                   {/* Time Skeleton */}
-                  <div className="h-4 w-16 bg-gradient-to-r from-gray-100 to-gray-200 rounded" />
+                  <div className="h-4 w-16 bg-muted rounded" />
                 </div>
                 {/* Message Skeleton */}
                 <div className="space-y-2 mb-3">
-                  <div className="h-4 w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded" />
-                  <div className="h-4 w-5/6 bg-gradient-to-r from-gray-100 to-gray-200 rounded" />
+                  <div className="h-4 w-full bg-muted rounded" />
+                  <div className="h-4 w-5/6 bg-muted rounded" />
                 </div>
                 {/* Button and Indicators Skeleton */}
                 <div className="flex items-center justify-between">
-                  <div className="h-4 w-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded" />
+                  <div className="h-4 w-20 bg-muted rounded" />
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-gray-100 to-gray-200" />
-                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-gray-100 to-gray-200" />
+                    <div className="w-2 h-2 rounded-full bg-muted" />
+                    <div className="w-2 h-2 rounded-full bg-muted" />
                   </div>
                 </div>
-                {/* Shimmer overlay */}
-                <div className="absolute inset-0 animate-shimmer opacity-50" />
               </div>
             ))}
           </div>

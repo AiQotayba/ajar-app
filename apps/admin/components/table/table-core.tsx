@@ -75,7 +75,7 @@ export interface TableConfig<T = any> {
   enableActions?: boolean
   actions?: {
     onView?: (row: T) => void
-    onEdit?: (row: T) => void 
+    onEdit?: (row: T) => void
   }
   searchPlaceholder?: string
   emptyMessage?: string
@@ -115,13 +115,13 @@ function useTableData<T>(apiEndpoint: string) {
   // Fetch function using API client
   const fetchData = React.useCallback(async () => {
     const params = Object.fromEntries(searchParams.entries())
-    
+
     // Add default sort values if not present
     if (!params.sort_field && !params.sort_order) {
       params.sort_field = "sort_order"
       params.sort_order = "asc"
     }
-    
+
     const response = await api.get(apiEndpoint, { params }) // Removed showErrorToast: true
 
     if (response.isError) throw new Error(response.message || "فشل في تحميل البيانات") // Changed error message to Arabic
@@ -356,7 +356,7 @@ export function TableCore<T extends Record<string, any>>({
   const [activeFilters, setActiveFilters] = React.useState<Record<string, any>>({})
   const [dateRange, setDateRange] = React.useState<{ from?: Date; to?: Date }>({})
   const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null)
-  
+
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [selectedRow, setSelectedRow] = React.useState<T | null>(null)
@@ -501,23 +501,23 @@ export function TableCore<T extends Record<string, any>>({
     try {
       // Call API to update sort order on server using the target item's ID
       console.info(`Updating sort order for item ${reorderedItem.id} to position of item ${targetItem.id}`)
-      
+
       const response = await api.put(`${apiEndpoint}/${reorderedItem.id}/reorder?sort_field=sort_order&sort_order=asc`, {
         sort_order: targetItem.sort_order
       })
-      
+
       console.info("Sort order update response:", response)
       toast.success("تم تحديث الترتيب بنجاح")
-      
+
       // Refetch data to ensure consistency
       refetch()
     } catch (error: any) {
       console.error("Error updating sort order:", error)
-      
+
       // Show more specific error message
       const errorMessage = error?.response?.data?.message || error?.message || "فشل في تحديث الترتيب"
       toast.error(errorMessage)
-      
+
       // Revert local changes on error
       refetch()
     }
@@ -571,7 +571,7 @@ export function TableCore<T extends Record<string, any>>({
 
       // Refetch data after successful delete
       refetch()
-      
+
       setDeleteDialogOpen(false)
       setSelectedRow(null)
     } catch (error) {
@@ -610,232 +610,234 @@ export function TableCore<T extends Record<string, any>>({
     <div className="space-y-4 bg-card rounded-3xl shadow-lg p-4 md:p-6 border border-border/50 relative overflow-hidden group">
       {/* Decorative gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      
+
       {/* Animated background elements */}
       <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 rounded-full blur-3xl animate-pulse opacity-30" />
       <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-accent/10 rounded-full blur-3xl animate-pulse opacity-30 delay-1000" />
-      
+
       <div className="relative z-10">
         {/* Toolbar */}
         <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center md:justify-between mb-4 md:mb-6">
-        <div className="flex flex-1 items-center gap-2 w-full">
-          <div className="flex flex-col sm:flex-row w-full gap-2">
-            <TableSearch
-              searchValue={searchParams.get("search") || ""}
-              placeholder={searchPlaceholder || "بحث..."} // Changed placeholder to Arabic
-              onSearch={handleSearch}
-            />
-            <TableFilters
-              filters={filters}
-              activeFilters={activeFilters}
-              dateRange={dateRange}
-              hasActiveFilters={hasActiveFilters}
-              onFilterChange={handleFilter}
-              onDateRangeChange={handleDateRange}
-              onClearFilters={clearFilters}
-              enableDateRange={enableDateRange}
-            />
+          <div className="flex flex-1 items-center gap-2 w-full">
+            <div className="flex flex-col sm:flex-row w-full gap-2">
+              <TableSearch
+                searchValue={searchParams.get("search") || ""}
+                placeholder={searchPlaceholder || "بحث..."} // Changed placeholder to Arabic
+                onSearch={handleSearch}
+              />
+              <TableFilters
+                filters={filters}
+                activeFilters={activeFilters}
+                dateRange={dateRange}
+                hasActiveFilters={hasActiveFilters}
+                onFilterChange={handleFilter}
+                onDateRangeChange={handleDateRange}
+                onClearFilters={clearFilters}
+                enableDateRange={enableDateRange}
+              />
+            </div>
+
+            {enableDragDrop && (
+              <Button
+                variant={isDragEnabled ? "default" : "outline"}
+                size="icon"
+                onClick={() => setIsDragEnabled(!isDragEnabled)}
+                title={isDragEnabled ? "تعطيل السحب والإفلات" : "تفعيل السحب والإفلات"}
+                className="shrink-0 transition-all duration-300 hover:scale-110 hover:shadow-lg"
+              >
+                <GripVertical className="h-4 w-4" />
+              </Button>
+            )}
           </div>
-
-          {enableDragDrop && (
-            <Button
-              variant={isDragEnabled ? "default" : "outline"}
-              size="icon"
-              onClick={() => setIsDragEnabled(!isDragEnabled)}
-              title={isDragEnabled ? "تعطيل السحب والإفلات" : "تفعيل السحب والإفلات"}
-              className="shrink-0 transition-all duration-300 hover:scale-110 hover:shadow-lg"
-            >
-              <GripVertical className="h-4 w-4" />
-            </Button>
-          )}
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="rounded-2xl bg-card overflow-hidden relative shadow-md border border-border/50 transition-all duration-300 hover:shadow-lg">
-        {isLoading ? (
-          <TableSkeleton
-            columns={initColumns.length + (enableActions ? 1 : 0)}
-            rows={skeletonRows}
-            variant={skeletonVariant}
-          />
-        ) : data.length === 0 ? (
-          <EmptyState message={emptyMessage} />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 hover:from-primary/15 hover:via-primary/10 hover:to-accent/15 transition-all duration-300 border-b border-border/50">
-                {isDragEnabled && <TableHead className="w-12" />}
-                {initColumns.map((column) => (
-                  <TableHead
-                    key={column.key}
-                    className={cn(
-                      "text-sm font-semibold text-foreground transition-all duration-200",
-                      column.sortable &&
-                      !isDragEnabled &&
-                      "cursor-pointer select-none hover:bg-primary/20 hover:scale-[1.02] transition-all duration-200",
-                      column.width,
-                      column.className,
-                    )}
-                    onClick={() => column.sortable && handleSort(column.key)}
-                  >
-                    <div className="flex items-center gap-2">
-                      {column.label}
-                      {column.sortable && !isDragEnabled && (
-                        <div className="flex flex-col transition-all duration-200">
-                          {sortColumn === column.key ? (
-                            sortDirection === "asc" ? (
-                              <ChevronUp className="h-4 w-4 text-primary animate-in zoom-in-95" />
-                            ) : sortDirection === "desc" ? (
-                              <ChevronDown className="h-4 w-4 text-primary animate-in zoom-in-95" />
+        {/* Table */}
+        <div className="rounded-2xl bg-card overflow-hidden relative shadow-md border border-border/50 transition-all duration-300 hover:shadow-lg">
+          {isLoading ? (
+            <TableSkeleton
+              columns={initColumns.length + (enableActions ? 1 : 0)}
+              rows={skeletonRows}
+              variant={skeletonVariant}
+            />
+          ) : data.length === 0 ? (
+            <EmptyState message={emptyMessage} />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 hover:from-primary/15 hover:via-primary/10 hover:to-accent/15 transition-all duration-300 border-b border-border/50">
+                  {isDragEnabled && <TableHead className="w-12" />}
+                  {initColumns.map((column) => (
+                    <TableHead
+                      key={column.key}
+                      className={cn(
+                        "text-sm font-semibold text-foreground transition-all duration-200",
+                        column.sortable &&
+                        !isDragEnabled &&
+                        "cursor-pointer select-none hover:bg-primary/20 hover:scale-[1.02] transition-all duration-200",
+                        column.width,
+                        column.className,
+                      )}
+                      onClick={() => column.sortable && handleSort(column.key)}
+                    >
+                      <div className="flex items-center gap-2">
+                        {column.label}
+                        {column.sortable && !isDragEnabled && (
+                          <div className="flex flex-col transition-all duration-200">
+                            {sortColumn === column.key ? (
+                              sortDirection === "asc" ? (
+                                <ChevronUp className="h-4 w-4 text-primary animate-in zoom-in-95" />
+                              ) : sortDirection === "desc" ? (
+                                <ChevronDown className="h-4 w-4 text-primary animate-in zoom-in-95" />
+                              ) : (
+                                <div className="flex flex-col -space-y-1">
+                                  <ChevronUp className="h-3 w-3 text-muted-foreground/50" />
+                                  <ChevronDown className="h-3 w-3 text-muted-foreground/50" />
+                                </div>
+                              )
                             ) : (
-                              <div className="flex flex-col -space-y-1">
+                              <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                 <ChevronUp className="h-3 w-3 text-muted-foreground/50" />
                                 <ChevronDown className="h-3 w-3 text-muted-foreground/50" />
                               </div>
-                            )
-                          ) : (
-                            <div className="flex flex-col -space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <ChevronUp className="h-3 w-3 text-muted-foreground/50" />
-                              <ChevronDown className="h-3 w-3 text-muted-foreground/50" />
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </TableHead>
-                ))}
-                {enableActions && (
-                  <TableHead className="w-32 text-center text-sm font-semibold text-foreground">الإجراءات</TableHead>
-                )}
-                {/* Changed header text to Arabic and added styling */}
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {data.map((row, index) => (
-                <TableRow
-                  key={row.id || index}
-                  draggable={isDragEnabled}
-                  onDragStart={() => handleDragStart(index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onDragEnd={handleDragEnd}
-                  className={cn(
-                    "hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 transition-all duration-300",
-                    "group/row",
-                    isDragEnabled && "cursor-move",
-                    draggedIndex === index && "opacity-50 scale-95",
-                    index % 2 === 0 && "bg-muted/20",
-                  )}
-                >
-                  {isDragEnabled && (
-                    <TableCell>
-                      <GripVertical className="h-4 w-4 text-muted-foreground group-hover/row:text-primary transition-colors" />
-                    </TableCell>
-                  )}
-
-                  {initColumns.map((column) => (
-                    <TableCell key={column.key} className={cn(column.width, column.className, "transition-colors duration-200")}>
-                      {column.render ? column.render(row[column.key], row) : row[column.key]}
-                    </TableCell>
-                  ))}
-
-                  {enableActions && actions && (
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-1">
-                        {" "}
-                        {/* Changed justify-center and gap */}
-                        {enableView && actions.onView && (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            title="عرض"
-                            onClick={() => actions.onView!(row)}
-                            className="hover:bg-primary/20 hover:text-primary hover:scale-110 hover:shadow-md transition-all duration-300"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {enableEdit && actions.onEdit && (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            title="تعديل"
-                            onClick={() => actions.onEdit!(row)}
-                            className="hover:bg-primary/20 hover:text-primary hover:scale-110 hover:shadow-md transition-all duration-300"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {enableDelete && (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            title="حذف"
-                            onClick={() => handleDeleteClick(row)}
-                            className="hover:bg-destructive/20 hover:text-destructive hover:scale-110 hover:shadow-md transition-all duration-300"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            )}
+                          </div>
                         )}
                       </div>
-                    </TableCell>
+                    </TableHead>
+                  ))}
+                  {enableActions && (
+                    <TableHead className="w-32 text-center text-sm font-semibold text-foreground">الإجراءات</TableHead>
                   )}
+                  {/* Changed header text to Arabic and added styling */}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+
+              <TableBody>
+                {data.map((row, index) => (
+                  <TableRow
+                    key={row.id || index}
+                    draggable={isDragEnabled}
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
+                    className={cn(
+                      "hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 transition-all duration-300",
+                      "group/row",
+                      isDragEnabled && "cursor-move",
+                      draggedIndex === index && "opacity-50 scale-95",
+                      index % 2 === 0 && "bg-muted/20",
+                    )}
+                  >
+                    {isDragEnabled && (
+                      <TableCell>
+                        <GripVertical className="h-4 w-4 text-muted-foreground group-hover/row:text-primary transition-colors" />
+                      </TableCell>
+                    )}
+
+                    {initColumns.map((column) => (
+                      <TableCell key={column.key} className={cn(column.width, column.className, "transition-colors duration-200")}>
+                        {column.render ? column.render(row[column.key], row) : row[column.key]}
+                      </TableCell>
+                    ))}
+
+                    {enableActions && actions && (
+                      <TableCell>
+                        <div className="flex items-center justify-center gap-1">
+                          {" "}
+                          {/* Changed justify-center and gap */}
+                          {enableView && actions.onView && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              title="عرض"
+                              onClick={() => actions.onView!(row)}
+                              className="hover:bg-primary/20 hover:text-primary hover:scale-110 hover:shadow-md transition-all duration-300"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {enableEdit && actions.onEdit && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              title="تعديل"
+                              onClick={() => actions.onEdit!(row)}
+                              className="hover:bg-primary/20 hover:text-primary hover:scale-110 hover:shadow-md transition-all duration-300"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {enableDelete && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              title="حذف"
+                              onClick={() => handleDeleteClick(row)}
+                              className="hover:bg-destructive/20 hover:text-destructive hover:scale-110 hover:shadow-md transition-all duration-300"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        <TablePagination
+          meta={pagination}
+          isLoading={isLoading}
+          hasData={data.length > 0}
+          onPageChange={handlePageChange}
+        />
+
+        {/* Delete Dialog */}
+        {selectedRow && (
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent className="bg-card border-border shadow-xl">
+              <DialogHeader>
+                <DialogTitle className="text-foreground">{deleteTitle}</DialogTitle>
+                <DialogDescription className="text-muted-foreground">
+                  {deleteDescription ? (
+                    deleteDescription(selectedRow)
+                  ) : (
+                    "هل أنت متأكد من الحذف؟ لا يمكن التراجع عن هذا الإجراء."
+                  )}
+                  {deleteWarning && deleteWarning(selectedRow) && (
+                    <span className="block mt-2 text-destructive font-semibold">
+                      {deleteWarning(selectedRow)}
+                    </span>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex flex-row justify-end gap-2">
+                <div className="flex !flex-row justify-end gap-2 w-full">
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeleteDialogOpen(false)}
+                    disabled={isDeleting}
+                    className="transition-all duration-300 hover:scale-105 cursor-pointer"
+                  >
+                    إلغاء
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeleteConfirm}
+                    disabled={isDeleting}
+                    className="transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer"
+                  >
+                    {isDeleting ? "جاري الحذف..." : "حذف"}
+                  </Button>
+                </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         )}
-      </div>
-
-      <TablePagination
-        meta={pagination}
-        isLoading={isLoading}
-        hasData={data.length > 0}
-        onPageChange={handlePageChange}
-      />
-
-      {/* Delete Dialog */}
-      {selectedRow && (
-        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent className="bg-card border-border shadow-xl">
-            <DialogHeader>
-              <DialogTitle className="text-foreground">{deleteTitle}</DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                {deleteDescription ? (
-                  deleteDescription(selectedRow)
-                ) : (
-                  "هل أنت متأكد من الحذف؟ لا يمكن التراجع عن هذا الإجراء."
-                )}
-                {deleteWarning && deleteWarning(selectedRow) && (
-                  <span className="block mt-2 text-destructive font-semibold">
-                    {deleteWarning(selectedRow)}
-                  </span>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setDeleteDialogOpen(false)}
-                disabled={isDeleting}
-                className="transition-all duration-300 hover:scale-105"
-              >
-                إلغاء
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-                className="transition-all duration-300 hover:scale-105 hover:shadow-lg"
-              >
-                {isDeleting ? "جاري الحذف..." : "حذف"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
       </div>
     </div>
   )

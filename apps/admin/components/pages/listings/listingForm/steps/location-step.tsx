@@ -60,11 +60,6 @@ export function LocationStep({
     setValue("longitude", validatedCoords.lng)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onNext()
-  }
-
   const handleLocationSelectInternal = (lat: number, lng: number, address?: string) => {
     setValue("latitude", lat)
     setValue("longitude", lng)
@@ -79,7 +74,7 @@ export function LocationStep({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Governorate */}
       <div className="space-y-2">
         <Label htmlFor="governorate_id" className="text-right block text-sm sm:text-base">
@@ -88,6 +83,7 @@ export function LocationStep({
         <Select
           value={watch("governorate_id")}
           onValueChange={(value) => setValue("governorate_id", value)}
+          dir="rtl"
         >
           <SelectTrigger id="governorate_id" className="text-right">
             <SelectValue placeholder="اختر المحافظة" />
@@ -114,6 +110,7 @@ export function LocationStep({
           value={watch("city_id")}
           onValueChange={(value) => setValue("city_id", value)}
           disabled={!watch("governorate_id")}
+          dir="rtl"
         >
           <SelectTrigger id="city_id" className="text-right">
             <SelectValue placeholder="اختر المدينة (اختياري)" />
@@ -168,14 +165,15 @@ export function LocationStep({
             السابق
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={onNext}
             className="flex-1 h-12 text-base font-bold rounded-xl"
           >
             التالي
           </Button>
         </div>
       )}
-    </form>
+    </div>
   )
 }
 

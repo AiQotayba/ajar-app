@@ -1,4 +1,5 @@
 import { Bath, Bed, CheckCircle, DollarSign, Maximize2, Palette, Shield, Sofa } from "lucide-react"
+import { useLocale } from "next-intl"
 
 interface PropertyInfoProps {
   title: string
@@ -22,6 +23,7 @@ interface PropertyInfoProps {
   width?: number
   height?: number
   depth?: number
+  property?: any
 }
 
 export function PropertyInfo({
@@ -46,7 +48,10 @@ export function PropertyInfo({
   width,
   height,
   depth,
+  property,
 }: PropertyInfoProps) {
+  const locale = useLocale()
+  console.log({ property })
   return (
     <div className="space-y-4">
       {/* Title & Description */}
@@ -58,12 +63,8 @@ export function PropertyInfo({
       {/* Price */}
       <div className="flex items-center gap-2">
         <div className="text-xl font-bold text-primary">{price}</div>
-        {/* {price && (
-          <div className="px-3 py-1 rounded-full bg-primary/10 text-primary text-lg font-bold">
-            {price}
-          </div>
-        )} */}
       </div>
+
       {/* Category & Location */}
       {(category || location) && (
         <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
@@ -80,120 +81,23 @@ export function PropertyInfo({
         </div>
       )}
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 py-4 border-t border-border text-sm">
+        {property?.map((item: any) => (
+          <div key={item.id}>
+            {item.property.icon && (
+              <img src={item.property.icon} alt={item.property.name[locale as any]} className="w-4 h-4" />
+            )}
+            <span className="px-2 py-1 font-bold">
+              {item.property.name[locale as any]}
+            </span>
 
-      {/* Property Details - Top Row */}
-      {(furnished !== undefined || area || insurance || bedrooms || bathrooms) && (
-        <div className="grid grid-cols-2 gap-3 py-4 border-t border-border text-sm">
-          {furnished !== undefined && (
-            <div className="flex items-center gap-2">
-              <Sofa className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{furnished ? "مفروش" : "غير مفروش"}</span>
-            </div>
-          )}
-          {area && (
-            <div className="flex items-center gap-2">
-              <Maximize2 className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{area}</span>
-            </div>
-          )}
-          {insurance && (
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{insurance.toLocaleString()} {currency} تأمين</span>
-            </div>
-          )}
-          {bedrooms && (
-            <div className="flex items-center gap-2">
-              <Bed className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{bedrooms} غرف</span>
-            </div>
-          )}
-          {bathrooms && (
-            <div className="flex items-center gap-2">
-              <Bath className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{bathrooms} حمام</span>
-            </div>
-          )}
-        </div>
-      )}
+            <span className="px-2 py-1 ">
+              {typeof item.value === 'object' ? item.value[locale as any] : item.value}
+            </span>
 
-      {/* Additional Details - Bottom Section */}
-      {(condition || material || color || width || height || depth) && (
-        <div className="grid grid-cols-2 gap-3 py-4 border-b border-border text-sm">
-          <Row value={condition} label="الحالة" Icon={CheckCircle} />
-          <Row value={material} label="المادة" Icon={Shield} />
-          <Row value={color} label="اللون" Icon={Palette} />
-          <Row value={width} label="العرض" Icon={Maximize2} />
-          <Row value={height} label="الارتفاع" Icon={Maximize2} />
-          <Row value={depth} label="العمق" Icon={Maximize2} />
-          <Row value={deposit} label="الإيجار" Icon={DollarSign} />
-          {condition && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">الحالة:</span>
-              <span className="font-medium">{typeof condition === 'object' ? JSON.stringify(condition) : condition}</span>
-            </div>
-          )}
-          {material && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">المادة:</span>
-              <span className="font-medium">{typeof material === 'object' ? JSON.stringify(material) : material}</span>
-            </div>
-          )}
-          {color && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">اللون:</span>
-              <span className="font-medium">{typeof color === 'object' ? JSON.stringify(color) : color}</span>
-            </div>
-          )}
-          {width && width > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">العرض:</span>
-              <span className="font-medium">{width} سم</span>
-            </div>
-          )}
-          {height && height > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">الارتفاع:</span>
-              <span className="font-medium">{height} سم</span>
-            </div>
-          )}
-          {depth && depth > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-muted-foreground">العمق:</span>
-              <span className="font-medium">{depth} سم</span>
-            </div>
-          )}
-          {deposit && (
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{deposit}</span>
-            </div>
-          )}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   )
-}
-
-function Row({ value, label, Icon }: { value: number | string | undefined, label: string, Icon: any }) {
-  if (!value) return <></>;
-  
-  // Convert object to string if needed
-  const displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
-  
-  if (value && typeof value === 'number' && value > 0) return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-muted-foreground" />
-      <span className="font-medium">{value} {label}</span>
-    </div>
-  )
-  
-  if (value && typeof value === 'string' && value.trim()) return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-muted-foreground" />
-      <span className="font-medium">{displayValue}</span>
-    </div>
-  )
-  
-  return <></>;
-}
+} 

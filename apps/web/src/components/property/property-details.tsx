@@ -1,5 +1,4 @@
 "use client"
-import { Header } from "@/components/layout/header"
 import { PropertyDetailsSkeleton } from "@/components/property/property-details-skeleton"
 import { PropertyFeatures } from "@/components/property/property-features"
 import { PropertyGallery } from "@/components/property/property-gallery"
@@ -11,7 +10,7 @@ import { useTranslationsHook } from "@/hooks/use-translations"
 import { api } from "@/lib/api"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/hooks/use-auth"
-import { Eye, Heart, MapPin, Navigation } from "lucide-react"
+import { Eye, Heart, MapPin } from "lucide-react"
 import { notFound } from "next/navigation"
 import { useState } from "react"
 
@@ -84,7 +83,6 @@ interface ListingData {
 
 export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
   const t = useTranslationsHook()
-  const [isFavorite, setIsFavorite] = useState(false)
   const queryClient = useQueryClient()
   const { user } = useAuth()
 
@@ -196,6 +194,7 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
     description: feature.description ? getLocalizedText(feature.description) : undefined,
     icon: feature.icon
   })) || []
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="container max-w-7xl mx-auto px-4 py-6">
@@ -236,11 +235,13 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
               width={parsePropertyValue(widthProperty?.value)}
               height={parsePropertyValue(heightProperty?.value)}
               depth={parsePropertyValue(depthProperty?.value)}
+
+              property={property.properties}
             />
 
             {/* Floating WhatsApp Button - Mobile only */}
             <div className="fixed bottom-0 !mb-0 pb-4 bg-white left-4 right-4 z-50 lg:hidden">
-              <div className="flex items-center justify-between bg-gray-100 gap-3 h-1 my-2 rounded-full"/>
+              <div className="flex items-center justify-between bg-gray-100 gap-3 h-1 my-2 rounded-full" />
               <div className="grid grid-cols-2 items-center justify-between gap-3">
                 <div className="flex-1">
                   <div className="text-xs text-muted-foreground mb-1">

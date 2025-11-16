@@ -32,6 +32,7 @@ export function ImageUpload({
     const [progress, setProgress] = React.useState(0)
     const [preview, setPreview] = React.useState<string | null>(value || null)
     const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const isUploadingRef = React.useRef(false) // Track upload state to prevent useEffect interference
 
     const aspectRatioClasses = {
         square: "aspect-square",
@@ -64,7 +65,8 @@ export function ImageUpload({
         }
         reader.readAsDataURL(file)
 
-        // Upload file
+        // Upload file 
+        isUploadingRef.current = true
         setIsUploading(true)
         setProgress(0)
 
@@ -82,13 +84,13 @@ export function ImageUpload({
             const imageName = response.data?.image_name || response.data?.path
 
             if (!response.isError && imageName) {
-                // Save the relative path (image_name) to form/database
-                onChange(imageName)
-
                 // Build full URL for preview display
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
                 const fullImageUrl = `${baseUrl}/storage/${imageName}`
                 setPreview(fullImageUrl)
+
+                // Save the relative path (image_name) to form/database 
+                onChange(imageName)
 
                 toast.success("تم رفع الصورة بنجاح")
             } else {
@@ -99,6 +101,7 @@ export function ImageUpload({
             setPreview(null)
             toast.error(error?.message || "فشل رفع الصورة")
         } finally {
+            isUploadingRef.current = false
             setIsUploading(false)
             setProgress(0)
             // Reset input
@@ -117,12 +120,17 @@ export function ImageUpload({
     }
 
     const handleClick = () => {
-        if (!disabled && !isUploading) {
-            fileInputRef.current?.click()
-        }
+        if (!disabled && !isUploading) fileInputRef.current?.click()
     }
 
     React.useEffect(() => {
+        // Don't update preview during upload - wait for upload to complete
+        if (isUploadingRef.current) return
+
+
+        // Don't update preview if it's a data URL (from FileReader) - wait for upload to complete
+        if (preview && preview.startsWith('data:')) return
+
         if (value) {
             // If value is a full URL, use it directly
             if (value.startsWith('http://') || value.startsWith('https://')) {
@@ -130,10 +138,14 @@ export function ImageUpload({
             } else {
                 // If value is image_name (relative path), build full URL
                 const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
-                setPreview(`${baseUrl}/storage/${value}`)
+                const fullUrl = `${baseUrl}/storage/${value}`
+                setPreview(fullUrl)
             }
         } else {
-            setPreview(null)
+            // Only clear preview if it's not a data URL (not during upload)
+            if (!preview || !preview.startsWith('data:')) {
+                setPreview(null)
+            }
         }
     }, [value])
 
@@ -150,7 +162,17 @@ export function ImageUpload({
             >
                 {preview ? (
                     <>
-                        <Images src={preview} alt="Preview" className="h-full w-full object-cover" />
+                        {preview.startsWith('data:') ? (
+                            // Use regular img for data URLs (from FileReader)
+                            <img
+                                src={preview}
+                                alt="Preview"
+                                className="h-full w-full object-cover"
+                            />
+                        ) : (
+                            // Use Images component for regular URLs
+                            <Images src={preview} alt="Preview" className="h-full w-full object-cover" />
+                        )}
                         {!disabled && !isUploading && (
                             <Button
                                 type="button"

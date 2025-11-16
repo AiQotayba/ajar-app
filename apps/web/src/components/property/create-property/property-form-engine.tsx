@@ -209,8 +209,12 @@ export function PropertyFormEngine({
       
       if (!response.isError && response.data) {
         const listing = response.data
-        methods.setValue({
+        methods.reset({
           ...listing,
+          title_ar: listing.title?.ar || listing.title_ar || "",
+          title_en: listing.title?.en || listing.title_en || "",
+          description_ar: listing.description?.ar || listing.description_ar || "",
+          description_en: listing.description?.en || listing.description_en || "",
           category_id: listing.category_id?.toString() || "",
           governorate_id: listing.governorate_id?.toString() || "",
           city_id: listing.city_id?.toString() || "",
@@ -360,29 +364,140 @@ export function PropertyFormEngine({
     }
   }
 
+  // Transform form data to API format
+  const transformFormDataToAPI = async (formData: PropertyFormData) => {
+    // Transform properties from {id, value} to {property_id, value, sort_order}
+    const transformedProperties = formData.properties?.map((prop, index) => {
+      // Convert value to JSON format as required by database
+      // If value is already an object, use it as is
+      // If value is a string, convert it to JSON object with ar and en keys
+      let value: any
+      if (typeof prop.value === 'object' && prop.value !== null) {
+        value = prop.value
+      } else if (typeof prop.value === 'string') {
+        // Convert string to JSON object format: {"ar": "value", "en": "value"}
+        value = {
+          ar: prop.value,
+          en: prop.value
+        }
+      } else {
+        // Fallback: convert to string first, then to object
+        value = {
+          ar: String(prop.value || ""),
+          en: String(prop.value || "")
+        }
+      }
+
+      return {
+        property_id: prop.id,
+        value: value,
+        sort_order: index + 1
+      }
+    }) || []
+
+    // Transform media (File objects) to media format
+    // First, upload files and get their URLs
+    const transformedMedia = await Promise.all(
+      formData.media.map(async (file:any, index) => {
+        if (file instanceof File) {
+          // Upload file and get image_name directly from API response
+          try {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ajar-backend.mystore.social/api/v1'
+            const uploadFormData = new FormData()
+            uploadFormData.append('image', file)
+            uploadFormData.append('folder', 'listings')
+
+            // Get token for authentication
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')
+
+            const response = await fetch(`${baseUrl}/general/upload-image`, {
+              method: 'POST',
+              body: uploadFormData,
+              headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Accept': 'application/json',
+              },
+            })
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}))
+              throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
+            }
+
+            const data = await response.json()
+            
+            // Get image_name (relative path) from API response
+            const imageName = data.data?.image_name || data.image_name || data.data?.path || data.path
+            
+            if (!imageName) {
+              throw new Error("لم يتم إرجاع رابط الصورة")
+            }
+            
+            return {
+              type: "image",
+              url: imageName,
+              source: "file",
+              sort_order: index + 1
+            }
+          } catch (error) {
+            console.error(`Error uploading image ${index + 1}:`, error)
+            throw error
+          }
+        } else if (typeof file === 'string') {
+          // Already a URL string - extract relative path if full URL
+          const relativePath = file.includes('/storage/') 
+            ? file.split('/storage/')[1] 
+            : file
+          return {
+            type: "image",
+            url: relativePath,
+            source: "file",
+            sort_order: index + 1
+          }
+        } else {
+          // Already in correct format
+          return file
+        }
+      })
+    )
+
+    // Transform title and description to object format
+    const title = {
+      ar: formData.title_ar || "",
+      en: formData.title_en || ""
+    }
+
+    const description = {
+      ar: formData.description_ar || "",
+      en: formData.description_en || ""
+    }
+
+    return {
+      title,
+      description,
+      type: formData.type,
+      category_id: formData.category_id ? Number(formData.category_id) : undefined,
+      properties: transformedProperties,
+      features: formData.features?.map(f => Number(f)) || [],
+      governorate_id: formData.governorate_id ? Number(formData.governorate_id) : undefined,
+      city_id: formData.city_id ? Number(formData.city_id) : undefined,
+      // Convert latitude and longitude to strings as required by API
+      latitude: formData.latitude?.toString() || "",
+      longitude: formData.longitude?.toString() || "",
+      media: transformedMedia,
+      price: parseFloat(formData.price) || 0,
+      currency: formData.currency || "USD",
+      availability_status: formData.availability_status || "available",
+      status: formData.status || "active",
+    }
+  }
+
   const onSubmit = async (data: PropertyFormData) => {
     try {
       setIsLoading(true)
       
-      // Prepare form data for API
-      const submitData = {
-        title_ar: data.title_ar,
-        title_en: data.title_en,
-        description_ar: data.description_ar,
-        description_en: data.description_en,
-        type: data.type,
-        category_id: parseInt(data.category_id),
-        properties: data.properties,
-        features: data.features,
-        governorate_id: parseInt(data.governorate_id),
-        city_id: parseInt(data.city_id),
-        latitude: data.latitude,
-        longitude: data.longitude,
-        price: parseFloat(data.price),
-        currency: data.currency,
-        availability_status: data.availability_status,
-        status: data.status,
-      }
+      // Transform form data to API format
+      const submitData = await transformFormDataToAPI(data)
 
       let response
       if (isEditing && listingId) {
@@ -400,9 +515,10 @@ export function PropertyFormEngine({
       } else {
         toast.error(response.message || "حدث خطأ أثناء حفظ الإعلان")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error)
-      toast.error("حدث خطأ أثناء حفظ الإعلان")
+      const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء حفظ الإعلان"
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
