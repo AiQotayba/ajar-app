@@ -11,6 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import {
   Menu,
@@ -33,8 +35,10 @@ import {
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { Clock } from "lucide-react"
 import { Logo } from "../logo"
 import { Map } from "../icons/map"
 import { SearchBar } from "../search/search-bar"
@@ -43,6 +47,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { LanguageSwitcher } from "../language-switcher"
 import { logout } from "@/lib/logout"
 import { toast } from "sonner"
+import { api } from "@/lib/api"
 
 interface NavbarProps {
   className?: string
@@ -314,21 +319,7 @@ export function Navbar({ className }: NavbarProps) {
 
             {/* Notifications - Only show if authenticated */}
             {isAuthenticated && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
-                asChild
-              >
-                <Link href={`/${locale}/notifications`}>
-                  <Bell className="w-5 h-5" />
-                  {user?.notifications_unread_count && user.notifications_unread_count > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
-                      {user.notifications_unread_count > 9 ? '9+' : user.notifications_unread_count}
-                    </Badge>
-                  )}
-                </Link>
-              </Button>
+              <NotificationBell locale={locale} />
             )}
 
             {/* Add Property Button - Only show if authenticated */}
@@ -358,7 +349,7 @@ export function Navbar({ className }: NavbarProps) {
                           alt={user.full_name || 'User'}
                           width={35}
                           height={35}
-                          className="rounded-full border-2 border-emerald-100 object-cover max-h-[35px] max-w-[35px]"
+                          className="rounded-full aspect-square border-2 border-emerald-100 object-cover max-h-[35px] max-w-[35px]"
                         />
                       ) : (
                         <User className="w-5 h-5" />
@@ -379,20 +370,20 @@ export function Navbar({ className }: NavbarProps) {
                             alt={user.full_name || 'User'}
                             width={35}
                             height={35}
-                            className="rounded-full border-2 border-emerald-100 object-cover max-h-[35px] max-w-[35px]"
+                            className="rounded-full aspect-square border-2 border-emerald-100 object-cover max-h-[35px] max-w-[35px]"
                           />
                         ) : (
                           <User className="w-5 h-5" />
                         )}
                         <div className="flex flex-col gap-1">
-                        <p className="text-sm font-medium leading-none rtl:text-end text-start">
-                          {user?.full_name || 'User'}
-                        </p>
-                        {user?.phone && (
-                          <p className="text-xs leading-none text-muted-foreground rtl:text-end text-start">
-                            {user.phone}
+                          <p className="text-sm font-medium leading-none rtl:text-end text-start">
+                            {user?.full_name || 'User'}
                           </p>
-                        )}
+                          {user?.phone && (
+                            <p className="text-xs leading-none text-muted-foreground rtl:text-end text-start">
+                              {user.phone}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </DropdownMenuLabel>
@@ -446,5 +437,185 @@ export function Navbar({ className }: NavbarProps) {
       {/* Filter Drawer */}
       <FilterDrawerWrapper open={isFilterOpen} onOpenChange={setIsFilterOpen} />
     </header>
+  )
+}
+
+// Notification Bell Component
+interface NotificationBellProps {
+  locale: string
+}
+
+interface Notification {
+  id: number
+  title: string
+  message: string
+  notificationable_id?: number | null
+  notificationable_type?: string | null
+  read_at?: string | null
+  is_read: boolean
+  metadata?: Record<string, any>
+  created_at: string
+  updated_at: string
+}
+
+function NotificationBell({ locale }: NotificationBellProps) {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false)
+  const { user } = useAuth()
+  const isRTL = locale === 'ar'
+
+  // Fetch notifications
+  const { data: notificationsData } = useQuery({
+    queryKey: ['notifications', 'header'],
+    queryFn: async () => {
+      const response = await api.get('/user/notifications', {
+        params: { per_page: 5 }
+      })
+
+      if (response.isError) {
+        return []
+      }
+
+      return response.data?.data || response.data || []
+    },
+    staleTime: 30000,
+    refetchInterval: 60000, // تحديث كل دقيقة
+    enabled: isOpen, // جلب البيانات فقط عند فتح النافذة
+  })
+
+  const notifications = notificationsData || []
+  const unreadCount = notifications.filter((n: Notification) => !n.is_read).length
+  const totalUnreadCount = user?.notifications_unread_count || unreadCount
+
+  // Mark as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await api.post(`/user/notifications/${id}/read`)
+
+      if (response.isError) {
+        throw new Error(response.message || 'Failed to mark notification as read')
+      }
+
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    },
+  })
+
+  const handleMarkAsRead = (id: number) => {
+    markAsReadMutation.mutate(id)
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+    if (diffInSeconds < 60) return isRTL ? "الآن" : "Now"
+    if (diffInSeconds < 3600) return isRTL ? `منذ ${Math.floor(diffInSeconds / 60)} دقيقة` : `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return isRTL ? `منذ ${Math.floor(diffInSeconds / 3600)} ساعة` : `${Math.floor(diffInSeconds / 3600)}h ago`
+    if (diffInSeconds < 604800) return isRTL ? `منذ ${Math.floor(diffInSeconds / 86400)} يوم` : `${Math.floor(diffInSeconds / 86400)}d ago`
+
+    return date.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US', {
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
+        >
+          <Bell className="w-5 h-5" />
+          {totalUnreadCount > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 text-white">
+              {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+            </Badge>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0 bg-white" align={isRTL ? "start" : "end"} dir={isRTL ? "rtl" : "ltr"}>
+        <div className="flex items-center justify-between p-4 border-b">
+          <h3 className="font-semibold text-foreground">
+            {isRTL ? "الإشعارات" : "Notifications"}
+          </h3>
+          {unreadCount > 0 && (
+            <Badge variant="destructive" className="text-xs">
+              {unreadCount} {isRTL ? "غير مقروء" : "unread"}
+            </Badge>
+          )}
+        </div>
+
+        {notifications.length === 0 ? (
+          <div className="p-8 text-center">
+            <Bell className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              {isRTL ? "لا توجد إشعارات" : "No notifications"}
+            </p>
+          </div>
+        ) : (
+          <>
+            <ScrollArea className="h-[400px]">
+              <div className="divide-y" dir="rtl">
+                {notifications.map((notification: Notification) => (
+                  <div
+                    key={notification.id}
+                    className={cn(
+                      "p-4 transition-colors hover:bg-muted/50 cursor-pointer",
+                      !notification.is_read && "bg-primary/5"
+                    )}
+                    onClick={() => {
+                      if (!notification.is_read) handleMarkAsRead(notification.id)
+                    }}
+                  >
+                    <div className="flex items-start gap-3 rtl:flex-row">
+                      <div className={cn(
+                        "flex-shrink-0 h-8 w-8 rounded-lg flex items-center justify-center",
+                        !notification.is_read ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                      )}>
+                        <Bell className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 ">
+                          <h4 className={cn(
+                            "text-sm font-medium text-foreground text-start ",
+                            !notification.is_read && "font-semibold"
+                          )}>
+                            {notification.title}
+                          </h4>
+                          {!notification.is_read && (
+                            <span className="h-2 w-2 rounded-full bg-primary" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-1"> 
+                          {notification.message}
+                        </p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{formatDate(notification.created_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="p-3 border-t">
+              <Link href={`/${locale}/notifications`} onClick={() => setIsOpen(false)}>
+                <Button variant="outline" className="w-full" size="sm">
+                  {isRTL ? "عرض الكل" : "View All"}
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
+      </PopoverContent>
+    </Popover>
   )
 }

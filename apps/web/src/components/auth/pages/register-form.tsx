@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronRight, User, Phone, Lock, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,22 +9,36 @@ import { Label } from "@/components/ui/label"
 import { useLocale, useTranslations } from "next-intl"
 import { useForm, Controller } from "react-hook-form"
 import { toast } from "sonner"
-import Link from "next/link"
-import { api } from "@/lib/api"
+import Link from "next/link" 
 import { AuthLayout } from "../authLayout"
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import '@/styles/phone-input.css'
 import { PasswordIcon } from "@/components/icons"
-import { handleAuthResponse } from "@/lib/auth/client"
+import { getFCMToken } from "@/lib/firebase"
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [deviceToken, setDeviceToken] = useState<string | null>(null)
   const router = useRouter()
   const t = useTranslations()
   const locale = useLocale()
+
+  // الحصول على FCM Token عند تحميل المكون
+  useEffect(() => {
+    const getDeviceToken = async () => {
+      try {
+        const token = await getFCMToken()
+        setDeviceToken(token)
+      } catch (error) {
+        console.error('Error getting FCM token:', error)
+      }
+    }
+    
+    getDeviceToken()
+  }, [])
 
   const {
     register,
@@ -48,6 +62,12 @@ export function RegisterForm() {
     setIsLoading(true)
 
     try {
+      // التأكد من وجود FCM Token
+      let finalDeviceToken = deviceToken
+      if (!finalDeviceToken) {
+        finalDeviceToken = await getFCMToken()
+      }
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL
       const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
@@ -57,7 +77,8 @@ export function RegisterForm() {
           phone: data.phone,
           password: data.password,
           password_confirmation: data.password_confirmation,
-          avatar: 'avatars/default_avatar.jpg'
+          avatar: 'avatars/default_avatar.jpg',
+          device_token: finalDeviceToken  // ✅ FCM Token
         }),
         headers: {
           'Content-Type': 'application/json',

@@ -111,6 +111,7 @@ function useTableData<T>(apiEndpoint: string) {
     const params = Object.fromEntries(searchParams.entries())
     return ["table-data", apiEndpoint, params]
   }, [apiEndpoint, searchParams])
+  console.log(queryKey);
 
   // Fetch function using API client
   const fetchData = React.useCallback(async () => {

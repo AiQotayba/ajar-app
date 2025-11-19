@@ -36,7 +36,7 @@ interface CategoriesDetailSidebarProps {
 
 export function CategoriesDetailSidebar({ category, onEdit, onDelete }: CategoriesDetailSidebarProps) {
     const queryClient = useQueryClient()
-    
+
     const [isPropertyDrawerOpen, setIsPropertyDrawerOpen] = useState(false)
     const [isFeatureDrawerOpen, setIsFeatureDrawerOpen] = useState(false)
     const [isChildFormDrawerOpen, setIsChildFormDrawerOpen] = useState(false)
@@ -284,7 +284,8 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
             return (
                 <Images
                     src={iconUrl}
-                    alt="" 
+                    alt=""
+                    fill={false}
                     width={20}
                     height={20}
                     className="w-4 h-4 object-cover rounded"
@@ -340,6 +341,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
         }
         return colors[type] || "bg-slate-500/10 text-slate-700 dark:text-slate-400"
     }
+    console.log(category.properties)
 
     return (
         <>
@@ -761,9 +763,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                                     {feature.icon && (
                                                         <div className="flex justify-center mb-2">
                                                             <Images
-                                                                src={feature.icon.startsWith('http')
-                                                                    ? feature.icon
-                                                                    : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'}/storage/${feature.icon}`}
+                                                                src={feature?.icon}
                                                                 alt=""
                                                                 fill={false}
                                                                 width={20}

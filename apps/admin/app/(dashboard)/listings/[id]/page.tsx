@@ -97,8 +97,8 @@ export default function ListingDetailPage() {
         : formattedPrice
 
     const location = listing.city
-        ? `${listing.city.name.ar}, ${listing.governorate?.name.ar}`
-        : listing.governorate?.name.ar || ""
+        ? `${typeof listing.city.name === 'object' ? listing.city.name?.ar : listing.city.name}, ${typeof listing.governorate?.name === 'object' ? listing.governorate?.name?.ar : listing.governorate?.name}`
+        : (typeof listing.governorate?.name === 'object' ? listing.governorate?.name?.ar : listing.governorate?.name) || ""
 
     return (
         <div className="space-y-6" dir="rtl">
@@ -175,7 +175,9 @@ export default function ListingDetailPage() {
 
                         <div className="flex flex-wrap gap-2">
                             {listing.category && (
-                                <Badge variant="outline">{listing.category.name.ar}</Badge>
+                                <Badge variant="outline">
+                                    {typeof listing.category.name === 'object' ? listing.category.name?.ar : listing.category.name}
+                                </Badge>
                             )}
                             {location && (
                                 <Badge variant="secondary">
@@ -263,11 +265,16 @@ export default function ListingDetailPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex flex-wrap gap-2">
-                            {listing.features.map((feature: any, index) => (
-                                <Badge key={feature.id || index} variant="outline">
-                                    {feature.name?.ar || feature}
-                                </Badge>
-                            ))}
+                            {listing.features.map((feature: any, index) => {
+                                const featureName = typeof feature === 'string' 
+                                    ? feature 
+                                    : (typeof feature?.name === 'object' ? feature?.name?.ar : feature?.name || feature)
+                                return (
+                                    <Badge key={feature.id || index} variant="outline">
+                                        {featureName}
+                                    </Badge>
+                                )
+                            })}
                         </div>
                     </CardContent>
                 </Card>
@@ -284,14 +291,22 @@ export default function ListingDetailPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {listing.properties.map((prop: any, index) => (
-                                <div key={prop.id || index} className="p-3 border rounded-lg">
-                                    <p className="text-xs text-muted-foreground mb-1">
-                                        {prop.property?.name?.ar || "خاصية"}
-                                    </p>
-                                    <p className="text-sm font-semibold">{prop.value}</p>
-                                </div>
-                            ))}
+                            {listing.properties.map((prop: any, index) => {
+                                const propertyName = prop.property?.name 
+                                    ? (typeof prop.property.name === 'object' ? prop.property.name?.ar : prop.property.name)
+                                    : "خاصية"
+                                const propertyValue = typeof prop.value === 'object' 
+                                    ? (prop.value?.ar || prop.value?.en || JSON.stringify(prop.value))
+                                    : prop.value
+                                return (
+                                    <div key={prop.id || index} className="p-3 border rounded-lg">
+                                        <p className="text-xs text-muted-foreground mb-1">
+                                            {propertyName}
+                                        </p>
+                                        <p className="text-sm font-semibold">{propertyValue}</p>
+                                    </div>
+                                )
+                            })}
                         </div>
                     </CardContent>
                 </Card>

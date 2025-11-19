@@ -16,7 +16,7 @@ export default function CategoriesPage() {
     const { data: categories, isLoading, refetch } = useQuery({
         queryKey: ["categories"],
         queryFn: async () => {
-            const response = await api.get<{ data: Category[] }>('/admin/categories')
+            const response = await api.get<{ data: Category[] }>('/admin/categories?sort_field=sort_order&sort_order=asc')
             return response.data
         },
     })

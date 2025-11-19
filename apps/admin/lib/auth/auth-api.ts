@@ -5,6 +5,7 @@ export interface LoginData {
   phone: string
   password: string
   role: string
+  device_token?: string
 }
 
 export interface RegisterData {

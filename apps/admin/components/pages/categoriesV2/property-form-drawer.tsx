@@ -41,7 +41,7 @@ const propertyFormSchema = z.object({
 	description_ar: z.string().optional(),
 	description_en: z.string().optional(),
 	icon: z.string().min(1, "الأيقونة مطلوبة"),
-	type: z.enum(["int", "bool", "datetime", "enum"]).default("int"),
+	type: z.enum(["int", "float", "bool", "datetime", "enum"]).default("int"),
 	is_filter: z.boolean().default(false),
 	options: z.array(z.union([z.string(), z.number()])).default([]),
 	sort_order: z.number().default(0),
@@ -109,12 +109,13 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 
 	const handleAddOption = () => {
 		if (!newOptionValue.trim()) return
-		
+
 		const currentOptions = form.getValues("options") || []
-		const valueToAdd = form.getValues("type") === "int"
-			? Number(newOptionValue)
+		const type = form.getValues("type")
+		const valueToAdd = type === "int" || type === "float"
+			? type === "int" ? Number.parseInt(newOptionValue, 10) : Number.parseFloat(newOptionValue)
 			: newOptionValue.trim()
-		
+
 		form.setValue("options", [...currentOptions, valueToAdd])
 		setNewOptionValue("")
 	}
@@ -153,7 +154,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 		onError: (error: any) => {
 			const errorMessage = error?.message || error?.response?.data?.message || "فشل إنشاء الخاصية"
 			toast.error(errorMessage)
-			
+
 			// Set form errors if API returns validation errors
 			if (error?.response?.data?.errors) {
 				const errors = error.response.data.errors
@@ -197,7 +198,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 		onError: (error: any) => {
 			const errorMessage = error?.message || error?.response?.data?.message || "فشل تحديث الخاصية"
 			toast.error(errorMessage)
-			
+
 			// Set form errors if API returns validation errors
 			if (error?.response?.data?.errors) {
 				const errors = error.response.data.errors
@@ -242,6 +243,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 	}
 
 	const isLoading = createMutation.isPending || updateMutation.isPending
+	console.log(form.getValues("type"), property);
 
 	return (
 		<Drawer open={open} onOpenChange={onOpenChange} direction="left">
@@ -374,6 +376,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 											</FormControl>
 											<SelectContent>
 												<SelectItem value="int">رقم صحيح</SelectItem>
+												<SelectItem value="float">رقم عشري</SelectItem>
 												<SelectItem value="bool">نعم/لا</SelectItem>
 												<SelectItem value="datetime">تاريخ ووقت</SelectItem>
 												<SelectItem value="enum">قائمة خيارات</SelectItem>
@@ -400,8 +403,8 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 							/>
 						</div>
 
-						{/* Options Field - Show for int and enum types */}
-						{form.watch("type") === "int" || form.watch("type") === "enum" ? (
+						{/* Options Field - Show for int, float and enum types */}
+						{form.watch("type") === "int" || form.watch("type") === "float" || form.watch("type") === "enum" ? (
 							<FormField
 								control={form.control}
 								name="options"
@@ -416,11 +419,12 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 													value={newOptionValue}
 													onChange={(e) => setNewOptionValue(e.target.value)}
 													placeholder={
-														form.watch("type") === "int"
+														form.watch("type") === "int" || form.watch("type") === "float"
 															? "أدخل رقم"
 															: "أدخل خيار جديد"
 													}
-													type={form.watch("type") === "int" ? "number" : "text"}
+													type={form.watch("type") === "int" || form.watch("type") === "float" ? "number" : "text"}
+													step={form.watch("type") === "float" ? "any" : undefined}
 													onKeyDown={(e) => {
 														if (e.key === "Enter") {
 															e.preventDefault()

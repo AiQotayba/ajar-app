@@ -11,6 +11,7 @@ import type React from "react";
 import { Toaster } from "sonner";
 import "../globals.css";
 import { MainLayout } from "@/components/layout";
+import ForegroundNotificationListenerProvider from "@/components/notifications/foreground-notification-listener-provider";
 
 export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
@@ -98,6 +99,7 @@ export default async function LocaleLayout({
             <body className="antialiased">
                 <QueryProvider>
                     <NextIntlClientProvider locale={locale} messages={messages}>
+                        <ForegroundNotificationListenerProvider />
                         <LocaleSaver />
                         <MainLayout>
                             <main className="min-h-screen">{children}</main>

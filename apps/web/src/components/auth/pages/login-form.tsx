@@ -9,36 +9,65 @@ import { ChevronRight, Eye, EyeOff, Phone } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { toast } from "sonner"
 import { AuthLayout } from "../authLayout"
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import '@/styles/phone-input.css'
+import { getFCMToken } from "@/lib/firebase"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [deviceToken, setDeviceToken] = useState<string | null>(null)
   const router = useRouter()
   const t = useTranslations()
   const locale = useLocale()
 
+  // الحصول على FCM Token عند تحميل المكون
+  useEffect(() => {
+    const getDeviceToken = async () => {
+      try {
+        const token = await getFCMToken()
+        setDeviceToken(token)
+      } catch (error) {
+        console.error('Error getting FCM token:', error)
+      }
+    }
+
+    getDeviceToken()
+  }, [])
+
   const { register, handleSubmit, control, formState: { errors }, } = useForm({
     defaultValues: { phone: '', password: '' }
   })
+  // التأكد من وجود FCM Token
+  let finalDeviceToken = deviceToken
+  if (!finalDeviceToken) {
+    console.log(getFCMToken())
+  }
+
 
   const onSubmit = async (data: any) => {
     setIsLoading(true)
 
     try {
+      // التأكد من وجود FCM Token
+      let finalDeviceToken = deviceToken
+      if (!finalDeviceToken) {
+        finalDeviceToken = await getFCMToken()
+      }
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         body: JSON.stringify({
           phone: data.phone,
           password: data.password,
-          role: 'user'
+          role: 'user',
+          device_token: finalDeviceToken  // ✅ FCM Token
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -47,14 +76,14 @@ export function LoginForm() {
         }
       })
       const responseData = await response.json()
-      
+
       // Check if login was successful
       if (responseData.success && responseData.access_token) {
         // Check if user account is verified
         if (responseData.data?.phone_verified === false) {
           // Account not verified, redirect to OTP verification
           toast.info(t('auth.login.accountNotVerified'))
-          
+
           // Store temp user data and OTP info in sessionStorage
           if (typeof window !== 'undefined') {
             sessionStorage.setItem('temp_user_data', JSON.stringify(responseData.data))
@@ -62,7 +91,7 @@ export function LoginForm() {
               sessionStorage.setItem('otp_info', JSON.stringify(responseData.info))
             }
           }
-          
+
           // Redirect to OTP page with phone, type, and expire params
           const otpExpiry = responseData.info?.otp_expire_at
           router.push(`/${locale}/verify-otp?phone=${encodeURIComponent(data.phone)}&type=login${otpExpiry ? `&expire=${encodeURIComponent(otpExpiry)}` : ''}`)
@@ -76,7 +105,7 @@ export function LoginForm() {
         // Check if account is not verified (different error format)
         if (responseData.key === 'auth.account_not_verified') {
           toast.info(t('auth.login.accountNotVerified'))
-          
+
           // Store temp user data and OTP info in sessionStorage
           if (typeof window !== 'undefined') {
             if (responseData.data) {
@@ -86,7 +115,7 @@ export function LoginForm() {
               sessionStorage.setItem('otp_info', JSON.stringify(responseData.info))
             }
           }
-          
+
           // Redirect to OTP page with phone, type, and expire params
           const otpExpiry = responseData.info?.otp_expire_at
           router.push(`/${locale}/verify-otp?phone=${encodeURIComponent(data.phone)}&type=login${otpExpiry ? `&expire=${encodeURIComponent(otpExpiry)}` : ''}`)

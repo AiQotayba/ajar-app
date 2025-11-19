@@ -82,7 +82,7 @@ export const getSettingsColumns = (): TableColumn<Setting>[] => [
             return (
                 <div className="flex items-center justify-between group">
                     <p className="text-sm text-foreground line-clamp-2 max-w-md">
-                        {value || <span className="text-muted-foreground italic">فارغ</span>}
+                        {row.type === "html" ? <div dangerouslySetInnerHTML={{ __html: value }} /> : value}
                     </p>
                 </div>
             )

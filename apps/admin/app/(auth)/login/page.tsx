@@ -14,6 +14,7 @@ import { AuthLayout } from "@/components/auth/auth-layout"
 import Link from "next/link"
 import "react-phone-number-input/style.css"
 import "@/styles/phone-input.css"
+import { getFCMToken } from "@/lib/firebase"
 
 interface LoginFormData {
   phone: string
@@ -24,6 +25,21 @@ export default function LoginPage() {
   const router = useRouter()
   const [showPassword, setShowPassword] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [deviceToken, setDeviceToken] = React.useState<string | null>(null)
+
+  // الحصول على FCM Token عند تحميل المكون
+  React.useEffect(() => {
+    const getDeviceToken = async () => {
+      try {
+        const token = await getFCMToken()
+        setDeviceToken(token)
+      } catch (error) {
+        console.error('Error getting FCM token:', error)
+      }
+    }
+
+    getDeviceToken()
+  }, [])
 
   const {
     register,
@@ -41,10 +57,17 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      // التأكد من وجود FCM Token
+      let finalDeviceToken = deviceToken
+      if (!finalDeviceToken) {
+        finalDeviceToken = await getFCMToken()
+      }
+
       const response = await authApi.login({
         phone: data.phone,
         password: data.password,
         role: "admin",
+        device_token: finalDeviceToken || undefined,  // ✅ FCM Token
       })
 
       if (response.success) {

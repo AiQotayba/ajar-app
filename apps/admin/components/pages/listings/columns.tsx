@@ -39,27 +39,55 @@ const statusConfig = {
 // Status Select Component
 function StatusSelect({ listingId, currentStatus }: { listingId: number; currentStatus: Listing["status"] }) {
     const queryClient = useQueryClient()
+    const [optimisticStatus, setOptimisticStatus] = React.useState<Listing["status"] | null>(null)
 
     const updateStatusMutation = useMutation({
         mutationFn: async (newStatus: Listing["status"]) => {
             const response = await api.put(`/admin/listings/${listingId}`, { status: newStatus })
-            queryClient.invalidateQueries({ queryKey: ["listings"] })
-            return response
+            return { response, newStatus }
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["listings"] })
+        onMutate: async (newStatus: Listing["status"]) => {
+            // تحديث الحالة مباشرة (optimistic update)
+            setOptimisticStatus(newStatus)
+            
+            // تحديث البيانات المحلية مباشرة
+            queryClient.setQueryData(
+                ["table-data", "/admin/listings", {}],
+                (oldData: any) => {
+                    if (!oldData?.data) return oldData
+                    
+                    return {
+                        ...oldData,
+                        data: oldData.data.map((listing: Listing) =>
+                            listing.id === listingId
+                                ? { ...listing, status: newStatus }
+                                : listing
+                        ),
+                    }
+                }
+            )
+        },
+        onSuccess: (data) => {
+            // إعادة جلب البيانات من الخادم للتأكد من التحديث
+            queryClient.invalidateQueries({ queryKey: ["table-data", "/admin/listings", {}] })
+            setOptimisticStatus(null)
             toast.success("تم تحديث الحالة بنجاح")
         },
-        onError: (error: any) => {
+        onError: (error: any, newStatus) => {
+            // إرجاع الحالة السابقة عند الخطأ
+            setOptimisticStatus(null)
+            queryClient.invalidateQueries({ queryKey: ["table-data", "/admin/listings", {}] })
             toast.error(error?.message || "فشل تحديث الحالة")
         },
     })
 
-    const config = statusConfig[currentStatus] || statusConfig.draft
+    // استخدام الحالة المحدثة مباشرة أو الحالة الحالية
+    const displayStatus = optimisticStatus || currentStatus
+    const config = statusConfig[displayStatus] || statusConfig.draft
 
     return (
         <Select
-            value={currentStatus}
+            value={displayStatus}
             onValueChange={(value) => updateStatusMutation.mutate(value as Listing["status"])}
             disabled={updateStatusMutation.isPending}
             dir="rtl"

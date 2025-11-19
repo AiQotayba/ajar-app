@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { Review } from "@/lib/types/review"
 import { renderStars } from "./columns"
 import Images from "@/components/ui/image"
+import Phone from "@/components/ui/phone"
 
 interface ReviewViewProps {
     open: boolean
@@ -97,7 +98,7 @@ export function ReviewView({ open, onOpenChange, urlEndpoint, review }: ReviewVi
                             </Avatar>
                             <div>
                                 <p className="text-sm font-semibold">{review.user.full_name}</p>
-                                <p className="text-xs text-muted-foreground">{review.user.phone}</p>
+                                <Phone text={review.user.phone} />
                                 <p className="text-xs text-muted-foreground">{review.user.email}</p>
                             </div>
                         </div>

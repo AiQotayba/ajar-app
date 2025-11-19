@@ -29,7 +29,8 @@ export default function ListingsPage() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status, reason }: { id: number; status: Listing["status"]; reason?: string }) =>
       api.put(`/admin/listings/${id}/status`, { status, reason }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data);
       queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
       setActionDialog({ listing: null, action: null, open: false })
     },

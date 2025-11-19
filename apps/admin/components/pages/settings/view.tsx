@@ -39,7 +39,7 @@ export function SettingView({ open, onOpenChange, urlEndpoint, setting }: Settin
         html: { label: "HTML", className: "bg-orange-500" },
     }
     const config = typeConfig[setting.type as keyof typeof typeConfig] || typeConfig.text
-
+    console.log(setting);
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -83,22 +83,15 @@ export function SettingView({ open, onOpenChange, urlEndpoint, setting }: Settin
                                 </pre>
                             ) : setting.type === "html" ? (
                                 <div className="space-y-2">
-                                    <pre className="text-xs font-mono whitespace-pre-wrap break-words bg-muted p-2 rounded">
-                                        {setting.value}
-                                    </pre>
-                                    <Separator />
-                                    <div className="text-xs text-muted-foreground">
-                                        <strong>معاينة HTML:</strong>
-                                        <div 
-                                            className="mt-2 p-2 border rounded bg-background"
-                                            dangerouslySetInnerHTML={{ __html: setting.value }}
-                                        />
-                                    </div>
+                                    <div
+                                        className="mt-2 p-2 rounded"
+                                        dangerouslySetInnerHTML={{ __html: setting.value }}
+                                    />
                                 </div>
                             ) : setting.type === "bool" ? (
                                 <div className="flex items-center gap-2">
-                                    <Badge variant={setting.value === "true" ? "default" : "secondary"} 
-                                           className={setting.value === "true" ? "bg-green-500" : "bg-gray-500"}>
+                                    <Badge variant={setting.value === "true" ? "default" : "secondary"}
+                                        className={setting.value === "true" ? "bg-green-500" : "bg-gray-500"}>
                                         {setting.value === "true" ? "✓ مفعّل" : "✗ معطّل"}
                                     </Badge>
                                 </div>

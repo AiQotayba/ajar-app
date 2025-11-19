@@ -19,8 +19,8 @@ export const renderStars = (rating: number) => {
                 <Star
                     key={i}
                     className={`h-4 w-4 ${i < rating
-                            ? "fill-amber-400 text-amber-400"
-                            : "fill-gray-200 text-gray-200"
+                        ? "fill-amber-400 text-amber-400"
+                        : "fill-gray-200 text-gray-200"
                         }`}
                 />
             ))}
@@ -46,7 +46,7 @@ export const getReviewsColumns = (
                     </Avatar>
                     <div>
                         <p className="font-semibold text-foreground">{value.full_name}</p>
-                        <p className="text-xs text-muted-foreground">{value.phone}</p>
+                        <span className="text-xs text-end font-light" style={{ direction: "ltr", unicodeBidi: "plaintext" }}>{value.phone}</span>
                     </div>
                 </div>
             ),
