@@ -3,7 +3,11 @@
 # سكربت نشر لمونوربّو فيه nextjs (apps/web apps/admin) مع pnpm و pm2
 
 set -e
-
+cd htdocs/ajarsyria.com/
+git clone https://github.com/AiQotayba/ajar-app.git
+cd ajar-app
+npm install -g pm2
+pm2 start "pnpm start" --name app
 echo "⬇️ جلب آخر تحديثات من Git..."
 git pull origin main
 
@@ -21,6 +25,8 @@ if pm2 list | grep -qw "web"; then
     pm2 reload web
 else
     pm2 start "pnpm --filter web start" --name web
+    pm2 start "pnpm start" --name app
+
 fi
 
 echo "🟢 تشغيل admin عن طريق pm2..."
