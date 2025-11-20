@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: "web",
-      script: "pnpm",
-      args: "start -p 3500",
+      script: "npm",
+      args: "start -- -p 3500",
       cwd: "/home/web/htdocs/ajarsyria.com/ajar-app/apps/web",
       env: {
         NODE_ENV: "production",
