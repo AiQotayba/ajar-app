@@ -3,16 +3,20 @@
 # سكربت نشر لمونوربّو فيه nextjs (apps/web apps/admin) مع pnpm و pm2
 
 set -e
-cd htdocs/ajarsyria.com/
+cd htdocs/dashboard.ajarsyria.com/
 git clone https://github.com/AiQotayba/ajar-app.git
 cd ajar-app
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+source ~/.bashrc
+pnpm install -g pnpm
+pnpm install
 npm install -g pm2
-pm2 start "pnpm start" --name app
+pnpm build
+pm2 start "pnpm start -p 3400" --name app
 echo "⬇️ جلب آخر تحديثات من Git..."
 git pull origin main
 
 echo "📦 تثبيت جميع الحزم..."
-pnpm install
 
 echo "⚒️ بناء مشروع web..."
 pnpm --filter web build
