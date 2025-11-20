@@ -25,7 +25,92 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 	const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null)
 	const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null)
 	const [localCategories, setLocalCategories] = React.useState<Category[]>(categories)
+	const [expandedCategories, setExpandedCategories] = React.useState<Set<number>>(new Set())
 	const queryClient = useQueryClient()
+	const containerRef = React.useRef<HTMLDivElement>(null)
+
+	// دالة لحفظ موضع الـ scroll واستعادته بعد استدعاء onSelectCategory
+	const handleSelectCategoryWithScrollPreservation = React.useCallback((category: Category, event?: React.MouseEvent) => {
+		// البحث عن جميع العناصر القابلة للتمرير وحفظ مواضعها
+		const scrollPositions: Array<{ element: HTMLElement, top: number, left: number }> = []
+		
+		// البحث في جميع العناصر القابلة للتمرير
+		const findAllScrollContainers = (element: HTMLElement | null): HTMLElement[] => {
+			const containers: HTMLElement[] = []
+			let current: HTMLElement | null = element
+			
+			while (current && current !== document.body && current !== document.documentElement) {
+				const style = window.getComputedStyle(current)
+				if (style.overflow === 'auto' || style.overflow === 'scroll' || 
+				    style.overflowY === 'auto' || style.overflowY === 'scroll' ||
+				    style.overflowX === 'auto' || style.overflowX === 'scroll') {
+					containers.push(current)
+				}
+				current = current.parentElement
+			}
+			
+			// إضافة window scroll أيضاً
+			if (window.scrollY > 0 || window.scrollX > 0) {
+				containers.push(document.documentElement)
+			}
+			
+			return containers
+		}
+
+		// حفظ مواضع الـ scroll
+		const startElement = event?.currentTarget as HTMLElement || containerRef.current
+		const scrollContainers = findAllScrollContainers(startElement)
+		
+		scrollContainers.forEach(container => {
+			scrollPositions.push({
+				element: container,
+				top: container.scrollTop,
+				left: container.scrollLeft
+			})
+		})
+
+		// حفظ موضع window scroll أيضاً
+		const windowScroll = {
+			top: window.scrollY || window.pageYOffset || 0,
+			left: window.scrollX || window.pageXOffset || 0
+		}
+
+		// استدعاء onSelectCategory
+		onSelectCategory(category)
+
+		// إعادة مواضع الـ scroll بعد re-render باستخدام عدة محاولات
+		const restoreScroll = () => {
+			// استعادة مواضع الـ scroll المحلية
+			scrollPositions.forEach(({ element, top, left }) => {
+				try {
+					if (element && (element.scrollTop !== top || element.scrollLeft !== left)) {
+						element.scrollTop = top
+						element.scrollLeft = left
+					}
+				} catch (e) {
+					// تجاهل الأخطاء
+				}
+			})
+			
+			// استعادة موضع window scroll
+			const currentWindowTop = window.scrollY || window.pageYOffset || 0
+			const currentWindowLeft = window.scrollX || window.pageXOffset || 0
+			if (Math.abs(currentWindowTop - windowScroll.top) > 1 || Math.abs(currentWindowLeft - windowScroll.left) > 1) {
+				window.scrollTo(windowScroll.left, windowScroll.top)
+			}
+		}
+
+		// محاولة استعادة الـ scroll عدة مرات للتأكد
+		requestAnimationFrame(() => {
+			restoreScroll()
+			requestAnimationFrame(() => {
+				restoreScroll()
+				setTimeout(() => {
+					restoreScroll()
+				}, 10)
+			})
+		})
+	}, [onSelectCategory])
 
 	// Update local categories when categories prop changes
 	React.useEffect(() => {
@@ -165,7 +250,83 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 
 		// للفئات الفرعية (level > 0)، نستخدم عرض بسيط بدون Accordion
 		if (level > 0) {
-			const [isExpanded, setIsExpanded] = React.useState(false)
+			const isExpanded = expandedCategories.has(category.id)
+
+			const toggleExpanded = (e?: React.MouseEvent) => {
+				// حفظ موضع الـ scroll قبل toggle
+				const scrollPositions: Array<{ element: HTMLElement, top: number, left: number }> = []
+				
+				// البحث عن جميع العناصر القابلة للتمرير
+				const findAllScrollContainers = (element: HTMLElement | null): HTMLElement[] => {
+					const containers: HTMLElement[] = []
+					let current: HTMLElement | null = element
+					
+					while (current && current !== document.body && current !== document.documentElement) {
+						const style = window.getComputedStyle(current)
+						if (style.overflow === 'auto' || style.overflow === 'scroll' || 
+						    style.overflowY === 'auto' || style.overflowY === 'scroll' ||
+						    style.overflowX === 'auto' || style.overflowX === 'scroll') {
+							containers.push(current)
+						}
+						current = current.parentElement
+					}
+					
+					if (window.scrollY > 0 || window.scrollX > 0) {
+						containers.push(document.documentElement)
+					}
+					
+					return containers
+				}
+
+				const startElement = e?.currentTarget as HTMLElement || containerRef.current
+				const scrollContainers = findAllScrollContainers(startElement)
+				
+				scrollContainers.forEach(container => {
+					scrollPositions.push({
+						element: container,
+						top: container.scrollTop,
+						left: container.scrollLeft
+					})
+				})
+
+				const windowScroll = {
+					top: window.scrollY || window.pageYOffset || 0,
+					left: window.scrollX || window.pageXOffset || 0
+				}
+
+				// تنفيذ toggle
+				setExpandedCategories(prev => {
+					const newSet = new Set(prev)
+					if (newSet.has(category.id)) {
+						newSet.delete(category.id)
+					} else {
+						newSet.add(category.id)
+					}
+					return newSet
+				})
+
+				// استعادة موضع الـ scroll بعد re-render
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
+						scrollPositions.forEach(({ element, top, left }) => {
+							try {
+								if (element && (element.scrollTop !== top || element.scrollLeft !== left)) {
+									element.scrollTop = top
+									element.scrollLeft = left
+								}
+							} catch (err) {
+								// تجاهل الأخطاء
+							}
+						})
+						
+						const currentWindowTop = window.scrollY || window.pageYOffset || 0
+						const currentWindowLeft = window.scrollX || window.pageXOffset || 0
+						if (Math.abs(currentWindowTop - windowScroll.top) > 1 || Math.abs(currentWindowLeft - windowScroll.left) > 1) {
+							window.scrollTo(windowScroll.left, windowScroll.top)
+						}
+					})
+				})
+			}
 
 			return (
 				<div
@@ -177,18 +338,41 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 				>
 					<div
 						className={cn(
-							"flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 rounded-lg transition-colors",
-							isSelected && "text-primary font-semibold bg-primary/5"
+							"flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+							isSelected && "bg-primary/5"
 						)}
-						onClick={() => {
-							onSelectCategory(category)
-						}}
 					>
 						<div className="flex items-center gap-2 flex-1 text-right">
-							<Button variant="ghost" size="icon" className="hover:bg-transparent cursor-pointer p-0" onClick={() => hasChildren && setIsExpanded(!isExpanded)} disabled={!hasChildren}>
+							<Button 
+								variant="ghost" 
+								size="icon" 
+								className="hover:bg-transparent cursor-pointer p-0" 
+								onClick={(e) => {
+									// منع السلوك الافتراضي والانتشار لمنع العودة للأعلى
+									e.preventDefault()
+									e.stopPropagation()
+									if (hasChildren) {
+										toggleExpanded(e)
+									}
+								}} 
+								disabled={!hasChildren}
+							>
 								{renderCategoryIcon(category.icon, isExpanded)}
 							</Button>
-							<span className="font-medium">{category.name.ar || category.name.en}</span>
+							<span 
+								className={cn(
+									"font-medium cursor-pointer hover:text-primary transition-colors",
+									isSelected && "text-primary font-semibold"
+								)}
+								onClick={(e) => {
+									// منع انتشار الحدث إلى العناصر الأب لمنع العودة للأعلى
+									e.stopPropagation()
+									// استخدام دالة حفظ موضع الـ scroll
+									handleSelectCategoryWithScrollPreservation(category, e)
+								}}
+							>
+								{category.name.ar || category.name.en}
+							</span>
 						</div>
 						{hasChildren && (
 							<span className="text-xs text-muted-foreground bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
@@ -263,13 +447,12 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 						isSelected && "text-primary font-semibold"
 					)}
 					onClick={(e) => {
-						// Don't trigger select if drag is enabled
-						if (!isDragEnabled) {
-							onSelectCategory(category)
-						} else {
-							// Prevent accordion toggle when drag is enabled
+						// منع انتشار الحدث لمنع العودة للأعلى
+						e.stopPropagation()
+						
+						// Prevent accordion toggle when drag is enabled
+						if (isDragEnabled) {
 							e.preventDefault()
-							e.stopPropagation()
 						}
 					}}
 					onMouseDown={(e) => {
@@ -311,7 +494,20 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 						) : null}
 						<div className="flex items-center gap-2">
 							{renderCategoryIcon(category.icon, hasChildren)}
-							<span className="font-medium">{category.name.ar || category.name.en}</span>
+							<span 
+								className={cn(
+									"font-medium cursor-pointer hover:text-primary transition-colors",
+									isSelected && "text-primary font-semibold"
+								)}
+								onClick={(e) => {
+									// منع انتشار الحدث لمنع العودة للأعلى
+									e.stopPropagation()
+									// استخدام دالة حفظ موضع الـ scroll
+									handleSelectCategoryWithScrollPreservation(category, e)
+								}}
+							>
+								{category.name.ar || category.name.en}
+							</span>
 						</div>
 						{hasChildren && (
 							<span className="text-xs text-muted-foreground bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
@@ -335,7 +531,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 	}
 
 	return (
-		<div className="max-w-4xl mx-auto" dir="rtl">
+		<div ref={containerRef} className="max-w-4xl mx-auto" dir="rtl">
 			{/* Drag & Drop Toggle Button */}
 			<div className="flex justify-end mb-4">
 				<Button

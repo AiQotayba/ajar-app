@@ -41,3 +41,12 @@ else
 fi
 
 echo "✅ تم النشر بنجاح!"
+# ------------------------------------------------------------
+ cd htdocs/ajarsyria.com/ajar-app/ 
+git pull  
+cd apps/web
+pnpm install
+npm run build  
+pm2 reload web 
+# ------------------------------------------------------------
+ cd htdocs/ajarsyria.com/ajar-app/ ; git pull origin main ; cd apps/web ; npm install ; npm run build ; pm2 reload web 
