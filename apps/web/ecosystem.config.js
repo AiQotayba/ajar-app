@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "app2",
+      name: "web",
       script: "pnpm",
       args: "start -p 3500",
       cwd: "/home/web/htdocs/ajarsyria.com/ajar-app/apps/web",
