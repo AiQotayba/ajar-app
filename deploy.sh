@@ -4,13 +4,15 @@
 
 set -e
 cd htdocs/dashboard.ajarsyria.com/
+cd htdocs/ajarsyria.com/
 git clone https://github.com/AiQotayba/ajar-app.git
-cd ajar-app
+cd ajar-app/apps/web
 curl -fsSL https://get.pnpm.io/install.sh | sh -
 source ~/.bashrc
 pnpm install -g pnpm
 pnpm install
 npm install -g pm2
+nano .env
 pnpm build
 pm2 start "pnpm start -p 3400" --name app
 echo "⬇️ جلب آخر تحديثات من Git..."
