@@ -10,9 +10,9 @@ import { useTranslationsHook } from "@/hooks/use-translations"
 import { api } from "@/lib/api"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/hooks/use-auth"
-import { Eye, Heart, MapPin } from "lucide-react"
+import { Eye, Heart, MapPin, } from "lucide-react"
 import { notFound } from "next/navigation"
-import { useState } from "react"
+import { Property404 } from "./property-404"
 
 interface PropertyDetailsProps {
   id: string
@@ -101,20 +101,9 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
   // if (true) return <PropertyDetailsSkeleton />
   if (isLoading) return <PropertyDetailsSkeleton />
 
-  if (error || !response?.data) {
-    return (
-      <div className="min-h-screen bg-background pb-24">
-        <div className="container max-w-2xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <p className="text-muted-foreground">
-              {locale === 'ar' ? 'حدث خطأ في تحميل العقار' : 'Error loading property'}
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
+  if (error || !response?.data)
+    // return <Property404 />
+    return notFound()
   const property: ListingData = response.data
   const isArabic = locale === 'ar'
 

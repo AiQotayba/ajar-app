@@ -24,7 +24,7 @@ export default function HomePage({ locale }: HomePageProps) {
   const hasFilters = queryParams.length > 0;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['home', currentLocale, queryParams],
+    queryKey: ['home',],
     queryFn: async () => {
       const url = `/user/home${queryParams ? `?${queryParams}` : ''}`;
       return api.get(url)

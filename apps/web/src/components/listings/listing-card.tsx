@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
 
 interface ListingCardProps {
   listing: {
@@ -94,13 +95,15 @@ interface ListingCardProps {
 
 // مكون منفصل لأزرار الحذف والتعديل
 interface ListingActionsProps {
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
   listingId: number
   locale: string
   onEdit?: (listingId: number) => void
   onDelete?: (listingId: number) => void
 }
 
-function ListingActions({ listingId, locale, onEdit, onDelete }: ListingActionsProps) {
+function ListingActions({ isOpen, setIsOpen, listingId, locale, onEdit, onDelete }: ListingActionsProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const t = useTranslations('property')
   const currentLocale = useLocale()
@@ -122,7 +125,7 @@ function ListingActions({ listingId, locale, onEdit, onDelete }: ListingActionsP
 
   return (
     <DropdownMenu dir={(locale || currentLocale) === 'ar' ? 'rtl' : 'ltr'}>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild onClick={() => setIsOpen(!isOpen)}>
         <Button
           size="icon"
           variant="secondary"
@@ -154,8 +157,10 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const [favoritesCount, setFavoritesCount] = useState(listing.favorites_count || 0)
   const [isLoading, setIsLoading] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
   const t = useTranslations('property')
   const currentLocale = useLocale()
+  const router = useRouter()
 
   const getLocalizedText = (text: { ar: string; en: string }) => text[(locale || currentLocale) as keyof typeof text] || text.ar
 
@@ -246,7 +251,7 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
 
   const handleEdit = (listingId: number) => {
     // Navigate to edit page
-    window.location.href = `/my-listings/${listingId}`
+    router.push(`/my-listings/${listingId}`)
   }
 
   const handleDelete = async (listingId: number) => {
@@ -265,9 +270,9 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
       toast.error(t('deleteListing'))
     }
   }
-
+  const url = openEdit ? `/my-listings/${listing.id}` : `/listings/${listing.id}`
   return (
-    <Link href={`/listings/${listing.id}`} className="block group">
+    <Link href={url} className="block group" >
       <div className="bg-card  overflow-hidden transition-all duration-300">
         <div className="relative h-56 overflow-hidden">
           {/* Image Layer */}
@@ -368,9 +373,16 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
                 </Badge>
               )}
             </div>
+            {isOpen && (
+              <div className="p-2 text-primary font-bold w-max">
+                {t('openListing')}
+              </div>
+            )}
             {/* أزرار الحذف والتعديل */}
             {(openEdit || deleteListing) && (
               <ListingActions
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
                 listingId={listing.id}
                 locale={locale || currentLocale}
                 onEdit={openEdit ? handleEdit : undefined}

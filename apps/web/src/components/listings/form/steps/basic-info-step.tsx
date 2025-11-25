@@ -69,32 +69,15 @@ export function BasicInfoStep({
         <Label htmlFor="title_ar" className="text-start block text-sm sm:text-base">
           {t('title')} <span className="text-destructive">*</span>
         </Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="col-span-1">
-
-            <Input
-              id="title[ar]"
-              {...register("title.ar", { required: t('titleRequired') })}
-              placeholder={t('titlePlaceholder')}
-              className="text-start h-10 sm:h-11"
-            />
-            {errors.title?.ar && (
-              <p className="text-xs text-destructive text-start">{errors.title.ar.message}</p>
-            )}
-          </div>
-          <div className="col-span-1">
-
-            <Input
-              id="title[en]"
-              {...register("title.en")}
-              placeholder={t('titleEnPlaceholderAlt')}
-              className="text-left h-10 sm:h-11"
-            />
-            {errors.title?.en && (
-              <p className="text-xs text-destructive text-start">{errors.title.en.message}</p>
-            )}
-          </div>
-        </div>
+        <Input
+          id="title[ar]"
+          {...register("title.ar", { required: t('titleRequired') })}
+          placeholder={t('titlePlaceholder')}
+          className="text-start h-10 sm:h-11"
+        />
+        {errors.title?.ar && (
+          <p className="text-xs text-destructive text-start">{errors.title.ar.message}</p>
+        )}
       </div>
 
       {/* Description */}
@@ -102,28 +85,13 @@ export function BasicInfoStep({
         <Label htmlFor="description_ar" className="text-start block text-sm sm:text-base">
           {t('description')}
         </Label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="col-span-1">
-
-            <textarea
-              id="description[ar]"
-              {...register("description.ar")}
-              placeholder={t('descriptionPlaceholder')}
-              className="w-full p-2.5 sm:p-3 border border-input rounded-md text-start resize-none text-sm sm:text-base"
-              rows={3}
-            />
-          </div>
-          <div className="col-span-1">
-
-            <textarea
-              id="description[en]"
-              {...register("description.en")}
-              placeholder={t('descriptionEnPlaceholder')}
-              className="w-full p-2.5 sm:p-3 border border-input rounded-md text-left resize-none text-sm sm:text-base"
-              rows={3}
-            />
-          </div>
-        </div>
+        <textarea
+          id="description[ar]"
+          {...register("description.ar")}
+          placeholder={t('descriptionPlaceholder')}
+          className="w-full p-2.5 sm:p-3 border border-input rounded-md text-start resize-none text-sm sm:text-base"
+          rows={3}
+        />
       </div>
 
       {/* Main Category */}
@@ -273,7 +241,7 @@ export function BasicInfoStep({
             onClick={() => setValue("availability_status", "unavailable")}
           />
           <Option
-            className={watch("availability_status") === "rented" ? "border-primary bg-primary/5" : "border-gray-200"}
+              className={watch("availability_status") === "rented" ? "border-primary bg-primary/5" : "border-gray-200"}
             classNameSub={watch("availability_status") === "rented" && "bg-primary"}
             text={t('rented')}
             onClick={() => setValue("availability_status", "rented")}
@@ -281,7 +249,7 @@ export function BasicInfoStep({
           <Option
             className={watch("availability_status") === "solded" ? "border-primary bg-primary/5" : "border-gray-200"}
             classNameSub={watch("availability_status") === "solded" && "bg-primary"}
-            text={t('sold')}
+            text={t('solded')}
             onClick={() => setValue("availability_status", "solded")}
           />
         </div>

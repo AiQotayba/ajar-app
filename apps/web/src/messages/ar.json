@@ -531,7 +531,12 @@
       "yes": "نعم",
       "no": "لا",
       "features": "مميزات العقار",
-      "next": "التالي"
+      "next": "التالي",
+      "in_review": "قيد المراجعة",
+      "approved": "معتمد",
+      "rejected": "مرفوض",
+      "solded": "مباع",
+      "draft": "مسودة"
     },
     "location": {
       "governorate": "المحافظة",

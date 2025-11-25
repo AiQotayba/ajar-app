@@ -63,6 +63,11 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     const [showSuccess, setShowSuccess] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(false)
 
+    // Scroll to top when step changes
+    React.useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, [currentStep])
+
     // Form state
     const [selectedCategory, setSelectedCategory] = React.useState<Category | null>(null)
     const [selectedSubCategory, setSelectedSubCategory] = React.useState<Category | null>(null)
@@ -115,17 +120,32 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             }
 
             return {
-                title: listing.title || { ar: "", en: "" },
-                description: listing.description || { ar: "", en: "" },
+                title: {
+                    ar: listing.title?.ar || "",
+                    en: listing.title?.en ?? "" // Convert null to empty string, preserve existing value
+                },
+                description: {
+                    ar: listing.description?.ar || "",
+                    en: listing.description?.en ?? "" // Convert null to empty string, preserve existing value
+                },
                 type: listing.type || "",
                 availability_status: listing.availability_status || "available",
                 category_id: categoryId,
                 sub_category_id: subCategoryId,
                 sub_sub_category_id: subSubCategoryId,
-                properties: listing.properties?.map((prop: any) => ({
-                    id: prop.property_id || prop.id,
-                    value: typeof prop.value === 'object' ? prop.value?.ar || prop.value?.en || "" : prop.value || ""
-                })) || [],
+                properties: listing.properties?.map((prop: any) => {
+                    let value: string = ""
+                    if (typeof prop.value === 'object' && prop.value !== null) {
+                        value = prop.value?.ar || prop.value?.en || ""
+                    } else if (prop.value !== null && prop.value !== undefined) {
+                        // Convert to string if it's a number or other type
+                        value = String(prop.value)
+                    }
+                    return {
+                        id: prop.property_id || prop.id,
+                        value: value
+                    }
+                }).filter((prop: any) => prop.id) || [],
                 features: listing.features?.map((f: any) => f.id?.toString() || f.toString()) || [],
                 governorate_id: listing.governorate?.id?.toString() || "",
                 city_id: listing.city?.id?.toString() || "",
@@ -134,9 +154,15 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 images: listing.media?.map((m: any) => m.url || m.image_url || m) || [],
                 cover_image_index: (listing as any).cover_image_index || 0,
                 price: listing.price || 0,
-                pay_every: listing.pay_every || "",
+                pay_every: listing.pay_every ? String(listing.pay_every) : "",
                 insurance: listing.insurance || 0,
-                status: listing.status || "draft",
+                status: (() => {
+                    // draft,in_review,approved,rejected
+                    const validStatuses = ["draft", "in_review", "approved", "rejected"]
+                    const listingStatus = listing.status || "draft"
+                    // Return the status if it's valid, otherwise default to "draft"
+                    return validStatuses.includes(listingStatus) ? listingStatus : "draft"
+                })(),
                 is_featured: listing.is_featured || false,
             }
         }
@@ -185,11 +211,41 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     React.useEffect(() => {
         if (isEditMode && listing && !isLoadingListing) {
             const listingKey = `${listingId}-${listing.id}`
-            
+
             if (hasResetRef.current !== listingKey) {
                 console.info("📥 [LOAD LISTING] Setting up form with listing data:", listing)
 
-                reset(defaultValues as any, {
+                // Ensure status and properties are normalized before reset
+                const normalizedValues = {
+                    ...defaultValues,
+                    title: {
+                        ar: defaultValues.title?.ar || "",
+                        en: defaultValues.title?.en ?? "" // Convert null to empty string
+                    },
+                    description: {
+                        ar: defaultValues.description?.ar || "",
+                        en: defaultValues.description?.en ?? "" // Convert null to empty string
+                    },
+                    status: (() => {
+                        const validStatuses = ["draft", "in_review", "approved", "rejected"]
+                        const listingStatus = listing.status || "draft"
+                        // Return the status if it's valid, otherwise default to "draft"
+                        return validStatuses.includes(listingStatus) ? listingStatus : "draft"
+                    })(),
+                    pay_every: (() => {
+                        const payEvery = defaultValues.pay_every
+                        if (!payEvery) return ""
+                        if (typeof payEvery === 'string') return payEvery
+                        if (typeof payEvery === 'number') return String(payEvery)
+                        return ""
+                    })(),
+                    properties: (defaultValues.properties || []).map((prop: any) => ({
+                        id: prop.id,
+                        value: typeof prop.value === 'string' ? prop.value : String(prop.value || "")
+                    }))
+                }
+
+                reset(normalizedValues as any, {
                     keepDefaultValues: false,
                     keepValues: false,
                     keepDirty: false,
@@ -261,6 +317,14 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     const formCategoryId = watch("category_id")
     const formSubCategoryId = watch("sub_category_id")
     const formSubSubCategoryId = watch("sub_sub_category_id")
+    const formType = watch("type")
+
+    // Clear pay_every when type is "sale" (not rent)
+    React.useEffect(() => {
+        if (formType === "sale") {
+            setValue("pay_every", "")
+        }
+    }, [formType, setValue])
 
     // Load category hierarchy
     React.useEffect(() => {
@@ -449,16 +513,68 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
 
     // Transform form data to API format
     const transformFormDataToAPI = (formData: ListingFormData) => {
-        const transformedProperties = formData.properties?.map((prop, index) => {
+        // Get original listing data for edit mode to preserve English values
+        const originalListing = isEditMode && listing ? listing : null
+
+        // Transform title: send Arabic value, empty English for create, preserve old English for edit
+        const transformedTitle = {
+            ar: formData.title?.ar || "",
+            en: isEditMode && originalListing?.title?.en !== null && originalListing?.title?.en !== undefined
+                ? originalListing.title.en
+                : "" // Empty string for create mode or if null/undefined in edit mode
+        }
+
+        // Transform description: send Arabic value, empty English for create, preserve old English for edit
+        const transformedDescription = {
+            ar: formData.description?.ar || "",
+            en: isEditMode && originalListing?.description?.en !== null && originalListing?.description?.en !== undefined
+                ? originalListing.description.en
+                : "" // Empty string for create mode or if null/undefined in edit mode
+        }
+
+        // Transform properties: for string/text properties, send Arabic value, empty/preserve English
+        const transformedProperties = formData.properties?.map((prop: any, index) => {
+            // Find the original property value from listing
+            const originalProperty = originalListing?.properties?.find(
+                (p: any) => (p.property_id || p.id) === prop.id
+            )
+
+            // Check if this property is a string/text type (without options)
+            const propertyDef = availableProperties.find(p => p.id === prop.id)
+            const isStringType = propertyDef &&
+                (propertyDef.type === 'text' || propertyDef.type === 'string') &&
+                !propertyDef.options
+
             let value: any
-            if (typeof prop.value === 'object' && prop.value !== null) {
+
+            if (isStringType) {
+                // For string/text properties: send Arabic, preserve/empty English
+                // prop.value might be a string (from form input) or an object (from edit mode with preserved English)
+                const arabicValue = typeof prop.value === 'object' && prop.value !== null && prop.value.ar !== undefined
+                    ? prop.value.ar
+                    : (typeof prop.value === 'string' ? prop.value : String(prop.value || ""))
+
+                const englishValue = isEditMode && originalProperty?.value?.en
+                    ? originalProperty.value.en
+                    : (typeof prop.value === 'object' && prop.value !== null && prop.value.en !== undefined
+                        ? prop.value.en
+                        : "")
+
+                value = {
+                    ar: arabicValue,
+                    en: englishValue
+                }
+            } else if (typeof prop.value === 'object' && prop.value !== null) {
+                // For other types (select, bool, etc.), keep as is
                 value = prop.value
             } else if (typeof prop.value === 'string') {
+                // For non-string properties that are stored as string, convert to object
                 value = {
                     ar: prop.value,
                     en: prop.value
                 }
             } else {
+                // For numbers and other types
                 value = {
                     ar: String(prop.value || ""),
                     en: String(prop.value || "")
@@ -514,10 +630,22 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             throw new Error(t('validation.imagesRequired'))
         }
 
-        const { images: _, ...restFormData } = formData
+        const { images: _, title: __, description: ___, ...restFormData } = formData
+
+        // Ensure pay_every is a string (or undefined if empty)
+        const normalizedPayEvery = (() => {
+            const payEvery = restFormData.pay_every
+            if (!payEvery) return undefined
+            if (typeof payEvery === 'string') return payEvery || undefined
+            if (typeof payEvery === 'number') return String(payEvery)
+            return undefined
+        })()
 
         return {
             ...restFormData,
+            pay_every: normalizedPayEvery,
+            title: transformedTitle,
+            description: transformedDescription,
             properties: transformedProperties,
             media: transformedImages,
             category_id: formData.category_id ? Number(formData.category_id) : undefined,
@@ -538,7 +666,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             return result
         },
         onSuccess: (data) => {
-            
+
             queryClient.invalidateQueries({ queryKey: ["user-listings"] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
             setShowSuccess(true)
@@ -547,17 +675,17 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         },
         onError: (error: any) => {
             let errorMessage = t('actions.createError')
-            
+
             // Try to extract error message from various possible locations
             const responseData = error?.response?.data || error?.data || {}
-            
+
             // First, try to get the main message
             if (responseData.message) {
                 errorMessage = responseData.message
             } else if (error?.message) {
                 errorMessage = error.message
             }
-            
+
             // Then, try to get specific field errors
             if (responseData.errors && typeof responseData.errors === 'object') {
                 const errors = responseData.errors
@@ -598,17 +726,17 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         },
         onError: (error: any) => {
             let errorMessage = t('actions.updateError')
-            
+
             // Try to extract error message from various possible locations
             const responseData = error?.response?.data || error?.data || {}
-            
+
             // First, try to get the main message
             if (responseData.message) {
                 errorMessage = responseData.message
             } else if (error?.message) {
                 errorMessage = error.message
             }
-            
+
             // Then, try to get specific field errors
             if (responseData.errors && typeof responseData.errors === 'object') {
                 const errors = responseData.errors
@@ -666,9 +794,11 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     const handleClose = () => {
         setShowSuccess(false)
         if (isEditMode && listingId) {
-            router.push(`/my-listings/${listingId}`)
+            // @
+            // router.push(`/my-listings/${listingId}`)
         } else {
-            router.push("/my-listings")
+            // @
+            // router.push("/my-listings")
         }
     }
 
@@ -685,6 +815,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         setShowSuccess(false)
         router.push("/my-listings")
     }
+    console.log(methods.formState.errors);
 
     const renderStep = () => {
         switch (currentStep) {
@@ -780,10 +911,10 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     return (
         <>
             <div className="max-w-4xl mx-auto">
-                <Card className="w-full">
+                <Card className="w-full my-4">
                     <CardHeader className="px-4 sm:px-6 pb-4 sm:pb-6">
                         <CardTitle className="text-lg sm:text-xl mb-3 sm:mb-4">
-                            {isEditMode 
+                            {isEditMode
                                 ? t('form.editListingForm')
                                 : t('form.createListingForm')
                             }
@@ -792,7 +923,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                             <StepIndicator steps={STEPS} currentStep={currentStep} />
                         </div>
                     </CardHeader>
-                    <CardContent className="px-4 sm:px-6">
+                    <CardContent className="px-4 sm:px-6 my-4">
                         <FormProvider {...methods}>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                                 <div className="min-h-[400px] sm:min-h-[500px]">

@@ -531,8 +531,14 @@
       "yes": "Yes",
       "no": "No",
       "features": "Property Features",
-      "next": "Next"
+      "next": "Next",
+      "in_review": "In Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "solded": "Solded",
+      "draft": "Draft"
     },
+    
     "location": {
       "governorate": "Governorate",
       "governorateRequired": "Governorate is required",

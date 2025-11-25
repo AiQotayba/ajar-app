@@ -72,7 +72,7 @@ export function MyListingsContent() {
     } = useQuery({
         queryKey: ['my-listings'],
         queryFn: async () => {
-            const response = await api.get('/user/listings?owner_id=1')
+            const response = await api.get(`/user/listings?owner_id=${user?.id}`)
 
             if (response.isError) {
                 throw new Error(response.message || t('errorLoading'))
@@ -85,9 +85,6 @@ export function MyListingsContent() {
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes
     })
-
-    const listings = listingsData || []
-
 
     // Show error state
     if (isError) {
@@ -109,7 +106,7 @@ export function MyListingsContent() {
     }
 
     // Show empty state
-    if (!isLoading && listings.length === 0) {
+    if (!isLoading && listingsData?.length === 0) {
         return (
             <div className="min-h-screen bg-background pb-24" dir={direction}>
                 {/* Add new listing button */}
@@ -171,15 +168,13 @@ export function MyListingsContent() {
             {/* Results count */}
             <div className="px-4 pb-2">
                 <p className="text-sm text-muted-foreground">
-                    {t('listingsCount', { count: listings.length })}
+                    {t('listingsCount', { count: listingsData?.length })}
                 </p>
             </div>
 
             <main className="space-y-6 px-4">
                 <ListingGrid
-                    data={listings.map((listing: Listing) => ({
-                        ...listing,
-                    }))}
+                    data={listingsData?.map((listing: Listing) => ({ ...listing }))}
                     isLoading={isLoading}
                     openEdit={true}
                     deleteListing={true}
