@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Bell, CheckCheck, Clock, AlertCircle, CheckCircle2, Info, AlertTriangle, ExternalLink, Building2 } from "lucide-react"
+import { Bell, CheckCheck, Clock, AlertCircle, CheckCircle2, Info, AlertTriangle, ExternalLink, Building2, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -15,10 +15,31 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface Notification {
     id: number
@@ -82,10 +103,22 @@ interface NotificationsResponse {
     }
 }
 
+// Form validation schema
+const createNotificationSchema = z.object({
+    title_ar: z.string().min(1, "العنوان بالعربية مطلوب"),
+    title_en: z.string().min(1, "العنوان بالإنجليزية مطلوب"),
+    message_ar: z.string().min(1, "الرسالة بالعربية مطلوبة"),
+    message_en: z.string().min(1, "الرسالة بالإنجليزية مطلوبة"),
+    type: z.enum(["info", "success", "warning", "error", "general_announcement"]).default("general_announcement"),
+})
+
+type CreateNotificationFormValues = z.infer<typeof createNotificationSchema>
+
 export default function NotificationsPage() {
     const queryClient = useQueryClient()
     const [filter, setFilter] = React.useState<"all" | "unread" | "read">("all")
     const [selectedNotification, setSelectedNotification] = React.useState<Notification | null>(null)
+    const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
 
     // Fetch notifications
     const { data: notifications, isLoading, error } = useQuery({
@@ -107,47 +140,98 @@ export default function NotificationsPage() {
     })
 
 
-    // Mark as read mutation
-    // const markAsReadMutation = useMutation({
-    //     mutationFn: async (id: number) => {
-    //         const response = await api.put(`/admin/notifications/${id}/read`)
-    //         if (response.isError) {
-    //             throw new Error(response.message || "فشل تحديث حالة الإشعار")
-    //         }
-    //         return response
-    //     },
-    //     onSuccess: () => {
-    //         queryClient.invalidateQueries({ queryKey: ["notifications"] })
-    //         toast.success("تم تحديد الإشعار كمقروء")
-    //     },
-    //     onError: (error: any) => {
-    //         const errorMessage = error?.message || error?.response?.data?.message || "فشل تحديث حالة الإشعار"
-    //         toast.error(errorMessage)
-    //     },
-    // })
-
-    // Mark all as read mutation
-    const markAllAsReadMutation = useMutation({
-        mutationFn: async () => {
-            const response = await api.put("/admin/notifications/read-all")
+    // Mark last notification as read mutation
+    const markLastAsReadMutation = useMutation({
+        mutationFn: async (id: number) => {
+            // Using POST as specified in the API documentation
+            const response = await api.post(`/user/notifications/${id}/read`)
             if (response.isError) {
-                throw new Error(response.message || "فشل تحديث الإشعارات")
+                throw new Error(response.message || "فشل تحديث حالة الإشعار")
             }
             return response
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["notifications"] })
-            toast.success("تم تحديد جميع الإشعارات كمقروءة")
+            toast.success("تم تحديد كل الإشعارات كمقروء")
         },
         onError: (error: any) => {
-            const errorMessage = error?.message || error?.response?.data?.message || "فشل تحديث الإشعارات"
+            const errorMessage = error?.message || error?.response?.data?.message || "فشل تحديث حالة الإشعار"
             toast.error(errorMessage)
         },
     })
 
-    // const handleMarkAsRead = (id: number) => markAsReadMutation.mutate(id)
+    // Create notification mutation
+    const createNotificationMutation = useMutation({
+        mutationFn: async (data: CreateNotificationFormValues) => {
+            const payload = {
+                user_id: null,
+                title: {
+                    ar: data.title_ar,
+                    en: data.title_en,
+                },
+                message: {
+                    ar: data.message_ar,
+                    en: data.message_en,
+                },
+                metadata: {
+                    type: data.type,
+                },
+            }
+            const response = await api.post("/admin/notifications", payload)
+            if (response.isError) {
+                throw new Error(response.message || "فشل إنشاء الإشعار")
+            }
+            return response
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["notifications"] })
+            toast.success("تم إنشاء الإشعار بنجاح")
+            setCreateDialogOpen(false)
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.message || error?.response?.data?.message || "فشل إنشاء الإشعار"
+            toast.error(errorMessage)
+        },
+    })
 
-    const handleMarkAllAsRead = () => markAllAsReadMutation.mutate()
+    // Create notification form
+    const createForm = useForm<CreateNotificationFormValues>({
+        resolver: zodResolver(createNotificationSchema),
+        defaultValues: {
+            title_ar: "",
+            title_en: "",
+            message_ar: "",
+            message_en: "",
+            type: "general_announcement",
+        },
+    })
+
+    const handleCreateNotification = async (data: CreateNotificationFormValues) => {
+        createNotificationMutation.mutate(data)
+    }
+
+    const handleMarkLastAsRead = () => {
+        if (!notifications || notifications.length === 0) {
+            toast.warning("لا توجد إشعارات")
+            return
+        }
+
+        // Get the last (most recent) unread notification, or the last notification if all are read
+        const lastUnreadNotification = notifications.find((n: Notification) => !n.is_read)
+        const lastNotification = lastUnreadNotification || notifications[0] // First item is usually the most recent
+
+        if (!lastNotification) {
+            toast.warning("لا يوجد إشعار لتحديده")
+            return
+        }
+
+        if (lastNotification.is_read) {
+            toast.info("جميع الإشعارات مقروءة بالفعل")
+            return
+        }
+
+        markLastAsReadMutation.mutate(lastNotification.id)
+    }
 
     const unreadCount = notifications?.filter((n: Notification) => !n.is_read).length || 0
 
@@ -160,17 +244,27 @@ export default function NotificationsPage() {
                         <h1 className="text-3xl font-bold tracking-tight">الإشعارات</h1>
                         <p className="text-muted-foreground mt-1">إدارة ومتابعة جميع الإشعارات</p>
                     </div>
-                    {unreadCount > 0 && (
+                    <div className="flex items-center gap-2">
                         <Button
-                            variant="outline"
-                            onClick={handleMarkAllAsRead}
-                            disabled={markAllAsReadMutation.isPending}
+                            variant="default"
+                            onClick={() => setCreateDialogOpen(true)}
                             className="gap-2"
                         >
-                            <CheckCheck className="h-4 w-4" />
-                            تحديد الكل كمقروء
+                            <Plus className="h-4 w-4" />
+                            إنشاء إشعار جديد
                         </Button>
-                    )}
+                        {notifications && notifications.length > 0 && (
+                            <Button
+                                variant="outline"
+                                onClick={handleMarkLastAsRead}
+                                disabled={markLastAsReadMutation.isPending}
+                                className="gap-2"
+                            >
+                                <CheckCheck className="h-4 w-4" />
+                                {markLastAsReadMutation.isPending ? "جاري التحديد..." : "تحديد الكل كمقروء"}    
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Tabs */}
@@ -287,17 +381,155 @@ export default function NotificationsPage() {
                     {selectedNotification && <NotificationDetails notification={selectedNotification} />}
                 </DialogContent>
             </Dialog>
+
+            {/* Create Notification Dialog */}
+            <Dialog
+                open={createDialogOpen}
+                onOpenChange={(open) => {
+                    setCreateDialogOpen(open)
+                    if (!open) {
+                        createForm.reset()
+                    }
+                }}
+            >
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+                    <DialogHeader>
+                        <DialogTitle>إنشاء إشعار جديد</DialogTitle>
+                        <DialogDescription>
+                            إرسال إشعار عام لجميع المستخدمين
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <Form {...createForm}>
+                        <form onSubmit={createForm.handleSubmit(handleCreateNotification)} className="space-y-6">
+                            {/* Type Selection */}
+                            <FormField
+                                control={createForm.control}
+                                name="type"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>نوع الإشعار</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="اختر نوع الإشعار" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="general_announcement">إعلان عام</SelectItem>
+                                                <SelectItem value="info">معلومات</SelectItem>
+                                                <SelectItem value="success">نجاح</SelectItem>
+                                                <SelectItem value="warning">تحذير</SelectItem>
+                                                <SelectItem value="error">خطأ</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Title Arabic */}
+                            <FormField
+                                control={createForm.control}
+                                name="title_ar"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>العنوان (عربي) *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="أدخل عنوان الإشعار بالعربية" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Title English */}
+                            <FormField
+                                control={createForm.control}
+                                name="title_en"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>العنوان (إنجليزي) *</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter notification title in English" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Message Arabic */}
+                            <FormField
+                                control={createForm.control}
+                                name="message_ar"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>الرسالة (عربي) *</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="أدخل محتوى الإشعار بالعربية"
+                                                className="min-h-24"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Message English */}
+                            <FormField
+                                control={createForm.control}
+                                name="message_en"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>الرسالة (إنجليزي) *</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Enter notification message in English"
+                                                className="min-h-24"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        setCreateDialogOpen(false)
+                                        createForm.reset()
+                                    }}
+                                    disabled={createNotificationMutation.isPending}
+                                >
+                                    إلغاء
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={createNotificationMutation.isPending}
+                                >
+                                    {createNotificationMutation.isPending ? "جاري الإنشاء..." : "إنشاء الإشعار"}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }
 
-function NotificationsCard({ 
-    notification, 
-    index, 
+function NotificationsCard({
+    notification,
+    index,
     // handleMarkAsRead, 
     // markAsReadMutation,
-    onViewDetails 
-}: { 
+    onViewDetails
+}: {
     notification: Notification
     index: number
     // handleMarkAsRead: (id: number) => void

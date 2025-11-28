@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "dev:spa": "next dev -p 3000 --experimental-https",
+    "deploy:prod": "ssh -t ajarsyria@82.29.178.80 './deploy.sh'",
     "start": "next start",
     "lint": "next lint"
   },

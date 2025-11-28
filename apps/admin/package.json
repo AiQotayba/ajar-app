@@ -7,6 +7,7 @@
     "build": "next build",
     "dev": "next dev -p 3100",
     "dev:spa": "next dev -p 3100 --experimental-https",
+    "deploy:prod": "ssh -t ajarsyria-dashboard@82.29.178.80 './deploy.sh'",
     "lint": "eslint .",
     "start": "next start",
     "type-check": "tsc --noEmit",
