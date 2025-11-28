@@ -12,7 +12,7 @@ export const listingFormSchema = z.object({
     en: z.string().optional()
   }),
   type: z.string().min(1, "نوع العقار مطلوب"),
-  availability_status: z.string().min(1, "حالة التوفر مطلوبة"),
+  availability_status: z.enum(["available", "unavailable", "rented", "solded"]).optional(),
   category_id: z.union([
     z.string().min(1, "التصنيف مطلوب"), 
     z.number().positive("التصنيف مطلوب"),
@@ -73,7 +73,7 @@ export const listingFormSchema = z.object({
   ),
   
   // Admin specific fields
-  status: z.enum(["draft", "active", "inactive", "pending", "rejected"]).optional(),
+  status: z.enum(["draft", "in_review", "approved", "rejected"]).optional(),
   is_featured: z.boolean().optional().default(false),
 })
 .refine((data) => {

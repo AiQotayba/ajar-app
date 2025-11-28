@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 import { useLocale, useTranslations } from "next-intl"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Image from "next/image"
 
 interface Category {
   id: number;
@@ -78,7 +79,7 @@ export function CategoryFilter({ data, isLoading }: { data: Category[] | undefin
   if (!data || data.length === 0) {
     return null;
   }
-
+console.log(activeCategory);
   return (
     <div dir={direction} className="w-full">
       <Tabs 
@@ -126,12 +127,18 @@ export function CategoryFilter({ data, isLoading }: { data: Category[] | undefin
                 whitespace-nowrap transition-all !flex-0 cursor-pointer
               "
             >
-              {category.name[locale as keyof typeof category.name]}
+              {category.icon && (
+                <Image src={category.icon || ""} alt={category.name[locale as keyof typeof category.name]} className="w-5 h-5 object-cover rounded flex-shrink-0" width={20} height={20} />
+              )}
+              <span className="text-sm font-medium">
+                {category.name[locale as keyof typeof category.name]}
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
       <CategoryFilter data={activeCategory?.children} isLoading={false} />
+
     </div>
   )
 }

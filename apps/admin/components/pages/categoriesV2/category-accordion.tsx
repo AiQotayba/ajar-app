@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Folder, FolderOpen, ChevronRight, GripVertical } from "lucide-react"
+import { Folder, FolderOpen, ChevronRight, GripVertical, } from "lucide-react"
 import type { Category } from "@/lib/types/category"
 import { cn } from "@/lib/utils"
 import Images from "@/components/ui/image"
@@ -33,34 +33,34 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 	const handleSelectCategoryWithScrollPreservation = React.useCallback((category: Category, event?: React.MouseEvent) => {
 		// البحث عن جميع العناصر القابلة للتمرير وحفظ مواضعها
 		const scrollPositions: Array<{ element: HTMLElement, top: number, left: number }> = []
-		
+
 		// البحث في جميع العناصر القابلة للتمرير
 		const findAllScrollContainers = (element: HTMLElement | null): HTMLElement[] => {
 			const containers: HTMLElement[] = []
 			let current: HTMLElement | null = element
-			
+
 			while (current && current !== document.body && current !== document.documentElement) {
 				const style = window.getComputedStyle(current)
-				if (style.overflow === 'auto' || style.overflow === 'scroll' || 
-				    style.overflowY === 'auto' || style.overflowY === 'scroll' ||
-				    style.overflowX === 'auto' || style.overflowX === 'scroll') {
+				if (style.overflow === 'auto' || style.overflow === 'scroll' ||
+					style.overflowY === 'auto' || style.overflowY === 'scroll' ||
+					style.overflowX === 'auto' || style.overflowX === 'scroll') {
 					containers.push(current)
 				}
 				current = current.parentElement
 			}
-			
+
 			// إضافة window scroll أيضاً
 			if (window.scrollY > 0 || window.scrollX > 0) {
 				containers.push(document.documentElement)
 			}
-			
+
 			return containers
 		}
 
 		// حفظ مواضع الـ scroll
 		const startElement = event?.currentTarget as HTMLElement || containerRef.current
 		const scrollContainers = findAllScrollContainers(startElement)
-		
+
 		scrollContainers.forEach(container => {
 			scrollPositions.push({
 				element: container,
@@ -91,7 +91,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 					// تجاهل الأخطاء
 				}
 			})
-			
+
 			// استعادة موضع window scroll
 			const currentWindowTop = window.scrollY || window.pageYOffset || 0
 			const currentWindowLeft = window.scrollX || window.pageXOffset || 0
@@ -186,7 +186,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 			}
 
 			toast.success("تم تحديث ترتيب التصنيف بنجاح")
-			
+
 			// Call onReorder callback to refetch categories (preferred method)
 			// Use await to ensure data is refetched before continuing
 			if (onReorder) {
@@ -203,7 +203,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 
 			// Revert local changes on error
 			setLocalCategories(categories)
-			
+
 			// Refetch to get latest data
 			if (onReorder) {
 				await onReorder()
@@ -255,32 +255,32 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 			const toggleExpanded = (e?: React.MouseEvent) => {
 				// حفظ موضع الـ scroll قبل toggle
 				const scrollPositions: Array<{ element: HTMLElement, top: number, left: number }> = []
-				
+
 				// البحث عن جميع العناصر القابلة للتمرير
 				const findAllScrollContainers = (element: HTMLElement | null): HTMLElement[] => {
 					const containers: HTMLElement[] = []
 					let current: HTMLElement | null = element
-					
+
 					while (current && current !== document.body && current !== document.documentElement) {
 						const style = window.getComputedStyle(current)
-						if (style.overflow === 'auto' || style.overflow === 'scroll' || 
-						    style.overflowY === 'auto' || style.overflowY === 'scroll' ||
-						    style.overflowX === 'auto' || style.overflowX === 'scroll') {
+						if (style.overflow === 'auto' || style.overflow === 'scroll' ||
+							style.overflowY === 'auto' || style.overflowY === 'scroll' ||
+							style.overflowX === 'auto' || style.overflowX === 'scroll') {
 							containers.push(current)
 						}
 						current = current.parentElement
 					}
-					
+
 					if (window.scrollY > 0 || window.scrollX > 0) {
 						containers.push(document.documentElement)
 					}
-					
+
 					return containers
 				}
 
 				const startElement = e?.currentTarget as HTMLElement || containerRef.current
 				const scrollContainers = findAllScrollContainers(startElement)
-				
+
 				scrollContainers.forEach(container => {
 					scrollPositions.push({
 						element: container,
@@ -318,7 +318,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 								// تجاهل الأخطاء
 							}
 						})
-						
+
 						const currentWindowTop = window.scrollY || window.pageYOffset || 0
 						const currentWindowLeft = window.scrollX || window.pageXOffset || 0
 						if (Math.abs(currentWindowTop - windowScroll.top) > 1 || Math.abs(currentWindowLeft - windowScroll.left) > 1) {
@@ -331,7 +331,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 			return (
 				<div
 					className={cn(
-						"border rounded-lg mb-2 transition-colors",
+						"rounded-lg mb-2 transition-colors hover:bg-primary/5",
 						isSelected && "bg-primary/5 border-primary/20"
 					)}
 				// style={{ marginRight: `${level * 1}rem` }}
@@ -343,10 +343,10 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 						)}
 					>
 						<div className="flex items-center gap-2 flex-1 text-right">
-							<Button 
-								variant="ghost" 
-								size="icon" 
-								className="hover:bg-transparent cursor-pointer p-0" 
+							<Button
+								variant="ghost"
+								size="icon"
+								className="hover:bg-transparent cursor-pointer p-0"
 								onClick={(e) => {
 									// منع السلوك الافتراضي والانتشار لمنع العودة للأعلى
 									e.preventDefault()
@@ -354,14 +354,14 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 									if (hasChildren) {
 										toggleExpanded(e)
 									}
-								}} 
+								}}
 								disabled={!hasChildren}
 							>
 								{renderCategoryIcon(category.icon, isExpanded)}
 							</Button>
-							<span 
+							<span
 								className={cn(
-									"font-medium cursor-pointer hover:text-primary transition-colors",
+									"font-medium cursor-pointer hover:text-primary transition-colors w-full",
 									isSelected && "text-primary font-semibold"
 								)}
 								onClick={(e) => {
@@ -374,10 +374,25 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 								{category.name.ar || category.name.en}
 							</span>
 						</div>
-						{hasChildren && (
+						{/* {hasChildren && (
 							<span className="text-xs text-muted-foreground bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
 								{category.children.length}
 							</span>
+						)} */}
+						{category.children.length > 0 && (
+							<Button variant="ghost" size="icon"
+								onClick={(e) => {
+									// منع السلوك الافتراضي والانتشار لمنع العودة للأعلى
+									e.preventDefault()
+									e.stopPropagation()
+									if (hasChildren) {
+										toggleExpanded(e)
+									}
+								}}
+								disabled={!hasChildren} 
+								className="hover:bg-transparent cursor-pointer p-0">
+								<ChevronRight className={cn("w-5 h-5 text-primary flex-shrink-0", isExpanded ? "rotate-90" : "rotate-0")} />
+							</Button>
 						)}
 					</div>
 					{hasChildren && isExpanded && (
@@ -449,7 +464,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 					onClick={(e) => {
 						// منع انتشار الحدث لمنع العودة للأعلى
 						e.stopPropagation()
-						
+
 						// Prevent accordion toggle when drag is enabled
 						if (isDragEnabled) {
 							e.preventDefault()
@@ -494,7 +509,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 						) : null}
 						<div className="flex items-center gap-2">
 							{renderCategoryIcon(category.icon, hasChildren)}
-							<span 
+							<span
 								className={cn(
 									"font-medium cursor-pointer hover:text-primary transition-colors",
 									isSelected && "text-primary font-semibold"

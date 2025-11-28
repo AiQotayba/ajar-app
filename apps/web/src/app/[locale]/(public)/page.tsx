@@ -62,9 +62,7 @@ export default async function HomePageSSR({ params }: HomePageProps) {
   const { locale } = await params;
 
   // Validate locale
-  if (!['ar', 'en'].includes(locale)) {
-    notFound();
-  }
+  if (!['ar', 'en'].includes(locale)) notFound();
 
   return <HomePage locale={locale} />;
 }

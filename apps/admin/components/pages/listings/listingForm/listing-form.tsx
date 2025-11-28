@@ -118,17 +118,32 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             }
 
             return {
-                title: listing.title || { ar: "", en: "" },
-                description: listing.description || { ar: "", en: "" },
+                title: {
+                    ar: listing.title?.ar || "",
+                    en: listing.title?.en ?? "" // Convert null to empty string, preserve existing value
+                },
+                description: {
+                    ar: listing.description?.ar || "",
+                    en: listing.description?.en ?? "" // Convert null to empty string, preserve existing value
+                },
                 type: listing.type || "",
                 availability_status: listing.availability_status || "available",
                 category_id: categoryId,
                 sub_category_id: subCategoryId,
                 sub_sub_category_id: subSubCategoryId,
-                properties: listing.properties?.map((prop: any) => ({
-                    id: prop.property_id || prop.id,
-                    value: typeof prop.value === 'object' ? prop.value?.ar || prop.value?.en || "" : prop.value || ""
-                })) || [],
+                properties: listing.properties?.map((prop: any) => {
+                    let value: string = ""
+                    if (typeof prop.value === 'object' && prop.value !== null) {
+                        value = prop.value?.ar || prop.value?.en || ""
+                    } else if (prop.value !== null && prop.value !== undefined) {
+                        // Convert to string if it's a number or other type
+                        value = String(prop.value)
+                    }
+                    return {
+                        id: prop.property_id || prop.id,
+                        value: value
+                    }
+                }).filter((prop: any) => prop.id) || [],
                 features: listing.features?.map((f: any) => f.id?.toString() || f.toString()) || [],
                 governorate_id: listing.governorate.id?.toString() || "",
                 city_id: listing.city?.id?.toString() || "",
@@ -137,9 +152,14 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 images: listing.media?.map((m: any) => m.url || m.image_url || m) || [],
                 cover_image_index: (listing as any).cover_image_index || 0,
                 price: listing.price || 0,
-                pay_every: listing.pay_every || "",
+                pay_every: listing.pay_every ? String(listing.pay_every) : "",
                 insurance: listing.insurance || 0,
-                status: listing.status || "draft",
+                status: (() => {
+                    const validStatuses = ["draft", "in_review", "approved", "rejected"]
+                    const listingStatus = listing.status || "draft"
+                    // Return the status if it's valid, otherwise default to "draft"
+                    return validStatuses.includes(listingStatus) ? listingStatus : "draft"
+                })(),
                 is_featured: listing.is_featured || false,
             }
         }
@@ -194,9 +214,39 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             if (hasResetRef.current !== listingKey) {
                 console.info("📥 [LOAD LISTING] Setting up form with listing data:", listing)
 
-                // Reset form with computed default values
+                // Ensure status, properties, title, description, and pay_every are normalized before reset
+                const normalizedValues = {
+                    ...defaultValues,
+                    title: {
+                        ar: defaultValues.title?.ar || "",
+                        en: defaultValues.title?.en ?? "" // Convert null to empty string
+                    },
+                    description: {
+                        ar: defaultValues.description?.ar || "",
+                        en: defaultValues.description?.en ?? "" // Convert null to empty string
+                    },
+                    status: (() => {
+                        const validStatuses = ["draft", "in_review", "approved", "rejected"]
+                        const listingStatus = listing.status || "draft"
+                        // Return the status if it's valid, otherwise default to "draft"
+                        return validStatuses.includes(listingStatus) ? listingStatus : "draft"
+                    })(),
+                    pay_every: (() => {
+                        const payEvery = defaultValues.pay_every
+                        if (!payEvery) return ""
+                        if (typeof payEvery === 'string') return payEvery
+                        if (typeof payEvery === 'number') return String(payEvery)
+                        return ""
+                    })(),
+                    properties: (defaultValues.properties || []).map((prop: any) => ({
+                        id: prop.id,
+                        value: typeof prop.value === 'string' ? prop.value : String(prop.value || "")
+                    }))
+                }
+
+                // Reset form with normalized values
                 // This ensures Select components get the correct values
-                reset(defaultValues as any, {
+                reset(normalizedValues as any, {
                     keepDefaultValues: false,
                     keepValues: false,
                     keepDirty: false,
@@ -531,8 +581,31 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         // Destructure to remove images and add media
         const { images: _, ...restFormData } = formData
 
+        // Ensure pay_every is a string (or undefined if empty)
+        const normalizedPayEvery = (() => {
+            const payEvery = restFormData.pay_every
+            if (!payEvery) return undefined
+            if (typeof payEvery === 'string') return payEvery || undefined
+            if (typeof payEvery === 'number') return String(payEvery)
+            return undefined
+        })()
+
+        // Ensure title and description en are not null
+        const normalizedTitle = {
+            ar: formData.title?.ar || "",
+            en: formData.title?.en ?? "" // Convert null to empty string
+        }
+
+        const normalizedDescription = {
+            ar: formData.description?.ar || "",
+            en: formData.description?.en ?? "" // Convert null to empty string
+        }
+
         return {
             ...restFormData,
+            title: normalizedTitle,
+            description: normalizedDescription,
+            pay_every: normalizedPayEvery,
             properties: transformedProperties,
             media: transformedImages,
             category_id: formData.category_id ? Number(formData.category_id) : undefined,

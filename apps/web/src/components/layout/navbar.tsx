@@ -209,7 +209,7 @@ export function Navbar({ className }: NavbarProps) {
                       <Logo width={40} height={40} />
                     </div>
                     {/* Mobile Language Switcher */}
-                    <div className="sm:hidden">
+                    <div className="sm:hidden ">
                       <LanguageSwitcher />
                     </div>
                   </div>
@@ -330,13 +330,13 @@ export function Navbar({ className }: NavbarProps) {
               >
                 <Link href={`/${locale}/my-listings/create`}>
                   <Plus className="w-4 h-4 mx-1" />
-                  {isRTL ? "إضافة عقار" : "Add listing"}
+                  {isRTL ? "إضافة اعلان" : "Add listing"}
                 </Link>
               </Button>
             )}
 
             {/* User Menu */}
-            <div className="relative items-center flex">
+            <div className="relative items-center flex mx-2">
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

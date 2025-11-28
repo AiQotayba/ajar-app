@@ -6,6 +6,7 @@
   - reponsvie: عندما نكون وضع موبايل ونعود سطح مكتب يصبح هناك خلل في التصميم 
     availability_status: available,unavailable,rented,solded 
       - ما عم تتحدث 
+    
 @[all](25)
 
 # next

@@ -52,4 +52,5 @@ npm run build
 pm2 reload app 
 # ------------------------------------------------------------
  cd htdocs/dashboard.ajarsyria.com/ajar-app/ ; git pull origin main ; cd apps/web ; npm install ; npm run build ; pm2 reload app 
+ cd htdocs/ajarsyria.com/ajar-app/ ; git pull origin main ; cd apps/web ; npm install ; npm run build ; pm2 reload app 
 nano 
