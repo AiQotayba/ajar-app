@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Deploy to Two Servers
 
 on:
   push:
@@ -19,6 +19,14 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-      - name: Run remote deploy script
-        run: |
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "./deploy.sh"
+      ###############################
+      # 🔥 السيرفر الأول
+      ###############################
+      - name: web server
+        run: ssh -i ~/.ssh/id_ed25519 ajarsyria@82.29.178.80 "./deploy.sh"
+
+      ###############################
+      # 🔥 السيرفر الثاني
+      ###############################
+      - name: dashboard server
+        run: ssh -i ~/.ssh/id_ed25519 ajarsyria-dashboard@82.29.178.81 "./deploy.sh"
