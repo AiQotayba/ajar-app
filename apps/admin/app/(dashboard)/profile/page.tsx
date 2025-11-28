@@ -24,7 +24,7 @@ export default function MyAccountPage() {
   const queryClient = useQueryClient()
   const [isEditingProfile, setIsEditingProfile] = React.useState(false)
   const [isEditingPassword, setIsEditingPassword] = React.useState(false)
-  
+
   // Password visibility states
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false)
   const [showNewPassword, setShowNewPassword] = React.useState(false)
@@ -33,11 +33,11 @@ export default function MyAccountPage() {
   // Fetch profile
   const { data: profileData, isLoading } = useQuery({
     queryKey: ["profile"],
-    queryFn: () => api.get(`/admin/profile`),
+    queryFn: () => api.get(`/user/me`),
   })
 
   const profile = profileData?.data as AdminUser | undefined
-
+  console.log({ profile });
   // Profile form state
   const [profileForm, setProfileForm] = React.useState<UpdateProfileData>({
     first_name: "",
@@ -66,14 +66,14 @@ export default function MyAccountPage() {
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
-    mutationFn: (data: UpdateProfileData) => api.put(`/admin/profile`, data),
+    mutationFn: (data: UpdateProfileData) => api.put(`/user/me`, data),
     onSuccess: (response: any) => {
       console.info("📥 Update Profile Response:", response)
-      
+
       // Check if response indicates an error
       if (response?.isError || (response?.status && response.status >= 400)) {
         console.error("❌ Update Profile Failed:", response)
-        
+
         // Handle validation errors
         if (response?.errors) {
           const firstError = Object.values(response.errors)[0]
@@ -84,7 +84,7 @@ export default function MyAccountPage() {
         }
         return
       }
-      
+
       console.info("✅ Update Profile Success")
       queryClient.invalidateQueries({ queryKey: ["profile"] })
       toast.success(response?.message || "تم تحديث الملف الشخصي بنجاح")
@@ -99,14 +99,14 @@ export default function MyAccountPage() {
 
   // Reset password mutation
   const resetPasswordMutation = useMutation({
-    mutationFn: (data: ResetPasswordData) => api.put(`/admin/profile/reset-password`, data),
+    mutationFn: (data: ResetPasswordData) => api.put(`/user/me/reset-password`, data),
     onSuccess: (response: any) => {
       console.info("📥 Reset Password Response:", response)
-      
+
       // Check if response indicates an error
       if (response?.isError || (response?.status && response.status >= 400)) {
         console.error("❌ Reset Password Failed:", response)
-        
+
         // Handle validation errors
         if (response?.errors) {
           const firstError = Object.values(response.errors)[0]
@@ -117,7 +117,7 @@ export default function MyAccountPage() {
         }
         return
       }
-      
+
       console.info("✅ Reset Password Success")
       toast.success(response?.message || "تم تغيير كلمة المرور بنجاح")
       resetPasswordForm()
@@ -137,22 +137,22 @@ export default function MyAccountPage() {
       toast.error("رقم الهاتف غير صحيح")
       return
     }
-    
+
     // Ensure phone number starts with +
     const submitData = {
       ...profileForm,
-      phone: profileForm.phone && !profileForm.phone.startsWith('+') 
-        ? `+${profileForm.phone}` 
+      phone: profileForm.phone && !profileForm.phone.startsWith('+')
+        ? `+${profileForm.phone}`
         : profileForm.phone
     }
-    
+
     console.info("📤 Updating Profile:", submitData)
     updateProfileMutation.mutate(submitData)
   }
 
   // Helper function to reset password form
   const resetPasswordForm = () => {
-    setPasswordForm({ 
+    setPasswordForm({
       new_password: "",
       new_password_confirmation: "",
     })
@@ -171,7 +171,7 @@ export default function MyAccountPage() {
       toast.error("كلمة المرور يجب أن تكون 8 أحرف على الأقل")
       return
     }
-    
+
     console.info("📤 Resetting Password")
     resetPasswordMutation.mutate(passwordForm)
   }
@@ -289,13 +289,11 @@ export default function MyAccountPage() {
             </CardContent>
           </Card>
         </div>
-        </div>
       </div>
-    )
+    </div>
+  )
 
-  if (isLoading) {
-    return <ProfileSkeleton />
-  }
+  if (isLoading) return <ProfileSkeleton />
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -319,11 +317,11 @@ export default function MyAccountPage() {
             <div className="flex flex-col items-center gap-4">
               <div className="relative group">
                 <Avatar className="h-32 w-32 border-4 border-primary/20 shadow-lg transition-all duration-300 group-hover:scale-105 group-hover:border-primary/40">
-                <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name} />
                   <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-3xl font-semibold">
-                  {profile?.first_name?.charAt(0)}{profile?.last_name?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+                    {profile?.first_name?.charAt(0)}{profile?.last_name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-2 shadow-md">
                   <Shield className="h-4 w-4" />
                 </div>
@@ -372,8 +370,8 @@ export default function MyAccountPage() {
                   <CardDescription className="text-sm mt-1">قم بتحديث معلوماتك الشخصية</CardDescription>
                 </div>
                 {!isEditingProfile ? (
-                  <Button 
-                    onClick={() => setIsEditingProfile(true)} 
+                  <Button
+                    onClick={() => setIsEditingProfile(true)}
                     variant="outline"
                     className="hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                   >
@@ -486,8 +484,8 @@ export default function MyAccountPage() {
                   <CardDescription className="text-sm mt-1">قم بتحديث كلمة المرور الخاصة بك</CardDescription>
                 </div>
                 {!isEditingPassword ? (
-                  <Button 
-                    onClick={() => setIsEditingPassword(true)} 
+                  <Button
+                    onClick={() => setIsEditingPassword(true)}
                     variant="outline"
                     className="hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                   >
@@ -546,9 +544,9 @@ export default function MyAccountPage() {
                   ] as const).map((field) => (
                     <div key={field.id} className="space-y-2">
                       <Label htmlFor={field.id} className="text-sm font-medium">{field.label}</Label>
-                    <div className="relative">
+                      <div className="relative">
                         <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                      <Input
+                        <Input
                           id={field.id}
                           type={field.showPassword ? "text" : "password"}
                           value={field.value}
@@ -564,21 +562,21 @@ export default function MyAccountPage() {
                         >
                           {field.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
+                      </div>
                     </div>
-                  </div>
                   ))}
 
                   {/* Password Match Validation */}
                   {passwordForm.new_password && passwordForm.new_password_confirmation && (
                     <div className={cn(
                       "text-sm p-3 rounded-lg transition-colors duration-200",
-                      passwordForm.new_password === passwordForm.new_password_confirmation 
-                        ? "bg-primary/10 text-primary" 
+                      passwordForm.new_password === passwordForm.new_password_confirmation
+                        ? "bg-primary/10 text-primary"
                         : "bg-destructive/10 text-destructive"
                     )}>
                       <p className="font-medium">
-                        {passwordForm.new_password === passwordForm.new_password_confirmation 
-                          ? "✓ كلمات المرور متطابقة" 
+                        {passwordForm.new_password === passwordForm.new_password_confirmation
+                          ? "✓ كلمات المرور متطابقة"
                           : "✗ كلمات المرور غير متطابقة"}
                       </p>
                     </div>

@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
+import { Info } from "lucide-react"
 
 interface Category {
   id: number;
@@ -30,7 +31,41 @@ interface Category {
   updated_at: string;
 }
 
+
 export function CategoryFilter({ data, isLoading }: { data: Category[] | undefined, isLoading: boolean }) {
+  const [info, setInfo] = useState<Category | undefined>(undefined)
+
+  const locale = useLocale()
+  const direction = locale === 'ar' ? 'rtl' : 'ltr'
+
+  // Show loading skeleton if loading
+  if (isLoading) {
+    return <CategoryFilterSkeleton direction={direction} />
+  }
+
+  // إذا لم تكن هناك بيانات، لا نعرض المكون
+  if (!data || data.length === 0) return null;
+
+  const description = locale === 'ar' ? info?.description?.ar : info?.description?.en
+  const name = locale === 'ar' ? info?.name?.ar : info?.name?.en
+  return (
+    <>
+      <CategoryTabs data={data} isLoading={isLoading} setInfo={setInfo} />
+      {name && (
+        <div className="text-sm text-gray-500 my-4 p-2 gap-4 mx-4 px-4 border-r-4 border-primary/20">
+          <div className="flex flex-row items-center gap-2">
+            <span className="text-sm font-medium">
+              {name}
+            </span>
+          </div>
+          {description}
+        </div>
+      )}
+    </>
+  )
+}
+
+export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | undefined, isLoading: boolean, setInfo: any }) {
   const [activeCategory, setActiveCategory] = useState<Category | undefined>(undefined)
   const locale = useLocale()
   const t = useTranslations('filters')
@@ -56,7 +91,8 @@ export function CategoryFilter({ data, isLoading }: { data: Category[] | undefin
   const handleCategoryChange = (categoryId: string) => {
     const category = data?.find((cat) => cat.id.toString() === categoryId)
     setActiveCategory(category)
-    
+    setInfo?.(category as Category)
+
     // Update searchParams
     const params = new URLSearchParams(searchParams.toString())
     if (category) {
@@ -66,7 +102,7 @@ export function CategoryFilter({ data, isLoading }: { data: Category[] | undefin
     } else {
       params.delete('category_id')
     }
-    
+
     router.push(`?${params.toString()}`, { scroll: false })
   }
 
@@ -76,16 +112,14 @@ export function CategoryFilter({ data, isLoading }: { data: Category[] | undefin
   }
 
   // إذا لم تكن هناك بيانات، لا نعرض المكون
-  if (!data || data.length === 0) {
-    return null;
-  }
-console.log(activeCategory);
+  if (!data || data.length === 0) return null;
+
   return (
     <div dir={direction} className="w-full">
-      <Tabs 
-        value={activeCategory?.id.toString() || ""} 
-        onValueChange={handleCategoryChange} 
-        className="w-full !rounded-none" 
+      <Tabs
+        value={activeCategory?.id.toString() || ""}
+        onValueChange={handleCategoryChange}
+        className="w-full !rounded-none"
         dir={direction}
       >
         <TabsList
@@ -95,7 +129,7 @@ console.log(activeCategory);
             "scrollbar-hide !rounded-none",
             "snap-x snap-mandatory",
             "scroll-smooth",
-            "justify-start",
+            "justify-start px-2",
             // direction === 'rtl' ? "justify-start" : "justify-end",
           )}
         >
@@ -113,7 +147,7 @@ console.log(activeCategory);
           >
             {t('all')}
           </TabsTrigger>
-          
+
           {data.map((category) => (
             <TabsTrigger
               key={category.id}
@@ -128,7 +162,7 @@ console.log(activeCategory);
               "
             >
               {category.icon && (
-                <Image src={category.icon || ""} alt={category.name[locale as keyof typeof category.name]} className="w-5 h-5 object-cover rounded flex-shrink-0" width={20} height={20} />
+                <Image src={category.icon || ""} alt={category.name[locale as keyof typeof category.name]} className="w-5 h-5 bg-white p-0.5 object-cover rounded flex-shrink-0" width={20} height={20} />
               )}
               <span className="text-sm font-medium">
                 {category.name[locale as keyof typeof category.name]}
@@ -137,8 +171,7 @@ console.log(activeCategory);
           ))}
         </TabsList>
       </Tabs>
-      <CategoryFilter data={activeCategory?.children} isLoading={false} />
-
+      <CategoryTabs data={activeCategory?.children} isLoading={false} setInfo={setInfo} />
     </div>
   )
 }

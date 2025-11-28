@@ -46,7 +46,7 @@ import { api } from "@/lib/api"
 const createUserSchema = z.object({
     first_name: z.string().min(2, "الاسم الأول يجب أن يكون حرفين على الأقل"),
     last_name: z.string().min(2, "الاسم الأخير يجب أن يكون حرفين على الأقل"),
-    email: z.string().email("البريد الإلكتروني غير صالح").min(1, "البريد الإلكتروني مطلوب"),
+    email: z.string().optional(),
     phone: z.string()
         .min(1, "رقم الهاتف مطلوب")
         .refine((val) => isValidPhoneNumber(val), {
@@ -68,7 +68,7 @@ const createUserSchema = z.object({
 const updateUserSchema = z.object({
     first_name: z.string().min(2, "الاسم الأول يجب أن يكون حرفين على الأقل"),
     last_name: z.string().min(2, "الاسم الأخير يجب أن يكون حرفين على الأقل"),
-    email: z.string().email("البريد الإلكتروني غير صالح").min(1, "البريد الإلكتروني مطلوب"),
+    email: z.string().optional(),
     phone: z.string()
         .min(1, "رقم الهاتف مطلوب")
         .refine((val) => isValidPhoneNumber(val), {
@@ -122,6 +122,7 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
             language: user?.language || "ar",
         },
     })
+console.log(user?.phone);
 
     // Create mutation
     const createMutation = useMutation({
