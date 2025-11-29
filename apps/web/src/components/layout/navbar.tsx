@@ -180,6 +180,7 @@ export function Navbar({ className }: NavbarProps) {
     }
     return true // Show items without auth requirement
   })
+  console.log(user?.avatar_url);
 
   return (
     <header className={cn(
@@ -343,7 +344,7 @@ export function Navbar({ className }: NavbarProps) {
                     <div
                       className="text-gray-600 rounded-full max-w-max px-4 py-auto w-max   overflow-hidden"
                     >
-                      {user?.avatar_url ? (
+                      {user?.avatar_url && user?.avatar !== "avatars/default_avatar.jpg" ? (
                         <Image
                           src={user.avatar_url}
                           alt={user.full_name || 'User'}
@@ -364,7 +365,7 @@ export function Navbar({ className }: NavbarProps) {
                     <DropdownMenuLabel className="font-normal">
 
                       <div className="flex rtl:flex-row-reverse items-center gap-2 space-y-1">
-                        {user?.avatar_url ? (
+                        {user?.avatar_url && user?.avatar !== "avatars/default_avatar.jpg" ? (
                           <Image
                             src={user.avatar_url}
                             alt={user.full_name || 'User'}
@@ -593,7 +594,7 @@ function NotificationBell({ locale }: NotificationBellProps) {
                             <span className="h-2 w-2 rounded-full bg-primary" />
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-1"> 
+                        <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
                           {notification.message}
                         </p>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">

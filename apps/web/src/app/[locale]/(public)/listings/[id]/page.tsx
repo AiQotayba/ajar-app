@@ -1,3 +1,4 @@
+import { fetchListing } from "@/components/listings/fatch"
 import { PropertyDetails } from "@/components/property/property-details"
 import { ListingSEO } from "@/components/seo/listing-seo"
 import { generateMetadata as generateSEOMetadata, SEO_CONSTANTS } from '@/lib/seo'
@@ -17,46 +18,7 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
 
   try {
     // Fetch listing data for SEO
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
-    const response = await fetch(`${apiUrl}/user/listings/${id}`, {
-      headers: {
-        'Accept-Language': locale,
-        'Accept': 'application/json',
-      }
-    })
-    
-    if (!response.ok) {
-      // Handle 404 (not found) without throwing to avoid noisy dev errors
-      if (response.status === 404) {
-        console.warn(`Listing ${id} not found (404)`)
-        return {
-          title: isArabic ? 'صفحة غير موجودة' : 'Page Not Found',
-          description: isArabic ? 'الصفحة المطلوبة غير موجودة' : 'The requested page was not found',
-          robots: { index: false, follow: false },
-        }
-      }
-
-      // For other non-OK statuses, return safe fallback metadata
-      console.warn(`API Error: ${response.status} ${response.statusText}`)
-      return {
-        title: isArabic ? 'حدث خطأ' : 'Something went wrong',
-        description: isArabic ? 'تعذر تحميل البيانات' : 'Failed to load data',
-        robots: { index: false, follow: false },
-      }
-    }
-    
-    const contentType = response.headers.get('content-type')
-    if (!contentType || !contentType.includes('application/json')) {
-      console.warn('API returned non-JSON response:', contentType)
-      return {
-        title: isArabic ? 'حدث خطأ' : 'Something went wrong',
-        description: isArabic ? 'تعذر تحميل البيانات' : 'Failed to load data',
-        robots: { index: false, follow: false },
-      }
-    }
-    
-    const data = await response.json()
-    const listing = data?.data
+    const listing = await fetchListing(id, locale)
 
     if (!listing) {
       return {
@@ -101,12 +63,16 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const { id, locale } = await params
+  
+  // Fetch listing data once (cached) and pass to both components
+  const listing = await fetchListing(id, locale)
+  
   return (
     <>
       {/* SEO Structured Data */}
       <ListingSEO id={id} locale={locale} />
 
-      <PropertyDetails id={id} locale={locale} />
+      <PropertyDetails id={id} locale={locale} initialData={listing} />
     </>
   )
 }

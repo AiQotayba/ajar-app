@@ -1,9 +1,8 @@
 "use client"
 
+import { store } from '@/lib/redux/store';
+import { setAuth, setUser, setToken, clearAuth as clearAuthAction, updateUser } from '@/lib/redux/slices/authSlice';
 import Cookies from 'js-cookie';
-
-const TOKEN_KEY = 'ajar_token';
-const USER_KEY = 'ajar_user';
 
 export interface User {
   id: number;
@@ -35,74 +34,116 @@ export interface AuthResponse {
   expires_in: number;
 }
 
-// Cookie options
-const COOKIE_OPTIONS = {
-  expires: 7, // 7 days
-  path: '/',
-  sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production'
-};
-
 /**
  * Check if user is authenticated (client-side)
  */
 export function isAuthenticated(): boolean {
-  const token = getToken();
-  return !!token;
+  if (typeof window === 'undefined') return false;
+  try {
+    const state = store.getState();
+    return !!state.auth.token && state.auth.isAuthenticated;
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Get authentication token from cookies (client-side)
+ * Get authentication token from Redux store (client-side)
  */
 export function getToken(): string | null {
-  return Cookies.get(TOKEN_KEY) || null;
-}
-
-/**
- * Store authentication token in cookies (client-side)
- */
-export function storeToken(token: string): void {
-  Cookies.set(TOKEN_KEY, token, COOKIE_OPTIONS);
-}
-
-/**
- * Remove authentication token from cookies (client-side)
- */
-export function removeToken(): void {
-  Cookies.remove(TOKEN_KEY, { path: '/' });
-  Cookies.remove(USER_KEY, { path: '/' });
-}
-
-/**
- * Store user data in cookies (client-side)
- */
-export function storeUser(user: User): void {
-  const userData = JSON.stringify(user);
-  Cookies.set(USER_KEY, userData, COOKIE_OPTIONS);
-}
-
-/**
- * Get user data from cookies (client-side)
- */
-export function getUser(): User | null {
-  const userData = Cookies.get(USER_KEY);
-  
-  if (!userData) {
-    return null;
-  }
-
+  if (typeof window === 'undefined') return null;
   try {
-    return JSON.parse(userData);
+    const state = store.getState();
+    return state.auth.token;
   } catch {
     return null;
   }
 }
 
 /**
- * Clear all authentication data (client-side)
+ * Store authentication token in Redux store and cookies (client-side)
+ */
+export function storeToken(token: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    // Store in Redux (for client-side)
+    store.dispatch(setToken(token));
+    // Store in cookies (for middleware and server-side)
+    Cookies.set('ajar_token', token, {
+      expires: 7, // 7 days
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
+    });
+  } catch (error) {
+    console.error('Error storing token:', error);
+  }
+}
+
+/**
+ * Remove authentication token from Redux store and cookies (client-side)
+ */
+export function removeToken(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    // Remove from Redux
+    store.dispatch(clearAuthAction());
+    // Remove from cookies
+    Cookies.remove('ajar_token', { path: '/' });
+    Cookies.remove('ajar_user', { path: '/' });
+  } catch (error) {
+    console.error('Error removing token:', error);
+  }
+}
+
+/**
+ * Store user data in Redux store and cookies (client-side)
+ */
+export function storeUser(user: User): void {
+  if (typeof window === 'undefined') return;
+  try {
+    // Store in Redux (for client-side)
+    store.dispatch(setUser(user));
+    // Store in cookies (for server-side)
+    const userData = JSON.stringify(user);
+    Cookies.set('ajar_user', userData, {
+      expires: 7, // 7 days
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production'
+    });
+  } catch (error) {
+    console.error('Error storing user:', error);
+  }
+}
+
+/**
+ * Get user data from Redux store (client-side)
+ */
+export function getUser(): User | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const state = store.getState();
+    return state.auth.user;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Clear all authentication data from Redux and cookies (client-side)
  */
 export function clearAuth(): void {
-  removeToken();
+  if (typeof window === 'undefined') return;
+  try {
+    // Clear from Redux
+    store.dispatch(clearAuthAction());
+    // Clear from cookies
+    Cookies.remove('ajar_token', { path: '/' });
+    Cookies.remove('ajar_user', { path: '/' });
+  } catch (error) {
+    console.error('Error clearing auth:', error);
+  }
 }
 
 /**
@@ -121,12 +162,31 @@ export function getAuthHeaders(): Record<string, string> {
 }
 
 /**
- * Handle authentication response and store data (client-side)
+ * Handle authentication response and store data in Redux and cookies (client-side)
  */
 export function handleAuthResponse(response: AuthResponse): void {
+  if (typeof window === 'undefined') return;
   if (response.success && response.access_token) {
-    storeToken(response.access_token);
-    storeUser(response.data);
+    try {
+      // Store in Redux (for client-side)
+      store.dispatch(setAuth(response));
+      // Store in cookies (for middleware and server-side)
+      Cookies.set('ajar_token', response.access_token, {
+        expires: 7, // 7 days
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+      });
+      const userData = JSON.stringify(response.data);
+      Cookies.set('ajar_user', userData, {
+        expires: 7, // 7 days
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+      });
+    } catch (error) {
+      console.error('Error handling auth response:', error);
+    }
   }
 }
 
@@ -160,4 +220,16 @@ export function getUserDisplayName(): string {
 export function isUserVerified(): boolean {
   const user = getUser();
   return user?.phone_verified || false;
+}
+
+/**
+ * Update user data in Redux store (client-side)
+ */
+export function updateUserData(userData: Partial<User>): void {
+  if (typeof window === 'undefined') return;
+  try {
+    store.dispatch(updateUser(userData));
+  } catch (error) {
+    console.error('Error updating user data:', error);
+  }
 }

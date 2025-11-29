@@ -1,7 +1,0 @@
-- add rules
-    - [✔️] Technical architecture
-    - [✔️] API Documentation
-    - [✔️] Database Schema
-    - [ ] UX Writing
-    - [ ] SEO Guide and Optimization
-    - [ ] ?

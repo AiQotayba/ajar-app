@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl"
 import { useLocale } from "next-intl"
 import { ProfileHeader } from "./profile-header"
 import { ProfileStats } from "./profile-stats"
+import { storeUser } from "@/lib/auth/client"
 
 const MenuItems = [
   {
@@ -50,14 +51,9 @@ export function ProfileContent() {
   const t = useTranslations('profile')
   const locale = useLocale()
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
-  
+
   // Fetch user data using React Query
-  const {
-    data: userData,
-    isLoading,
-    error,
-    refetch
-  } = useQuery({
+  const { data: userData, isLoading, error, refetch } = useQuery({
     queryKey: ['user-profile'],
     queryFn: async () => {
       const response = await api.get('/user/me')
@@ -65,7 +61,7 @@ export function ProfileContent() {
       if (response.isError) {
         throw new Error(response.message || 'Failed to fetch user profile')
       }
-
+      storeUser(response.data as any)
       return response.data as User
     },
     retry: 2,

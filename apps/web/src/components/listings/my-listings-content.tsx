@@ -109,16 +109,6 @@ export function MyListingsContent() {
     if (!isLoading && listingsData?.length === 0) {
         return (
             <div className="min-h-screen bg-background pb-24" dir={direction}>
-                {/* Add new listing button */}
-                <div className="p-4">
-                    <Link href="/listings/create" className="max-w-[300px] ">
-                        <Button className="w-full" size="lg">
-                            <Plus className="w-5 h-5 mr-2" />
-                            {t('addListing')}
-                        </Button>
-                    </Link>
-                </div>
-
                 {/* Empty state */}
                 <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
                     <div className="relative w-80 h-80 mb-8">

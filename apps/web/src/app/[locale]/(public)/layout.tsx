@@ -1,5 +1,6 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { QueryProvider } from "@/components/QueryProvider";
+import { ReduxProvider } from "@/components/ReduxProvider";
 import { JsonLd } from "@/components/seo/json-ld";
 import { LocaleSaver } from "@/components/locale-saver";
 import { routing } from '@/lib/i18n/routing';
@@ -97,17 +98,19 @@ export default async function LocaleLayout({
                 
             </head>
             <body className="antialiased">
-                <QueryProvider>
-                    <NextIntlClientProvider locale={locale} messages={messages}>
-                        <ForegroundNotificationListenerProvider />
-                        <LocaleSaver />
-                        <MainLayout>
-                            <main className="min-h-screen">{children}</main>
-                        </MainLayout>
-                        {/* <BottomNav /> */}
-                        <Toaster position="top-center" richColors />
-                    </NextIntlClientProvider>
-                </QueryProvider>
+                <ReduxProvider>
+                    <QueryProvider>
+                        <NextIntlClientProvider locale={locale} messages={messages}>
+                            <ForegroundNotificationListenerProvider />
+                            <LocaleSaver />
+                            <MainLayout>
+                                <main className="min-h-screen">{children}</main>
+                            </MainLayout>
+                            {/* <BottomNav /> */}
+                            <Toaster position="top-center" richColors />
+                        </NextIntlClientProvider>
+                    </QueryProvider>
+                </ReduxProvider>
             </body>
         </html>
     );

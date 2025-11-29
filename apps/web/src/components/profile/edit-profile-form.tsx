@@ -116,11 +116,12 @@ export function EditProfileForm() {
     },
     onSuccess: (data: any) => {
       console.log(data);
-      
+
       refreshUser()
       toast.success(data.message)
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
       router.back()
+      window.location.href = "/profile"
     },
     onError: (error: Error) => {
       toast.error(error.message || t('updateError'))
@@ -245,6 +246,7 @@ export function EditProfileForm() {
       fileInput.click()
     }
   }
+  console.log(userData);
   return (
     <div className="min-h-screen max-w-2xl mx-auto bg-background" dir={direction}>
       <form onSubmit={handleSubmit} className="p-6 space-y-6" dir={direction}>
@@ -255,7 +257,7 @@ export function EditProfileForm() {
           </Label>
           <div className="relative group *:cursor-pointer">
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary/20 transition-all group-hover:border-primary/40">
-              {avatarPreview ? (
+              {avatarPreview && userData?.avatar !== "avatars/default_avatar.jpg" ? (
                 <Image
                   src={avatarPreview}
                   alt={userData?.full_name || 'User'}

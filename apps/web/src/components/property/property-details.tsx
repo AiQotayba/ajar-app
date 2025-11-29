@@ -17,6 +17,7 @@ import { Property404 } from "./property-404"
 interface PropertyDetailsProps {
   id: string
   locale?: string
+  initialData?: ListingData | null
 }
 
 interface ListingData {
@@ -81,7 +82,7 @@ interface ListingData {
   updated_at: string
 }
 
-export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
+export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDetailsProps) {
   const t = useTranslationsHook()
   const queryClient = useQueryClient()
   const { user } = useAuth()
@@ -96,6 +97,8 @@ export function PropertyDetails({ id, locale = 'ar' }: PropertyDetailsProps) {
     queryFn: () => api.get(`/user/listings/${id}`),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+    initialData: initialData ? { data: initialData, isError: false, status: 200 } : undefined, // Use cached data from server
+    // If we have initial data, the query will use it and won't refetch immediately
   })
 
   // if (true) return <PropertyDetailsSkeleton />
