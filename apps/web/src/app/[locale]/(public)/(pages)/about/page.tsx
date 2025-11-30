@@ -27,10 +27,10 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
       description: t('description'),
     },
     alternates: {
-      canonical: `https://ajar.com/${locale}/about`,
+      canonical: `https://ajar.com/${locale}/about-app`,
       languages: {
-        'ar': 'https://ajar.com/ar/about',
-        'en': 'https://ajar.com/en/about',
+        'ar': 'https://ajar.com/ar/about-app',
+        'en': 'https://ajar.com/en/about-app',
       },
     },
   }

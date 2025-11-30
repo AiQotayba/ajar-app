@@ -161,7 +161,7 @@ export function Navbar({ className }: NavbarProps) {
     {
       id: "about",
       label: isRTL ? "من نحن" : "About",
-      href: `/${locale}/about`,
+      href: `/${locale}/about-app`,
       icon: Info,
       requiresAuth: false
     },

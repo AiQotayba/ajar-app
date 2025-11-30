@@ -50,7 +50,7 @@ export function SettingsContent() {
         </Link> */}
 
         {/* About App */}
-        <Link href="/about" className="w-full flex items-center justify-between p-4 bg-card rounded-2xl border hover:shadow-md transition-colors">
+        <Link href="/about-app" className="w-full flex items-center justify-between p-4 bg-card rounded-2xl border hover:shadow-md transition-colors">
           <div className="flex items-center gap-2">
             <svg width="20" height="22" viewBox="0 0 20 22" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M10.0002 12.75C9.80165 12.7487 9.61164 12.6693 9.47127 12.5289C9.3309 12.3885 9.25146 12.1985 9.25015 12V6.75C9.25146 6.55149 9.3309 6.36149 9.47127 6.22112C9.61164 6.08075 9.80165 6.00131 10.0002 6C10.1987 6.00131 10.3887 6.08075 10.529 6.22112C10.6694 6.36149 10.7488 6.55149 10.7502 6.75V12C10.7488 12.1985 10.6694 12.3885 10.529 12.5289C10.3887 12.6693 10.1987 12.7487 10.0002 12.75Z" fill="#333333" />

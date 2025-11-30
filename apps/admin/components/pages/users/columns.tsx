@@ -6,8 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { TableColumn } from "@/components/table/table-core"
 import type { User } from "@/lib/types/user"
-import { format } from "date-fns"
-import { ar } from "date-fns/locale"
 
 // Get role config
 export const getRoleConfig = (role: string) => {
@@ -116,7 +114,7 @@ export const getUsersColumns = (): TableColumn<User>[] => [
         label: "التوثيق",
         sortable: true,
         width: "w-28",
-        render: (value, row) => {
+        render: (value) => {
             return value ? (
                 <Badge className="bg-green-500 text-white">
                     <CheckCircle className="h-3 w-3 ml-1" />

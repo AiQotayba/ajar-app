@@ -43,6 +43,7 @@ import { ar } from "date-fns/locale"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
 import type { Setting } from "@/lib/types/setting"
+import { ApiResponse } from "@/lib/api-client"
 
 // Form validation schema
 const settingFormSchema = z.object({
@@ -89,25 +90,25 @@ export function SettingForm({ open, onOpenChange, urlEndpoint, setting, mode }: 
 
     // Create mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => api.post(`/admin/settings`, data),
+        mutationFn: (data: SettingFormValues) => api.post(`/admin/settings`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
             form.reset()
         },
-        onError: (error: any) => {
+        onError: (error: ApiResponse<Setting>) => {
             console.error("حدث خطأ أثناء إضافة الإعداد:", error)
         },
     })
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => api.put(`/admin/settings/${setting!.id}`, data),
+        mutationFn: (data: SettingFormValues) => api.put(`/admin/settings/${setting!.id}`, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
         },
-        onError: (error: any) => {
+        onError: (error: ApiResponse<Setting>) => {
             console.error("حدث خطأ أثناء تحديث الإعداد:", error)
         },
     })

@@ -126,8 +126,7 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
             phone_verified: user?.phone_verified || false,
             language: user?.language || "ar",
         },
-    })
-console.log(user?.phone);
+    }) 
 
     // Create mutation
     const createMutation = useMutation({
