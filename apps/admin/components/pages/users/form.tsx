@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useForm, Controller } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { User as UserIcon, Phone } from "lucide-react"
@@ -41,6 +41,7 @@ import { ImageUpload } from "@/components/ui/image-upload"
 import type { User } from "@/lib/types/user"
 import { toast } from "sonner"
 import { api } from "@/lib/api"
+import { ApiResponse } from "@/lib/api-client"
 
 // Form validation schema - for create
 const createUserSchema = z.object({
@@ -114,7 +115,11 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
             first_name: user?.first_name || "",
             last_name: user?.last_name || "",
             email: user?.email || "",
-            phone: user?.phone ? (user.phone.startsWith('+') ? user.phone : `+${user.phone}`) : "",
+            phone: user?.phone ? (() => {
+                // Remove all leading + signs and add only one
+                const cleanPhone = user.phone.replace(/^\+*/, '')
+                return cleanPhone ? `+${cleanPhone}` : ""
+            })() : "",
             avatar: user?.avatar || "",
             role: user?.role || "user",
             status: user?.status || "active",
@@ -126,8 +131,8 @@ console.log(user?.phone);
 
     // Create mutation
     const createMutation = useMutation({
-        mutationFn: (data: any) => api.post(`/admin/users`, data),
-        onSuccess: (response: any) => {
+        mutationFn: (data: CreateUserFormValues) => api.post(`/admin/users`, data),
+        onSuccess: (response: ApiResponse<User>) => {
             console.info("📥 Create User Response:", response)
 
             // Check if response indicates an error
@@ -151,7 +156,7 @@ console.log(user?.phone);
             form.reset()
             toast.success(response?.message || "تم إضافة المستخدم بنجاح")
         },
-        onError: (error: any) => {
+        onError: (error: ApiResponse<User>) => {
             console.error("❌ Create User Error:", error)
             const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء إضافة المستخدم"
             toast.error(errorMessage)
@@ -160,8 +165,8 @@ console.log(user?.phone);
 
     // Update mutation
     const updateMutation = useMutation({
-        mutationFn: (data: any) => api.put(`/admin/users/${user!.id}`, data),
-        onSuccess: (response: any) => {
+        mutationFn: (data: UpdateUserFormValues) => api.put(`/admin/users/${user!.id}`, data),
+        onSuccess: (response: ApiResponse<User>) => {
             console.info("📥 Update User Response:", response)
 
             // Check if response indicates an error
@@ -184,7 +189,7 @@ console.log(user?.phone);
             onOpenChange(false)
             toast.success(response?.message || "تم تحديث المستخدم بنجاح")
         },
-        onError: (error: any) => {
+        onError: (error: ApiResponse<User>) => {
             console.error("❌ Update User Error:", error)
             const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء تحديث المستخدم"
             toast.error(errorMessage)
@@ -192,16 +197,17 @@ console.log(user?.phone);
     })
 
     const onSubmit = (values: UserFormValues) => {
-        // Ensure phone number starts with +
-        const submitData = {
+        // Remove all + signs from phone number before sending
+        const cleanPhone = values.phone ? values.phone.replace(/\+/g, '') : ""
+        const submitData: CreateUserFormValues | UpdateUserFormValues = {
             ...values,
-            phone: values.phone && !values.phone.startsWith('+') ? `+${values.phone}` : values.phone
+            phone: cleanPhone
         }
 
         console.info("📤 Submitting User Data:", submitData)
 
         if (mode === "create") {
-            createMutation.mutate(submitData)
+            createMutation.mutate(submitData as CreateUserFormValues)
         } else {
             updateMutation.mutate(submitData)
         }
@@ -211,11 +217,13 @@ console.log(user?.phone);
 
     React.useEffect(() => {
         if (user && mode === "update") {
+            // Remove any existing + signs and add only one
+            const cleanPhone = user.phone ? user.phone.replace(/^\+*/, '') : ""
             form.reset({
                 first_name: user.first_name,
                 last_name: user.last_name,
                 email: user.email || "",
-                phone: user.phone ? (user.phone.startsWith('+') ? user.phone : `+${user.phone}`) : "",
+                phone: cleanPhone ? `+${cleanPhone}` : "",
                 avatar: user.avatar || "",
                 role: user.role,
                 status: user.status,

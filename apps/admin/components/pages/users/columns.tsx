@@ -85,6 +85,17 @@ export const getUsersColumns = (): TableColumn<User>[] => [
         ),
     },
     {
+        key: "email",
+        label: "البريد الإلكتروني",
+        sortable: false,
+        width: "w-40",
+        render: (value) => (
+            <p className="text-sm text-end text-foreground" dir="ltr">
+                {value || "-"}
+            </p>
+        ),
+    },
+    {
         key: "role",
         label: "الدور",
         sortable: true,
