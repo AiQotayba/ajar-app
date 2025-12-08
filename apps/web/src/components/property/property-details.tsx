@@ -13,6 +13,8 @@ import { useAuth } from "@/hooks/use-auth"
 import { Eye, Heart, MapPin, } from "lucide-react"
 import { notFound } from "next/navigation"
 import { Property404 } from "./property-404"
+import { useListingViews } from "@/hooks/use-listing-views"
+import { useEffect } from "react"
 
 interface PropertyDetailsProps {
   id: string
@@ -86,6 +88,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
   const t = useTranslationsHook()
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const { trackView, updateViewCount } = useListingViews({ autoSubmit: true, debounceDelay: 2000 })
 
   // Function to refresh property data
   const refreshPropertyData = () => {
@@ -95,11 +98,25 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
   const { data: response, isLoading, error } = useQuery({
     queryKey: ['property', id, locale],
     queryFn: () => api.get(`/user/listings/${id}`),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes - server cache
     gcTime: 10 * 60 * 1000, // 10 minutes
     initialData: initialData ? { data: initialData, isError: false, status: 200 } : undefined, // Use cached data from server
     // If we have initial data, the query will use it and won't refetch immediately
   })
+
+  // Track view when component mounts and listing is loaded
+  useEffect(() => {
+    if (response?.data && !isLoading) {
+      const listingId = parseInt(id, 10)
+      if (!isNaN(listingId)) {
+        const wasNew = trackView(listingId)
+        if (wasNew) {
+          // Update view count in the displayed data
+          updateViewCount(listingId, response.data.views_count + 1)
+        }
+      }
+    }
+  }, [id, response?.data, isLoading, trackView, updateViewCount])
 
   // if (true) return <PropertyDetailsSkeleton />
   if (isLoading) return <PropertyDetailsSkeleton />

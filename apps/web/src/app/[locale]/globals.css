@@ -7,8 +7,8 @@
 @font-face {
   font-family: "ITF Qomra Arabic";
   src: url('/fonts/itfQomraArabic-Light.woff2') format('woff2'),
-       url('/fonts/itfQomraArabic-Light.woff') format('woff'),
-       url('/fonts/itfQomraArabic-Light.ttf') format('truetype');
+    url('/fonts/itfQomraArabic-Light.woff') format('woff'),
+    url('/fonts/itfQomraArabic-Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -17,8 +17,8 @@
 @font-face {
   font-family: "ITF Qomra Arabic";
   src: url('/fonts/itfQomraArabic-Regular.woff2') format('woff2'),
-       url('/fonts/itfQomraArabic-Regular.woff') format('woff'),
-       url('/fonts/itfQomraArabic-Regular.ttf') format('truetype');
+    url('/fonts/itfQomraArabic-Regular.woff') format('woff'),
+    url('/fonts/itfQomraArabic-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -27,8 +27,8 @@
 @font-face {
   font-family: "ITF Qomra Arabic";
   src: url('/fonts/itfQomraArabic-Medium.woff2') format('woff2'),
-       url('/fonts/itfQomraArabic-Medium.woff') format('woff'),
-       url('/fonts/itfQomraArabic-Medium.ttf') format('truetype');
+    url('/fonts/itfQomraArabic-Medium.woff') format('woff'),
+    url('/fonts/itfQomraArabic-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -37,8 +37,8 @@
 @font-face {
   font-family: "ITF Qomra Arabic";
   src: url('/fonts/itfQomraArabic-Bold.woff2') format('woff2'),
-       url('/fonts/itfQomraArabic-Bold.woff') format('woff'),
-       url('/fonts/itfQomraArabic-Bold.ttf') format('truetype');
+    url('/fonts/itfQomraArabic-Bold.woff') format('woff'),
+    url('/fonts/itfQomraArabic-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -47,8 +47,8 @@
 @font-face {
   font-family: "ITF Qomra Arabic";
   src: url('/fonts/itfQomraArabic-Black.woff2') format('woff2'),
-       url('/fonts/itfQomraArabic-Black.woff') format('woff'),
-       url('/fonts/itfQomraArabic-Black.ttf') format('truetype');
+    url('/fonts/itfQomraArabic-Black.woff') format('woff'),
+    url('/fonts/itfQomraArabic-Black.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -321,6 +321,7 @@ body {
   0% {
     background-position: -1000px 0;
   }
+
   100% {
     background-position: 1000px 0;
   }
@@ -330,4 +331,18 @@ body {
   animation: shimmer 2s infinite linear;
   background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
   background-size: 1000px 100%;
+}
+
+[dir="ltr"] .page-content p,
+[dir="ltr"] .page-content ul,
+[dir="ltr"] .page-content ol,
+[dir="ltr"] .page-content li,
+[dir="ltr"] .page-content a,
+[dir="ltr"] .page-content span,
+[dir="ltr"] .page-content h2,
+[dir="ltr"] .page-content h3,
+[dir="ltr"] .page-content h4,
+[dir="ltr"] .page-content h5,
+[dir="ltr"] .page-content h6 {
+  text-align: left !important;
 }
