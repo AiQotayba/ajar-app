@@ -42,8 +42,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const title = pageTitles[page]?.[locale as 'ar' | 'en'] || page
     const description = locale === 'ar'
-        ? `${title} لتطبيق أجار - منصة العقارات`
-        : `${title} for Ajar App - Real Estate Platform`
+        ? `${title} لتطبيق أجار - منصة الإعلانات`
+        : `${title} for Ajar App - Classifieds Platform`
 
     return {
         title: `${title} | أجار`,
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  */
 function unescapeHtml(html: string): string {
     if (!html) return ''
-    
+
     // Replace escaped quotes and backslashes
     return html
         .replace(/\\"/g, '"')  // Replace \" with "
@@ -87,20 +87,20 @@ function unescapeHtml(html: string): string {
  */
 function sanitizeHtml(html: string): string {
     if (!html) return ''
-    
+
     // Remove script tags and their content
     let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    
+
     // Remove event handlers (onclick, onerror, etc.)
     sanitized = sanitized.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '')
     sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, '')
-    
+
     // Remove javascript: protocol in href/src
     sanitized = sanitized.replace(/javascript:/gi, '')
-    
+
     // Remove data: URLs that could contain scripts (allow images)
     sanitized = sanitized.replace(/data:text\/html/gi, '')
-    
+
     return sanitized
 }
 
@@ -112,6 +112,7 @@ async function fetchPageContent(page: string, locale: string): Promise<SettingDa
     const settingKey = `${page}-${locale}`
 
     try {
+        console.log(`${baseUrl}/general/settings/${settingKey}`);
         const response = await fetch(
             `${baseUrl}/general/settings/${settingKey}`,
             {
@@ -120,9 +121,9 @@ async function fetchPageContent(page: string, locale: string): Promise<SettingDa
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                 },
-                next: {
-                    revalidate: 600, // Revalidate every 10 minutes
-                },
+                // next: {
+                // revalidate: 60, // Revalidate every 1 minutes
+                // },
             }
         )
         if (!response.ok) {
@@ -153,7 +154,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
     // Fetch page content from API
     const pageContent = await fetchPageContent(page, locale)
-
+    console.log(pageContent)
     // Error state - return 404 if content not found
     if (!pageContent || !pageContent.value) {
         notFound()
@@ -161,7 +162,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
     // Unescape the HTML content (handles escaped quotes from API)
     const unescapedHtml = unescapeHtml(pageContent.value)
-    
+
     // Sanitize HTML to prevent XSS attacks (defense in depth)
     // Even though content comes from admin panel, we sanitize on frontend too
     const sanitizedHtml = sanitizeHtml(unescapedHtml)
@@ -171,7 +172,7 @@ export default async function DynamicPage({ params }: PageProps) {
     // The value field contains HTML with escaped quotes that need to be unescaped
     return (
         <div
-            className="min-h-screen px-4 md:px-8 lg:px-12 mx-auto max-w-4xl py-8"
+            className="min-h-screen/50 px-4 md:px-8 lg:px-12 mx-auto max-w-4xl py-8 bg-white shadow-md my-4 rounded-lg"
             dir={locale === 'ar' ? 'rtl' : 'ltr'}
             dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         />

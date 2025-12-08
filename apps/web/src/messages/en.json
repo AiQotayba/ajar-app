@@ -2,7 +2,7 @@
   "auth": {
     "login": {
       "title": "Sign In",
-      "subtitle": "Welcome back! Sign in to continue tracking all your property details with ease, speed and security",
+      "subtitle": "Welcome back! Sign in to continue tracking all your listing details with ease, speed and security",
       "name": "Name",
       "phone": "Phone Number",
       "password": "Password",
@@ -162,41 +162,41 @@
     "optional": "optional",
     "addListing": "Add New Listing",
     "noListingsTitle": "No listings!",
-    "noListingsDescription": "Start by adding your first listing to sell or rent your property",
+    "noListingsDescription": "Start by adding your first listing to showcase your product or service",
     "listingsCount": "{count} {count, plural, =1 {listing} other {listings}} of your listings",
     "errorLoading": "Error loading your listings"
   },
   "about": {
     "title": "About Us - Ajar",
-    "description": "Syria's leading real estate platform, helping you find the perfect property or sell your property at the best prices",
+    "description": "Syria's leading classifieds platform, helping you find what you're looking for or post your ad to reach more customers",
     "hero": {
       "title": "Ajar",
-      "subtitle": "Syria's leading real estate platform, helping you find the perfect property or sell your property at the best prices"
+      "subtitle": "Syria's leading classifieds platform, helping you find what you're looking for or post your ad to reach more customers"
     },
     "stats": {
-      "properties": "Properties Available",
+      "properties": "Listings Available",
       "clients": "Satisfied Clients",
       "rating": "Customer Rating",
       "experience": "Years Experience"
     },
     "vision": {
       "title": "Our Vision",
-      "description": "To be Syria's leading real estate platform, providing the best services to our clients while ensuring transparency and reliability in every transaction."
+      "description": "To be Syria's leading classifieds platform, providing the best services to our clients while ensuring transparency and reliability in every transaction."
     },
     "mission": {
       "title": "Our Mission",
-      "description": "Facilitate the process of searching, selling, and renting properties through an advanced technological platform, while providing excellent technical support and top-tier customer service."
+      "description": "Facilitate the process of searching for products and services and posting ads through an advanced technological platform, while providing excellent technical support and top-tier customer service."
     },
     "features": {
       "title": "Why Choose Ajar?",
-      "subtitle": "We provide you with the best services and tools to find the perfect property",
+      "subtitle": "We provide you with the best services and tools to find what you're looking for or post your ad",
       "security": {
         "title": "Security & Reliability",
         "description": "We guarantee the security of your transactions and data reliability"
       },
       "search": {
         "title": "Precise Search",
-        "description": "Advanced search tools to find the right property"
+        "description": "Advanced search tools to find the right products and services"
       },
       "innovation": {
         "title": "Continuous Innovation",
@@ -209,19 +209,19 @@
     },
     "team": {
       "title": "Our Team",
-      "subtitle": "A team of experts and specialists in real estate and technology"
+      "subtitle": "A team of experts and specialists in classifieds and technology"
     },
     "contact": {
       "title": "Contact Us",
-      "subtitle": "We're here to help you every step of your real estate journey"
+      "subtitle": "We're here to help you every step of your journey in posting or searching for listings"
     }
   },
   "map": {
     "title": "Map",
-    "loading": "Loading properties...",
+    "loading": "Loading listings...",
     "permission": {
       "title": "Enable Location",
-      "description": "We need location permission to show properties near you on the map",
+      "description": "We need location permission to show listings near you on the map",
       "allow": "Allow",
       "deny": "Later"
     },
@@ -290,12 +290,12 @@
     "map": "Map"
   },
   "property": {
-    "title": "Properties",
+    "title": "Listings",
     "addProperty": "Add listing",
-    "editProperty": "Edit Property",
-    "propertyDetails": "Property Details",
-    "propertyType": "Property Type",
-    "propertyStatus": "Property Status",
+    "editProperty": "Edit Listing",
+    "propertyDetails": "Listing Details",
+    "propertyType": "Listing Type",
+    "propertyStatus": "Listing Status",
     "price": "Price",
     "area": "Area",
     "bedrooms": "Bedrooms",
@@ -327,7 +327,7 @@
     "featured": "Featured",
     "noResults": {
       "title": "No Results Found",
-      "description": "We couldn't find any properties matching your search criteria. Try adjusting your filters or search terms.",
+      "description": "We couldn't find any listings matching your search criteria. Try adjusting your filters or search terms.",
       "clearFilters": "Clear Filters",
       "backToHome": "Back to Home",
       "suggestions": {
@@ -340,10 +340,10 @@
   },
   "search": {
     "title": "Search",
-    "searchPlaceholder": "Search for a property...",
+    "searchPlaceholder": "Search for a listing...",
     "filters": "Filters",
     "location": "Location",
-    "propertyType": "Property Type",
+    "propertyType": "Listing Type",
     "priceRange": "Price Range",
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
@@ -360,7 +360,7 @@
     "markReadSuccess": "Notification marked as read",
     "noNotifications": "No notifications",
     "newMessage": "New message",
-    "propertyUpdate": "Property update",
+    "propertyUpdate": "Listing update",
     "priceChange": "Price change",
     "newReview": "New review",
     "updating": "Updating...",
@@ -429,9 +429,9 @@
     "title": "Filter By",
     "all": "All",
     "search": "Search",
-    "searchPlaceholder": "Search for property, location, or city...",
+    "searchPlaceholder": "Search for listing, product, service, or location...",
     "propertyType": {
-      "title": "Property Type",
+      "title": "Listing Type",
       "sell": "Sell",
       "rent": "Rent"
     },
@@ -468,9 +468,9 @@
       "unfurnishedOption": "Unfurnished"
     },
     "properties": {
-      "title": "Property Properties & Features",
-      "propertiesTitle": "Property Properties",
-      "featuresTitle": "Property Features",
+      "title": "Listing Properties & Features",
+      "propertiesTitle": "Listing Properties",
+      "featuresTitle": "Listing Features",
       "clearAll": "Clear All",
       "selectProperty": "Select {property}",
       "enterProperty": "Enter {property}",
@@ -504,10 +504,10 @@
       "titleEnPlaceholder": "Enter title in English",
       "titleEnPlaceholderAlt": "Write a clear title in English",
       "description": "Description",
-      "descriptionPlaceholder": "Write a detailed description of the property",
+      "descriptionPlaceholder": "Write a detailed description of the listing",
       "descriptionEnPlaceholder": "Enter detailed description in English",
-      "propertyType": "Property Type",
-      "propertyTypeRequired": "Property type is required",
+      "propertyType": "Listing Type",
+      "propertyTypeRequired": "Listing type is required",
       "sale": "For Sale",
       "rent": "For Rent",
       "availabilityStatus": "Availability Status",
@@ -525,12 +525,12 @@
       "noSubCategories": "No sub categories",
       "subSubCategory": "Sub-Sub Category",
       "selectSubSubCategory": "Select sub-sub category",
-      "properties": "Property Properties",
+      "properties": "Listing Properties",
       "enterProperty": "Enter {property}",
       "selectProperty": "Select {property}",
       "yes": "Yes",
       "no": "No",
-      "features": "Property Features",
+      "features": "Listing Features",
       "next": "Next",
       "in_review": "In Review",
       "approved": "Approved",
@@ -550,7 +550,7 @@
       "selectedAddress": "Selected address: {address}",
       "previous": "Previous",
       "next": "Next",
-      "markerTitle": "Property Location",
+      "markerTitle": "Listing Location",
       "mapLoadError": "Failed to load map",
       "searchPlaceholder": "Search for an address...",
       "searchButton": "Search",
@@ -600,7 +600,7 @@
     },
     "validation": {
       "titleArRequired": "Title in Arabic is required",
-      "propertyTypeRequired": "Property type is required",
+      "propertyTypeRequired": "Listing type is required",
       "categoryRequired": "Category is required",
       "governorateRequired": "Governorate is required",
       "locationRequired": "Please select location on map",

@@ -40,15 +40,15 @@ export function Footer({ className }: FooterProps) {
                 {/* {isRTL ? "أجار" : "Ajar"} */}
               </div>
               <div className="text-sm text-gray-600">
-                {isRTL ? "منصة العقارات الرائدة" : "Leading Real Estate Platform"}
+                {isRTL ? "منصة الإعلانات الرائدة" : "Leading Classifieds Platform"}
               </div>
             </Link>
 
             {/* Description */}
             <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
               {isRTL
-                ? "منصة عقارية متكاملة تهدف إلى تسهيل عملية البحث عن العقارات وبيعها وإيجارها في سوريا. نقدم خدمات عالية الجودة مع ضمان الأمان والموثوقية."
-                : "A comprehensive real estate platform designed to simplify the process of searching, buying, and renting properties in Syria. We provide high-quality services with guaranteed security and reliability."
+                ? "منصة إعلانات متكاملة تهدف إلى تسهيل عملية البحث عن المنتجات والخدمات ونشر الإعلانات في سوريا. نقدم خدمات عالية الجودة مع ضمان الأمان والموثوقية."
+                : "A comprehensive classifieds platform designed to simplify the process of searching for products and services and posting ads in Syria. We provide high-quality services with guaranteed security and reliability."
               }
             </p>
 

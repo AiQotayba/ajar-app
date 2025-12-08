@@ -88,7 +88,7 @@ export function NotFound() {
                 size="lg"
               >
                 <Search className={`h-5 w-5 ${isArabic ? 'mr-2' : 'ml-2'}`} />
-                {isArabic ? 'تصفح العقارات' : 'Browse Properties'}
+                {isArabic ? 'تصفح الإعلانات' : 'Browse Listings'}
               </Button>
             </Link>
           </div>

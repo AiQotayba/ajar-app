@@ -2,7 +2,7 @@
   "auth": {
     "login": {
       "title": "تسجيل الدخول",
-      "subtitle": "مرحباً بعودتك! سجل دخولك لمتابعة كل تفاصيل عقاراتك بسهولة وسرعة وأمان",
+      "subtitle": "مرحباً بعودتك! سجل دخولك لمتابعة كل تفاصيل إعلاناتك بسهولة وسرعة وأمان",
       "name": "الاسم",
       "phone": "رقم الهاتف",
       "password": "كلمة المرور",
@@ -162,41 +162,41 @@
     "optional": "اختياري",
     "addListing": "إضافة إعلان جديد",
     "noListingsTitle": "لا يوجد إعلانات!",
-    "noListingsDescription": "ابدأ بإضافة إعلانك الأول لبيع أو إيجار عقارك",
+    "noListingsDescription": "ابدأ بإضافة إعلانك الأول لعرض منتجك أو خدمتك",
     "listingsCount": "{count} {count, plural, =1 {إعلان} other {إعلان}} من إعلاناتك",
     "errorLoading": "حدث خطأ في تحميل إعلاناتك"
   },
   "about": {
     "title": "من نحن - أجار",
-    "description": "منصة العقارات الرائدة في سوريا، نساعدك في العثور على العقار المثالي أو بيع عقارك بأفضل الأسعار",
+    "description": "منصة الإعلانات الرائدة في سوريا، نساعدك في العثور على ما تبحث عنه أو نشر إعلانك للوصول إلى أكبر عدد من العملاء",
     "hero": {
       "title": "أجار",
-      "subtitle": "منصة العقارات الرائدة في سوريا، نساعدك في العثور على العقار المثالي أو بيع عقارك بأفضل الأسعار"
+      "subtitle": "منصة الإعلانات الرائدة في سوريا، نساعدك في العثور على ما تبحث عنه أو نشر إعلانك للوصول إلى أكبر عدد من العملاء"
     },
     "stats": {
-      "properties": "عقار متاح",
+      "properties": "إعلان متاح",
       "clients": "عميل راضي",
       "rating": "تقييم العملاء",
       "experience": "سنوات خبرة"
     },
     "vision": {
       "title": "رؤيتنا",
-      "description": "أن نكون المنصة العقارية الأولى في سوريا، ونقدم أفضل الخدمات لعملائنا مع ضمان الشفافية والموثوقية في كل معاملة."
+      "description": "أن نكون منصة الإعلانات الأولى في سوريا، ونقدم أفضل الخدمات لعملائنا مع ضمان الشفافية والموثوقية في كل معاملة."
     },
     "mission": {
       "title": "رسالتنا",
-      "description": "تسهيل عملية البحث عن العقارات وبيعها وإيجارها من خلال منصة تقنية متطورة، مع توفير دعم فني متميز وخدمة عملاء على أعلى مستوى."
+      "description": "تسهيل عملية البحث عن المنتجات والخدمات ونشر الإعلانات من خلال منصة تقنية متطورة، مع توفير دعم فني متميز وخدمة عملاء على أعلى مستوى."
     },
     "features": {
       "title": "لماذا تختار أجار؟",
-      "subtitle": "نقدم لك أفضل الخدمات والأدوات للعثور على العقار المثالي",
+      "subtitle": "نقدم لك أفضل الخدمات والأدوات للعثور على ما تبحث عنه أو نشر إعلانك",
       "security": {
         "title": "أمان وموثوقية",
         "description": "نضمن أمان معاملاتك وموثوقية البيانات"
       },
       "search": {
         "title": "دقة في البحث",
-        "description": "أدوات بحث متقدمة للعثور على العقار المناسب"
+        "description": "أدوات بحث متقدمة للعثور على المنتجات والخدمات المناسبة"
       },
       "innovation": {
         "title": "ابتكار مستمر",
@@ -209,19 +209,19 @@
     },
     "team": {
       "title": "فريقنا",
-      "subtitle": "فريق من الخبراء والمتخصصين في مجال العقارات والتكنولوجيا"
+      "subtitle": "فريق من الخبراء والمتخصصين في مجال الإعلانات والتكنولوجيا"
     },
     "contact": {
       "title": "تواصل معنا",
-      "subtitle": "نحن هنا لمساعدتك في كل خطوة من رحلتك العقارية"
+      "subtitle": "نحن هنا لمساعدتك في كل خطوة من رحلتك في نشر أو البحث عن الإعلانات"
     }
   },
   "map": {
     "title": "الخريطة",
-    "loading": "جاري تحميل العقارات...",
+    "loading": "جاري تحميل الإعلانات...",
     "permission": {
       "title": "تفعيل الموقع",
-      "description": "نحتاج إلى إذن الموقع لعرض العقارات القريبة منك على الخريطة",
+      "description": "نحتاج إلى إذن الموقع لعرض الإعلانات القريبة منك على الخريطة",
       "allow": "السماح",
       "deny": "لاحقاً"
     },
@@ -231,7 +231,7 @@
       "sell": "بيع"
     },
     "clusters": {
-      "properties": "عقار"
+      "properties": "إعلان"
     }
   },
   "common": {
@@ -285,17 +285,17 @@
     "notifications": "الإشعارات",
     "settings": "الإعدادات",
     "myAds": "إعلاناتي",
-    "myListings": "عقاراتي",
+    "myListings": "إعلاناتي",
     "office": "المكتب",
     "map": "الخريطة"
   },
   "property": {
-    "title": "العقارات",
-    "addProperty": "إضافة عقار",
-    "editProperty": "تعديل العقار",
-    "propertyDetails": "تفاصيل العقار",
-    "propertyType": "نوع العقار",
-    "propertyStatus": "حالة العقار",
+    "title": "الإعلانات",
+    "addProperty": "إضافة إعلان",
+    "editProperty": "تعديل الإعلان",
+    "propertyDetails": "تفاصيل الإعلان",
+    "propertyType": "نوع الإعلان",
+    "propertyStatus": "حالة الإعلان",
     "price": "السعر",
     "area": "المساحة",
     "bedrooms": "عدد الغرف",
@@ -340,10 +340,10 @@
   },
   "search": {
     "title": "البحث",
-    "searchPlaceholder": "ابحث عن عقار...",
+    "searchPlaceholder": "ابحث عن إعلان...",
     "filters": "المرشحات",
     "location": "الموقع",
-    "propertyType": "نوع العقار",
+    "propertyType": "نوع الإعلان",
     "priceRange": "نطاق السعر",
     "bedrooms": "عدد الغرف",
     "bathrooms": "عدد الحمامات",
@@ -360,7 +360,7 @@
     "markReadSuccess": "تم تعليم الإشعار كمقروء",
     "noNotifications": "لا يوجد إشعارات!",
     "newMessage": "رسالة جديدة",
-    "propertyUpdate": "تحديث العقار",
+    "propertyUpdate": "تحديث الإعلان",
     "priceChange": "تغيير السعر",
     "newReview": "تقييم جديد",
     "updating": "جاري التحديث...",
@@ -429,9 +429,9 @@
     "title": "فلترة حسب",
     "all": "الكل",
     "search": "بحث",
-    "searchPlaceholder": "ابحث عن عقار، موقع، أو مدينة...",
+    "searchPlaceholder": "ابحث عن إعلان، منتج، خدمة، أو موقع...",
     "propertyType": {
-      "title": "نوع العقار",
+      "title": "نوع الإعلان",
       "sell": "بيع",
       "rent": "إيجار"
     },
@@ -468,9 +468,9 @@
       "unfurnishedOption": "غير مفروش"
     },
     "properties": {
-      "title": "خصائص وميزات العقار",
-      "propertiesTitle": "خصائص العقار",
-      "featuresTitle": "مميزات العقار",
+      "title": "خصائص وميزات الإعلان",
+      "propertiesTitle": "خصائص الإعلان",
+      "featuresTitle": "مميزات الإعلان",
       "clearAll": "مسح الكل",
       "selectProperty": "اختر {property}",
       "enterProperty": "أدخل {property}",
@@ -504,10 +504,10 @@
       "titleEnPlaceholder": "Enter title in English",
       "titleEnPlaceholderAlt": "اكتب عنواناً واضحاً بالإنجليزية",
       "description": "الوصف",
-      "descriptionPlaceholder": "اكتب وصفاً مفصلاً للعقار",
+      "descriptionPlaceholder": "اكتب وصفاً مفصلاً للإعلان",
       "descriptionEnPlaceholder": "Enter detailed description in English",
-      "propertyType": "نوع العقار",
-      "propertyTypeRequired": "نوع العقار مطلوب",
+      "propertyType": "نوع الإعلان",
+      "propertyTypeRequired": "نوع الإعلان مطلوب",
       "sale": "للبيع",
       "rent": "للإيجار",
       "availabilityStatus": "حالة التوفر",
@@ -525,12 +525,12 @@
       "noSubCategories": "لا توجد تصنيفات فرعية",
       "subSubCategory": "التصنيف الفرعي للفرعي",
       "selectSubSubCategory": "اختر التصنيف الفرعي للفرعي",
-      "properties": "خصائص العقار",
+      "properties": "خصائص الإعلان",
       "enterProperty": "أدخل {property}",
       "selectProperty": "اختر {property}",
       "yes": "نعم",
       "no": "لا",
-      "features": "مميزات العقار",
+      "features": "مميزات الإعلان",
       "next": "التالي",
       "in_review": "قيد المراجعة",
       "approved": "معتمد",
@@ -549,7 +549,7 @@
       "selectedAddress": "العنوان المحدد: {address}",
       "previous": "السابق",
       "next": "التالي",
-      "markerTitle": "موقع العقار",
+      "markerTitle": "موقع الإعلان",
       "mapLoadError": "فشل تحميل الخريطة",
       "searchPlaceholder": "ابحث عن عنوان...",
       "searchButton": "بحث",
@@ -599,7 +599,7 @@
     },
     "validation": {
       "titleArRequired": "العنوان بالعربية مطلوب",
-      "propertyTypeRequired": "نوع العقار مطلوب",
+      "propertyTypeRequired": "نوع الإعلان مطلوب",
       "categoryRequired": "التصنيف مطلوب",
       "governorateRequired": "المحافظة مطلوبة",
       "locationRequired": "يرجى تحديد الموقع على الخريطة",

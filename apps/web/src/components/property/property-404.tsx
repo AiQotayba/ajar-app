@@ -52,12 +52,12 @@ export function Property404() {
           {/* Error Message */}
           <div className="space-y-3">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              {isArabic ? 'العقار غير موجود' : 'Property Not Found'}
+              {isArabic ? 'الإعلان غير موجود' : 'Listing Not Found'}
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground max-w-md leading-relaxed">
               {isArabic
-                ? 'عذراً، العقار الذي تبحث عنه غير موجود أو تم حذفه. يرجى التحقق من الرابط والمحاولة مرة أخرى.'
-                : 'Sorry, the property you are looking for does not exist or has been deleted. Please check the link and try again.'}
+                ? 'عذراً، الإعلان الذي تبحث عنه غير موجود أو تم حذفه. يرجى التحقق من الرابط والمحاولة مرة أخرى.'
+                : 'Sorry, the listing you are looking for does not exist or has been deleted. Please check the link and try again.'}
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export function Property404() {
                 size="lg"
               >
                 <Search className={`h-5 w-5 ${isArabic ? 'mr-2' : 'ml-2'}`} />
-                {isArabic ? 'تصفح العقارات' : 'Browse Properties'}
+                {isArabic ? 'تصفح الإعلانات' : 'Browse Listings'}
               </Button>
             </Link>
           </div>

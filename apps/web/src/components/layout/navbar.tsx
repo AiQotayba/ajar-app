@@ -244,7 +244,7 @@ export function Navbar({ className }: NavbarProps) {
                           onClick={() => setIsMenuOpen(false)}
                         >
                           <Plus className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                          {isRTL ? "إضافة عقار" : "Add listing"}
+                          {isRTL ? "إضافة إعلان" : "Add listing"}
                         </Link>
                       )}
                     </div>
@@ -294,7 +294,7 @@ export function Navbar({ className }: NavbarProps) {
                 </div>
                 <input
                   type="text"
-                  placeholder={isRTL ? "ابحث عن عقار، موقع، أو مدينة..." : "Search for property, location, or city..."}
+                  placeholder={isRTL ? "ابحث عن إعلان، منتج، خدمة، أو موقع..." : "Search for listing, product, service, or location..."}
                   className="focus:border-primary focus:outline-none h-12 pr-14 placeholder:text-primary/80 px-5 transition-all w-full rounded-2xl"
                 />
               </div>

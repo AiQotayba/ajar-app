@@ -250,7 +250,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
                       window.open(property.whatsapp_url, '_blank')
                     } else {
                       // Fallback WhatsApp URL
-                      const message = encodeURIComponent(`${isArabic ? 'مرحباً، أود الاستفسار عن العقار' : 'Hello, I would like to inquire about the property'}: ${title}`)
+                      const message = encodeURIComponent(`${isArabic ? 'مرحباً، أود الاستفسار عن الإعلان' : 'Hello, I would like to inquire about the listing'}: ${title}`)
                       window.open(`https://wa.me/?text=${message}`, '_blank')
                     }
                   }}
@@ -322,7 +322,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
                   <div className="flex-1">
                     <div className="font-medium text-foreground">{location}</div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      {isArabic ? 'موقع العقار' : 'Property location'}
+                      {isArabic ? 'موقع الإعلان' : 'Listing location'}
                     </div>
                   </div>
                 </div>

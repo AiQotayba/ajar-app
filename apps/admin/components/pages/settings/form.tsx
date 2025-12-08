@@ -44,26 +44,38 @@ import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
 import type { Setting } from "@/lib/types/setting"
 import { ApiResponse } from "@/lib/api-client"
+import { isHTMLSafe } from "@/lib/utils/sanitize-html"
+import { TiptapEditor } from "@/components/ui/tiptap-editor"
 
 // Form validation schema
 const settingFormSchema = z.object({
     key: z.string().min(2, "المفتاح يجب أن يكون حرفين على الأقل"),
     value: z.string().min(1, "القيمة مطلوبة"),
     type: z.enum(["text", "long_text", "int", "float", "bool", "json", "datetime", "html"]),
-}).refine((data) => {
+}).superRefine((data, ctx) => {
     // Validate JSON if type is json
     if (data.type === "json") {
         try {
             JSON.parse(data.value)
-            return true
         } catch {
-            return false
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "JSON غير صالح. تأكد من صحة التنسيق",
+                path: ["value"],
+            })
         }
     }
-    return true
-}, {
-    message: "JSON غير صالح. تأكد من صحة التنسيق",
-    path: ["value"],
+    
+    // Validate HTML safety if type is html
+    if (data.type === "html") {
+        if (!isHTMLSafe(data.value)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "المحتوى HTML غير آمن. يرجى التحقق من المحتوى",
+                path: ["value"],
+            })
+        }
+    }
 })
 
 type SettingFormValues = z.infer<typeof settingFormSchema>
@@ -285,16 +297,22 @@ export function SettingForm({ open, onOpenChange, urlEndpoint, setting, mode }: 
                                                     {...field}
                                                 />
                                             ) : selectedType === "html" ? (
-                                                <Textarea
-                                                    placeholder="<div>HTML content</div>"
-                                                    className="min-h-[200px] font-mono text-sm"
-                                                    {...field}
+                                                <TiptapEditor
+                                                    value={field.value || ""}
+                                                    onChange={field.onChange}
+                                                    mode="html"
+                                                    placeholder="أدخل محتوى HTML..."
+                                                    height="400px"
+                                                    disabled={isLoading}
                                                 />
                                             ) : selectedType === "long_text" ? (
-                                                <Textarea
-                                                    placeholder="نص طويل متعدد الأسطر..."
-                                                    className="min-h-[200px]"
-                                                    {...field}
+                                                <TiptapEditor
+                                                    value={field.value || ""}
+                                                    onChange={field.onChange}
+                                                    mode="text"
+                                                    placeholder="أدخل نص طويل..."
+                                                    height="300px"
+                                                    disabled={isLoading}
                                                 />
                                             ) : (
                                                 <Input
@@ -305,13 +323,13 @@ export function SettingForm({ open, onOpenChange, urlEndpoint, setting, mode }: 
                                         </FormControl>
                                         <FormDescription>
                                             {selectedType === "text" && "نص قصير (سطر واحد)"}
-                                            {selectedType === "long_text" && "نص طويل متعدد الأسطر"}
+                                            {selectedType === "long_text" && "استخدم المحرر النصي لإدخال نص طويل متعدد الأسطر مع تنسيق"}
                                             {selectedType === "int" && "رقم صحيح (بدون فواصل عشرية)"}
                                             {selectedType === "float" && "رقم عشري (مع فواصل)"}
                                             {selectedType === "bool" && "استخدم المفتاح للتبديل بين true و false"}
                                             {selectedType === "json" && "أدخل JSON صالح"}
                                             {selectedType === "datetime" && "اختر تاريخ ووقت"}
-                                            {selectedType === "html" && "كود HTML (احذر من XSS)"}
+                                            {selectedType === "html" && "استخدم المحرر النصي لإدخال محتوى HTML آمن (يتم تنظيفه تلقائياً)"}
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>

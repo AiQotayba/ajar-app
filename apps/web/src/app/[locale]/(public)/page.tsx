@@ -13,28 +13,28 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   const { locale } = await params;
 
   return {
-    title: locale === 'ar' ? 'أجار - منصة العقارات في سوريا' : 'Ajar - Syrian Real Estate Platform',
+    title: locale === 'ar' ? 'أجار - منصة الإعلانات في سوريا' : 'Ajar - Syrian Classifieds Platform',
     description: locale === 'ar'
-      ? 'منصة شاملة للعقارات في سوريا. ابحث عن شقق، فيلل، مكاتب، محلات وأراضي للبيع والإيجار'
-      : 'Comprehensive real estate platform in Jordan. Find apartments, villas, offices, shops and land for sale and rent',
+      ? 'منصة شاملة للإعلانات في سوريا. ابحث عن منتجات، خدمات، وظائف، عقارات وأكثر. أو انشر إعلانك للوصول إلى أكبر عدد من العملاء'
+      : 'Comprehensive classifieds platform in Syria. Find products, services, jobs, real estate and more. Or post your ad to reach more customers',
     keywords: locale === 'ar'
-      ? 'عقارات سوريا، شقق للبيع، فيلل للإيجار، مكاتب تجارية، محلات، أراضي'
-      : 'Jordan real estate, apartments for sale, villas for rent, commercial offices, shops, land',
+      ? 'إعلانات سوريا، منصة إعلانات، إعلانات مبوبة، منتجات، خدمات، وظائف، عقارات'
+      : 'Syria classifieds, ads platform, classified ads, products, services, jobs, real estate',
     openGraph: {
-      title: locale === 'ar' ? 'أجار - منصة العقارات في سوريا' : 'Ajar - Syrian Real Estate Platform',
+      title: locale === 'ar' ? 'أجار - منصة الإعلانات في سوريا' : 'Ajar - Syrian Classifieds Platform',
       description: locale === 'ar'
-        ? 'منصة شاملة للعقارات في سوريا'
-        : 'Comprehensive real estate platform in Jordan',
+        ? 'منصة شاملة للإعلانات في سوريا'
+        : 'Comprehensive classifieds platform in Syria',
       type: 'website',
       locale: locale === 'ar' ? 'ar_SY' : 'en_SY',
       siteName: 'Ajar',
     },
     twitter: {
       card: 'summary_large_image',
-      title: locale === 'ar' ? 'أجار - منصة العقارات في سوريا' : 'Ajar - Syrian Real Estate Platform',
+      title: locale === 'ar' ? 'أجار - منصة الإعلانات في سوريا' : 'Ajar - Syrian Classifieds Platform',
       description: locale === 'ar'
-        ? 'منصة شاملة للعقارات في سوريا'
-        : 'Comprehensive real estate platform in Jordan',
+        ? 'منصة شاملة للإعلانات في سوريا'
+        : 'Comprehensive classifieds platform in Syria',
     },
     alternates: {
       canonical: `https://ajar.com/${locale}`,

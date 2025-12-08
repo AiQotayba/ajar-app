@@ -7,9 +7,9 @@ import type { Category } from "@/lib/types/category"
 import { cn } from "@/lib/utils"
 import Images from "@/components/ui/image"
 import { Button } from "@/components/ui/button"
-import { api } from "@/lib/api-client"
+import { api, ApiResponse } from "@/lib/api-client"
 import { toast } from "sonner"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query" 
 
 interface CategoriesAccordionProps {
 	categories: Category[]
@@ -88,6 +88,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 						element.scrollLeft = left
 					}
 				} catch (e) {
+					console.log(e)
 					// تجاهل الأخطاء
 				}
 			})
@@ -121,6 +122,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 
 	// Handle drag and drop
 	const handleDragStart = (index: number, e?: React.DragEvent) => {
+		console.log(e)
 		if (!isDragEnabled) {
 			return
 		}
@@ -196,9 +198,9 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 				await queryClient.refetchQueries({ queryKey: ["categories"] })
 			}
 
-		} catch (error: any) {
+		} catch (error) {
 			// Show more specific error message
-			const errorMessage = error?.response?.data?.message || error?.message || "فشل في تحديث الترتيب"
+			const errorMessage = (error as ApiResponse<Category>)?.message || "فشل في تحديث الترتيب"
 			toast.error(errorMessage)
 
 			// Revert local changes on error
@@ -214,6 +216,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 	}
 
 	const handleDragEnd = (e?: React.DragEvent) => {
+		console.log(e)
 		setDraggedIndex(null)
 		setHoveredIndex(null)
 	}
@@ -315,6 +318,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 									element.scrollLeft = left
 								}
 							} catch (err) {
+								console.log(err)
 								// تجاهل الأخطاء
 							}
 						})
@@ -359,21 +363,21 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 							>
 								{renderCategoryIcon(category.icon, isExpanded)}
 							</Button>
-							<span
-								className={cn(
-									"font-medium cursor-pointer hover:text-primary transition-colors w-full",
-									isSelected && "text-primary font-semibold"
-								)}
-								onClick={(e) => {
-									// منع انتشار الحدث إلى العناصر الأب لمنع العودة للأعلى
-									e.stopPropagation()
-									// استخدام دالة حفظ موضع الـ scroll
-									handleSelectCategoryWithScrollPreservation(category, e)
-								}}
-							>
-								{category.name.ar || category.name.en}
-							</span>
 						</div>
+						<span
+							className={cn(
+								"font-medium cursor-pointer hover:text-primary transition-colors w-full",
+								isSelected && "text-primary font-semibold"
+							)}
+							onClick={(e) => {
+								// منع انتشار الحدث إلى العناصر الأب لمنع العودة للأعلى
+								e.stopPropagation()
+								// استخدام دالة حفظ موضع الـ scroll
+								handleSelectCategoryWithScrollPreservation(category, e)
+							}}
+						>
+							{category.name.ar || category.name.en}
+						</span>
 						{/* {hasChildren && (
 							<span className="text-xs text-muted-foreground bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
 								{category.children.length}
@@ -389,7 +393,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 										toggleExpanded(e)
 									}
 								}}
-								disabled={!hasChildren} 
+								disabled={!hasChildren}
 								className="hover:bg-transparent cursor-pointer p-0">
 								<ChevronRight className={cn("w-5 h-5 text-primary flex-shrink-0", isExpanded ? "rotate-90" : "rotate-0")} />
 							</Button>
@@ -417,6 +421,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 					hoveredIndex === index && draggedIndex !== null && draggedIndex !== index && "border-primary border-2 bg-primary/10 scale-[1.02]"
 				)}
 				onDragStart={(e) => {
+					console.log(e)
 					// Allow drag to propagate to handle
 				}}
 				onDragOver={(e) => {
@@ -470,7 +475,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 							e.preventDefault()
 						}
 					}}
-					onMouseDown={(e) => {
+					onMouseDown={() => { 
 						// Prevent accordion toggle when drag is enabled
 						if (isDragEnabled && level === 0) {
 							// Don't prevent default, let drag handle it
@@ -507,11 +512,11 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 								<GripVertical className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors pointer-events-none" />
 							</div>
 						) : null}
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 w-full">
 							{renderCategoryIcon(category.icon, hasChildren)}
 							<span
 								className={cn(
-									"font-medium cursor-pointer hover:text-primary transition-colors",
+									"font-medium cursor-pointer hover:text-primary transition-colors w-full",
 									isSelected && "text-primary font-semibold"
 								)}
 								onClick={(e) => {

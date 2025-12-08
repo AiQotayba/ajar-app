@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     const isArabic = locale === 'ar';
 
     return generateSEOMetadata({
-        title: isArabic ? 'أجار - منصة العقارات في سوريا' : 'Ajar - Syrian Real Estate Platform',
+        title: isArabic ? 'أجار - منصة الإعلانات في سوريا' : 'Ajar - Syrian Classifieds Platform',
         description: isArabic ? SEO_CONSTANTS.DEFAULT_DESCRIPTION_AR : SEO_CONSTANTS.DEFAULT_DESCRIPTION_EN,
         keywords: isArabic ? SEO_CONSTANTS.DEFAULT_KEYWORDS_AR : SEO_CONSTANTS.DEFAULT_KEYWORDS_EN,
         locale,

@@ -1,5 +1,5 @@
 /**
- * SEO Configuration and utilities for Ajar Real Estate Platform
+ * SEO Configuration and utilities for Ajar Classifieds Platform
  * Supports both Arabic and English with RTL/LTR support
  */
 
@@ -55,7 +55,7 @@ export function generateMetadata(config: SEOConfig) {
       title: config.title,
       description: config.description,
       url: config.url,
-      siteName: config.siteName || 'أجار - منصة العقارات',
+      siteName: config.siteName || 'أجار - منصة الإعلانات',
       images: [
         {
           url: config.image || '/og-image.jpg',
@@ -169,7 +169,7 @@ export function generateOrganizationStructuredData(): StructuredData {
     alternateName: 'Ajar',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com',
     logo: `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`,
-    description: 'منصة شاملة للعقارات في سوريا',
+    description: 'منصة شاملة للإعلانات في سوريا',
     foundingDate: '2024',
     contactPoint: {
       '@type': 'ContactPoint',
@@ -264,12 +264,18 @@ export function generateLocalBusinessStructuredData(): StructuredData {
  * SEO constants for the platform
  */
 export const SEO_CONSTANTS = {
-  SITE_NAME: 'أجار - منصة العقارات',
-  SITE_NAME_EN: 'Ajar - Real Estate Platform',
-  DEFAULT_DESCRIPTION_AR: 'منصة شاملة للعقارات في سوريا. ابحث عن شقق، فيلل، مكاتب، محلات وأراضي للبيع والإيجار',
-  DEFAULT_DESCRIPTION_EN: 'Comprehensive real estate platform in Syria. Find apartments, villas, offices, shops and land for sale and rent',
+  SITE_NAME: 'أجار - منصة الإعلانات',
+  SITE_NAME_EN: 'Ajar - Classifieds Platform',
+  DEFAULT_DESCRIPTION_AR: 'منصة شاملة للإعلانات في سوريا. ابحث عن منتجات، خدمات، وظائف، عقارات وأكثر. أو انشر إعلانك للوصول إلى أكبر عدد من العملاء',
+  DEFAULT_DESCRIPTION_EN: 'Comprehensive classifieds platform in Syria. Find products, services, jobs, real estate and more. Or post your ad to reach more customers',
   DEFAULT_KEYWORDS_AR: [
-    'عقارات سوريا',
+    'إعلانات سوريا',
+    'منصة إعلانات',
+    'إعلانات مبوبة',
+    'منتجات',
+    'خدمات',
+    'وظائف',
+    'عقارات',
     'شقق للبيع',
     'فيلل للإيجار',
     'مكاتب تجارية',
@@ -290,7 +296,13 @@ export const SEO_CONSTANTS = {
     'القامشلي',
   ],
   DEFAULT_KEYWORDS_EN: [
-    'syria real estate',
+    'syria classifieds',
+    'classified ads',
+    'ads platform',
+    'products',
+    'services',
+    'jobs',
+    'real estate',
     'apartments for sale',
     'villas for rent',
     'commercial offices',

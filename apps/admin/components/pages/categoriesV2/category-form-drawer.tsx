@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { ImageUpload } from "@/components/ui/image-upload"
+import { ApiResponse } from "@/lib/api-client"
 
 const categoryFormSchema = z.object({
     name_ar: z.string().min(1, "الاسم بالعربية مطلوب"),
@@ -76,6 +77,32 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
 
     const isEditMode = !!category
 
+    // Helper function to normalize icon URL - extract relative path if it's a full URL
+    const normalizeIconUrl = (icon: string | null | undefined): string | null => {
+        if (!icon) return null
+        
+        // If it's already a relative path (doesn't start with http), return as is
+        if (!icon.startsWith('http://') && !icon.startsWith('https://')) {
+            return icon
+        }
+        
+        // Extract relative path from full URL
+        // Example: "https://ajar-backend.mystore.social/storage/listings/image.webp" -> "listings/image.webp"
+        const storageMatch = icon.match(/\/storage\/(.+)$/)
+        if (storageMatch && storageMatch[1]) {
+            return storageMatch[1]
+        }
+        
+        // Fallback: try to extract path after the last /storage/
+        const parts = icon.split('/storage/')
+        if (parts.length > 1) {
+            return parts[parts.length - 1]
+        }
+        
+        // If we can't extract, return null to avoid duplication
+        return null
+    }
+
     const form = useForm<CategoryFormValues>({
         resolver: zodResolver(categoryFormSchema),
         defaultValues: {
@@ -84,7 +111,7 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
             description_ar: category?.description?.ar || "",
             description_en: category?.description?.en || "",
             parent_id: category?.parent_id?.toString() || undefined,
-            icon: category?.icon || "",
+            icon: normalizeIconUrl(category?.icon) || "",
             properties_source: category?.properties_source || "custom",
             is_visible: category?.is_visible ?? true,
         },
@@ -98,7 +125,7 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
                 description_ar: category.description?.ar || "",
                 description_en: category.description?.en || "",
                 parent_id: category.parent_id?.toString() || undefined,
-                icon: category.icon || "",
+                icon: normalizeIconUrl(category.icon) || "",
                 properties_source: category.properties_source,
                 is_visible: category.is_visible,
             })
@@ -122,12 +149,12 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
                 name: { ar: data.name_ar, en: data.name_en || "" },
                 description: { ar: data.description_ar || "", en: data.description_en || "" },
                 parent_id: data.parent_id && data.parent_id !== "none" ? parseInt(data.parent_id) : null,
-                icon: data.icon || null,
+                icon: normalizeIconUrl(data.icon) || null,
                 properties_source: data.properties_source,
                 is_visible: data.is_visible,
             })
         },
-        onSuccess: (data: any) => {
+        onSuccess: (data: ApiResponse<Category>) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
             toast.success(data?.message)
             onOpenChange(false)
@@ -145,12 +172,12 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
                 name: { ar: data.name_ar, en: data.name_en || "" },
                 description: { ar: data.description_ar || "", en: data.description_en || "" },
                 parent_id: data.parent_id && data.parent_id !== "none" ? parseInt(data.parent_id) : null,
-                icon: data.icon || null,
+                icon: normalizeIconUrl(data.icon) || null,
                 properties_source: data.properties_source,
                 is_visible: data.is_visible,
             })
         },
-        onSuccess: (data: any) => {
+        onSuccess: (data: ApiResponse<Category>) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
             toast.success(data?.message)
             onOpenChange(false)

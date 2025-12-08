@@ -61,3 +61,9 @@ cd apps/web
 npm install 
 npm run build 
 pm2 reload app 
+
+ssh -t ajarsyria-dashboard@82.29.178.80
+cd ~/htdocs/dashboard.ajarsyria.com/ajar-app ; git pull ; cd apps/admin ; pm2 stop app ; pnpm run build ; pm2 restart app
+
+ssh -t ajarsyria@82.29.178.80
+cd ~/htdocs/ajarsyria.com/ajar-app ; git pull ; cd apps/web ; pm2 stop app ; pnpm run build ; pm2 restart app
