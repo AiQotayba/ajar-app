@@ -14,7 +14,7 @@ pnpm install
 npm install -g pm2
 nano .env
 pnpm build
-pm2 start "pnpm start -p 3400" --name app
+pm2 start "pnpm start -p 3200" --name app
 echo "⬇️ جلب آخر تحديثات من Git..."
 git pull origin main
 
@@ -61,9 +61,11 @@ cd apps/web
 npm install 
 npm run build 
 pm2 reload app 
+pm2 save
+pm2 startup
 
 ssh -t ajarsyria-dashboard@82.29.178.80
-cd ~/htdocs/dashboard.ajarsyria.com/ajar-app ; git pull ; cd apps/admin ; pm2 stop app ; pnpm run build ; pm2 restart app
+cd ~/htdocs/dashboard.ajarsyria.com/ajar-app ; git pull ; cd apps/admin ; pm2 stop app;pnpm i ; pnpm run build ; pm2 restart app
 
 ssh -t ajarsyria@82.29.178.80
-cd ~/htdocs/ajarsyria.com/ajar-app ; git pull ; cd apps/web ; pm2 stop app ; pnpm run build ; pm2 restart app
+cd ~/htdocs/ajarsyria.com/ajar-app ; git pull ; cd apps/web ; pm2 stop app ; pnpm i ; pnpm run build ; pm2 restart app

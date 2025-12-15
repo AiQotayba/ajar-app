@@ -153,7 +153,7 @@ jspm_packages/
 # dotenv environment variables file
 .env
 .env.test
-
+*github_action_key
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -218,4 +218,11 @@ Thumbs.db
 .turbo
 .turbo-cache
 apps/web/github_action_key
-apps/web/github_action_key
+apps/web/*.key
+github_action_key
+*.key
+*.pem
+
+
+# pnpm
+*pnpm-lock.yaml

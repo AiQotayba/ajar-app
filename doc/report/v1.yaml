@@ -1,10 +1,7 @@
 new report:
-  web:   
-    title: "صورة التصنيف عكس لونها لتكون بيضاء"
-      - description: "صورة التصنيف عكس لونها لتكون بيضاء"
-      - steps:
-        ? 
-    title: "المشاهدات"
+  web:    
+    views:
+      - title: "المشاهدات"
       - description: "المشاهدات"
       - steps:
         - عمل viewerStorage للمشاهدات لاجل الاستخدام المتكرر في نفس الجلسة
@@ -13,21 +10,19 @@ new report:
           - عمل كاش على السيرفر لمدة 5 دقائق
           - استخدم كاش محلي للاستخدام مع الكلاينت
           - استخدام api POST `/user/listings/view` [{id, count, viewed_at}]
-        list listings
+        list listings:
           - استخدام api POST `/user/listings/view` [{id, count, viewed_at}]
           - استخدمه ضمن الصفحة الرئيسي والمفضلة فقط
           - يجب تخزين id للاعلان عندما نشاهده او عندما يكون ضمن view الخاص بالشاشة 
           - التخزين يكون ضمن الجلسات فقط وليس تخزين محلي دائم
           - استفد من هذا التخزين في في تفاصيل الاعلان
-    title: "إضافة رابط صورة خارجي قصدي تضمين"
+    add external link:
+      - title: "إضافة رابط صورة خارجي قصدي تضمين"
       - description: "إضافة رابط صورة خارجي قصدي تضمين"
       - steps:
-        ?
-    title: "الرفع على السيرفر"
-      - description: "الرفع على السيرفر"
-      - steps:
-        push to server
-        build and deploy  
+        - ?
+    tasks:
+    - 
 [42/48]
 next:
   dashboard integration api من احمد
