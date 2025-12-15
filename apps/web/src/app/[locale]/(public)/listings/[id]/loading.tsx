@@ -1,5 +1,5 @@
-import { PropertyDetailsSkeleton } from "@/components/property/property-details-skeleton"
+import { ListingsDetailsSkeleton } from "@/components/listings/listings-details-skeleton"
 
 export default function Loading() {
-  return <PropertyDetailsSkeleton />
+  return <ListingsDetailsSkeleton />
 }

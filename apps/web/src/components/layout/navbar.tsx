@@ -180,7 +180,6 @@ export function Navbar({ className }: NavbarProps) {
     }
     return true // Show items without auth requirement
   })
-  console.log(user?.avatar_url);
 
   return (
     <header className={cn(

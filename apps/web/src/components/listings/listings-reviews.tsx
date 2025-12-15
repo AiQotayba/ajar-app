@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Star, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { api } from "@/lib/api"
-import { useQuery } from "@tanstack/react-query"
+import { api } from "@/lib/api" 
 import { toast } from "sonner"
 
 interface Review {
@@ -43,7 +42,7 @@ interface Review {
   created_at: string
 }
 
-interface PropertyReviewsProps {
+interface ListingsReviewsProps {
   rating: number
   reviews: Review[]
   reviewsCount: number
@@ -53,7 +52,7 @@ interface PropertyReviewsProps {
   onReviewAdded?: () => void
 }
 
-export function PropertyReviews({ rating, reviews, reviewsCount, propertyId, locale = 'ar', currentUserId, onReviewAdded }: PropertyReviewsProps) {
+export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, locale = 'ar', currentUserId, onReviewAdded }: ListingsReviewsProps) {
   const [showAddReview, setShowAddReview] = useState(false)
   const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null)
 

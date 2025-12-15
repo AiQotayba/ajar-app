@@ -1,7 +1,6 @@
-import { Bath, Bed, CheckCircle, DollarSign, Maximize2, Palette, Shield, Sofa } from "lucide-react"
 import { useLocale } from "next-intl"
 
-interface PropertyInfoProps {
+interface ListingsInfoProps {
   title: string
   description: string
   price: string
@@ -26,7 +25,7 @@ interface PropertyInfoProps {
   property?: any
 }
 
-export function PropertyInfo({
+export function ListingsInfo({
   title,
   description,
   price,
@@ -49,7 +48,7 @@ export function PropertyInfo({
   height,
   depth,
   property,
-}: PropertyInfoProps) {
+}: ListingsInfoProps) {
   const locale = useLocale()
   console.log({ property })
   return (

@@ -1,10 +1,10 @@
 import { fetchListing } from "@/components/listings/fatch"
-import { PropertyDetails } from "@/components/property/property-details"
+import { ListingsDetails } from "@/components/listings/listings-details" 
 import { ListingSEO } from "@/components/seo/listing-seo"
 import { generateMetadata as generateSEOMetadata, SEO_CONSTANTS } from '@/lib/seo'
 import type { Metadata } from 'next'
 
-interface PropertyPageProps {
+interface ListingsPageProps {
   params: Promise<{
     id: string
     locale: string
@@ -12,7 +12,7 @@ interface PropertyPageProps {
 }
 
 // Generate SEO metadata for the listing page
-export async function generateMetadata({ params }: PropertyPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ListingsPageProps): Promise<Metadata> {
   const { id, locale } = await params
   const isArabic = locale === 'ar'
 
@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: PropertyPageProps): Promise<M
   }
 }
 
-export default async function PropertyPage({ params }: PropertyPageProps) {
+export default async function ListingsPage({ params }: ListingsPageProps) {
   const { id, locale } = await params
   
   // Fetch listing data once (cached) and pass to both components
@@ -72,7 +72,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       {/* SEO Structured Data */}
       <ListingSEO id={id} locale={locale} />
 
-      <PropertyDetails id={id} locale={locale} initialData={listing} />
+      <ListingsDetails id={id} locale={locale} initialData={listing} />
     </>
   )
 }

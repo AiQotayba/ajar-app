@@ -172,7 +172,7 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const displayPrice = `${listing.price.toLocaleString()} ${listing.currency}`
   const periodText = listing.type === 'rent' ? (listing.pay_every ? t('everyMonth', { months: listing.pay_every }) : t('monthly')) : ''
 
-  const mainImage = listing.cover_image || (listing.images?.[0]?.full_url) || "/images/placeholder.svg?height=400&width=600&query=modern property"
+  const mainImage = (listing.images?.[0]?.full_url) || "/images/placeholder.svg?height=400&width=600&query=modern property"
   const placeholderImage = "/images/placeholder.svg?height=400&width=600&query=modern property"
   const imageToShow = imageError ? placeholderImage : mainImage
 
@@ -270,6 +270,7 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
       toast.error(t('deleteListing'))
     }
   }
+
   const url = openEdit ? `/my-listings/${listing.id}` : `/listings/${listing.id}`
   return (
     <Link href={url} className="block group" >

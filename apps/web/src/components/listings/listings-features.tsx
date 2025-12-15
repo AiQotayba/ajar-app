@@ -7,7 +7,7 @@ interface Feature {
   icon?: string
 }
 
-interface PropertyFeaturesProps {
+interface ListingsFeaturesProps {
   features: Feature[]
   locale?: string
 }
@@ -28,7 +28,7 @@ const iconMap = {
   default: CheckCircle,
 }
 
-export function PropertyFeatures({ features, locale = 'ar' }: PropertyFeaturesProps) {
+export function ListingsFeatures({ features, locale = 'ar' }: ListingsFeaturesProps) { 
   if (!features || features.length === 0) {
     return null
   }

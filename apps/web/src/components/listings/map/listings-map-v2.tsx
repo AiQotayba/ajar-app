@@ -2,7 +2,7 @@
 
 import { Circle, GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api"
 
-interface PropertyMapV2Props {
+interface ListingsMapV2Props {
   lat: number
   lng: number
   zoom?: number
@@ -17,7 +17,7 @@ const containerStyle = {
 // Static libraries array to prevent re-renders
 const GOOGLE_MAPS_LIBRARIES = ["places", "maps"] as any
 
-export function PropertyMapV2({ lat, lng, zoom = 15 }: PropertyMapV2Props) {
+export function ListingsMapV2({ lat, lng, zoom = 15 }: ListingsMapV2Props) { 
   // Suppress Google Maps deprecation warnings in development
   if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
     const originalWarn = console.warn;

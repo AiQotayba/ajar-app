@@ -21,7 +21,7 @@ interface GalleryImage {
   sort_order: number
 }
 
-interface PropertyGalleryProps {
+interface ListingsGalleryProps {
   images?: GalleryImage[]
   coverImage?: string
   badge?: string
@@ -48,7 +48,7 @@ interface PropertyGalleryProps {
   }
 }
 
-export function PropertyGallery({
+export function ListingsGallery({
   images = [],
   coverImage,
   badge,
@@ -60,7 +60,7 @@ export function PropertyGallery({
   favoritesCount: initialFavoritesCount = 0,
   onFavoriteToggle,
   listingData
-}: PropertyGalleryProps) {
+}: ListingsGalleryProps) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite)
   const [favoritesCount, setFavoritesCount] = useState(initialFavoritesCount)
   const [isLoading, setIsLoading] = useState(false)
@@ -73,9 +73,7 @@ export function PropertyGallery({
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set())
 
   // Prepare images array - use cover image as first if available, then add other images
-  const allImages = coverImage
-    ? [{ id: 0, url: coverImage, full_url: coverImage, sort_order: 0 }, ...images]
-    : images
+  const allImages = images
 
   // Sort images by sort_order
   const sortedImages = allImages.sort((a, b) => a.sort_order - b.sort_order)
@@ -163,7 +161,9 @@ export function PropertyGallery({
     setMousePosition(null)
     setIsAutoPlaying(true) // Resume auto-play when leaving
   }
-
+  
+  console.log(images);
+  
   const handleShare = async () => {
     const listingUrl = window.location.href
     const mainImage = coverImage || (sortedImages[0]?.full_url || sortedImages[0]?.url)

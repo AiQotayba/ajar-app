@@ -8,9 +8,6 @@ const nextConfig = {
   experimental: {
     useCache: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -20,12 +17,6 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    domains: [
-      'images.unsplash.com',
-      'localhost',
-      'ajar.com',
-      'www.ajar.com',
-    ],
     formats: ['image/webp', 'image/avif'],
     remotePatterns: [
       {
@@ -39,6 +30,22 @@ const nextConfig = {
         hostname: 'localhost',
         port: '3000',
         pathname: '/api/map-image**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ajar.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.ajar.com',
       },
     ],
   },

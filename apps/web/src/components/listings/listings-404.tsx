@@ -1,25 +1,12 @@
-"use client"
-import { PropertyDetailsSkeleton } from "@/components/property/property-details-skeleton"
-import { PropertyFeatures } from "@/components/property/property-features"
-import { PropertyGallery } from "@/components/property/property-gallery"
-import { PropertyInfo } from "@/components/property/property-info"
-import { PropertyMapV2 } from "@/components/property/map/property-map-v2"
-import { PropertyReviews } from "@/components/property/property-reviews"
+"use client" 
 import { Button } from "@/components/ui/button"
-import { useTranslationsHook } from "@/hooks/use-translations"
-import { api } from "@/lib/api"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useAuth } from "@/hooks/use-auth"
-import { Eye, Heart, MapPin, Home, Search, AlertCircle } from "lucide-react"
-import { notFound } from "next/navigation"
-import { useState } from "react"
+import { Home, Search, AlertCircle } from "lucide-react" 
 import Link from "next/link"
 import { useLocale } from "next-intl"
 
 
 
-export function Property404() {
-  const t = useTranslationsHook()
+export function Listings404() {
   const locale = useLocale()
   const isArabic = locale === 'ar'
   return (

@@ -1,10 +1,9 @@
 "use client"
-import { PropertyDetailsSkeleton } from "@/components/property/property-details-skeleton"
-import { PropertyFeatures } from "@/components/property/property-features"
-import { PropertyGallery } from "@/components/property/property-gallery"
-import { PropertyInfo } from "@/components/property/property-info"
-import { PropertyMapV2 } from "@/components/property/map/property-map-v2"
-import { PropertyReviews } from "@/components/property/property-reviews"
+import { ListingsDetailsSkeleton } from "@/components/listings/listings-details-skeleton"
+import { ListingsFeatures } from "@/components/listings/listings-features"
+import { ListingsGallery } from "@/components/listings/listings-gallery"
+import { ListingsMapV2 } from "@/components/listings/map/listings-map-v2"
+import { ListingsReviews } from "@/components/listings/listings-reviews"
 import { Button } from "@/components/ui/button"
 import { useTranslationsHook } from "@/hooks/use-translations"
 import { api } from "@/lib/api"
@@ -12,11 +11,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/hooks/use-auth"
 import { Eye, Heart, MapPin, } from "lucide-react"
 import { notFound } from "next/navigation"
-import { Property404 } from "./property-404"
 import { useListingViews } from "@/hooks/use-listing-views"
 import { useEffect } from "react"
+import { ListingsInfo } from "./listings-info"
 
-interface PropertyDetailsProps {
+interface ListingsDetailsProps {
   id: string
   locale?: string
   initialData?: ListingData | null
@@ -84,7 +83,7 @@ interface ListingData {
   updated_at: string
 }
 
-export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDetailsProps) {
+export function ListingsDetails({ id, locale = 'ar', initialData }: ListingsDetailsProps) {
   const t = useTranslationsHook()
   const queryClient = useQueryClient()
   const { user } = useAuth()
@@ -119,11 +118,9 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
   }, [id, response?.data, isLoading, trackView, updateViewCount])
 
   // if (true) return <PropertyDetailsSkeleton />
-  if (isLoading) return <PropertyDetailsSkeleton />
+  if (isLoading) return <ListingsDetailsSkeleton />
 
-  if (error || !response?.data)
-    // return <Property404 />
-    return notFound()
+  if (error || !response?.data) return notFound()
   const property: ListingData = response.data
   const isArabic = locale === 'ar'
 
@@ -213,7 +210,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
           <div className="lg:col-span-1 space-y-6 lg:space-y-0">
             {/* Gallery */}
             <div className="lg:sticky lg:top-6">
-              <PropertyGallery
+              <ListingsGallery
                 images={galleryImages}
                 coverImage={coverImage}
                 isFavorite={property.is_favorite}
@@ -228,7 +225,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
 
           {/* Property Details */}
           <div className="lg:col-span-1 space-y-6">
-            <PropertyInfo
+            <ListingsInfo
               title={title}
               description={description}
               price={priceText}
@@ -298,7 +295,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
 
             {/* Features */}
             {displayFeatures.length > 0 && (
-              <PropertyFeatures features={displayFeatures} locale={locale} />
+              <ListingsFeatures features={displayFeatures} locale={locale} />
             )}
 
             {/* WhatsApp Contact Button - Desktop only (under features) */}
@@ -348,7 +345,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
               {/* Map */}
               {property.latitude && property.longitude && property.latitude !== '0' && property.longitude !== '0' ? (
                 <div className="space-y-3">
-                  <PropertyMapV2
+                  <ListingsMapV2
                     lat={parseFloat(property.latitude)}
                     lng={parseFloat(property.longitude)}
                   />
@@ -369,7 +366,7 @@ export function PropertyDetails({ id, locale = 'ar', initialData }: PropertyDeta
             {/* Mobile Layout: Location and Reviews in second row */}
             <div className="lg:col-span-1 space-y-6">
               {/* Reviews */}
-              <PropertyReviews
+              <ListingsReviews
                 rating={property.average_rating}
                 reviews={property.reviews || []}
                 reviewsCount={property.reviews_count}
