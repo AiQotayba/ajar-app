@@ -50,7 +50,7 @@ function getPreferredLocale(req: NextRequest): string {
   return routing.defaultLocale;
 }
 
-export const middleware = async (req: NextRequest) => {
+export const proxy = async (req: NextRequest) => {
   // استثناء طلب ملف الـ Service Worker والخطوط
   if (req.nextUrl.pathname === '/firebase-messaging-sw.js' || 
       req.nextUrl.pathname === '/manifest.json' ||

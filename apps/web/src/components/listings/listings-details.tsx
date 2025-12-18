@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { Eye, Heart, MapPin, } from "lucide-react"
 import { notFound } from "next/navigation"
 import { useListingViews } from "@/hooks/use-listing-views"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { ListingsInfo } from "./listings-info"
 
 interface ListingsDetailsProps {
@@ -87,7 +87,9 @@ export function ListingsDetails({ id, locale = 'ar', initialData }: ListingsDeta
   const t = useTranslationsHook()
   const queryClient = useQueryClient()
   const { user } = useAuth()
-  const { trackView, updateViewCount } = useListingViews({ autoSubmit: true, debounceDelay: 2000 })
+  // For details page, send immediately without debounce
+  const { trackView, updateViewCount, submitViews } = useListingViews({ autoSubmit: false })
+  const hasSubmittedRef = useRef(false) // Track if we've already submitted for this listing
 
   // Function to refresh property data
   const refreshPropertyData = () => {
@@ -104,18 +106,24 @@ export function ListingsDetails({ id, locale = 'ar', initialData }: ListingsDeta
   })
 
   // Track view when component mounts and listing is loaded
+  // For details page, send immediately without debounce
   useEffect(() => {
-    if (response?.data && !isLoading) {
+    if (response?.data && !isLoading && !hasSubmittedRef.current) {
       const listingId = parseInt(id, 10)
       if (!isNaN(listingId)) {
-        const wasNew = trackView(listingId)
+        // Pass views_count to trackView so it uses the correct count
+        const wasNew = trackView(listingId, 1)
         if (wasNew) {
           // Update view count in the displayed data
-          updateViewCount(listingId, response.data.views_count + 1)
+          updateViewCount(listingId, 1)
+          // Send immediately for details page (no debounce)
+          // Mark as submitted to prevent duplicate sends (especially in React Strict Mode)
+          hasSubmittedRef.current = true
+          submitViews()
         }
       }
     }
-  }, [id, response?.data, isLoading, trackView, updateViewCount])
+  }, [id, response?.data, isLoading, trackView, updateViewCount, submitViews])
 
   // if (true) return <PropertyDetailsSkeleton />
   if (isLoading) return <ListingsDetailsSkeleton />

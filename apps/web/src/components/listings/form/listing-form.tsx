@@ -609,7 +609,26 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                         sort_order: index + 1
                     }
                 } else if (image && typeof image === 'object' && !Array.isArray(image)) {
-                    const imageObj = image as { type?: string; url?: string; source?: string; sort_order?: number }
+                    const imageObj = image as { 
+                        type?: string; 
+                        url?: string; 
+                        source?: string; 
+                        sort_order?: number;
+                        iframely?: any;
+                    }
+                    
+                    // If it's an iframely object, include the full iframely data
+                    if (imageObj.source === 'iframely' && imageObj.iframely) {
+                        return {
+                            type: imageObj.type || "image",
+                            url: imageObj.url || '',
+                            source: "iframely",
+                            iframely: imageObj.iframely,
+                            sort_order: imageObj.sort_order || index + 1
+                        }
+                    }
+                    
+                    // Regular object without iframely
                     return {
                         type: imageObj.type || "image",
                         url: imageObj.url || '',
@@ -621,7 +640,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                     return null
                 }
             })
-            .filter((item): item is { type: string; url: string; source: string; sort_order: number } =>
+            .filter((item): item is { type: string; url: string; source: string; sort_order: number; iframely?: any } =>
                 item !== null && item !== undefined && item.url !== undefined && item.url !== ''
             )
 

@@ -580,7 +580,18 @@
       "dragToReorder": "اسحب الصور لترتيبها",
       "imageUrlNotReturned": "لم يتم إرجاع رابط الصورة",
       "previous": "السابق",
-      "next": "التالي"
+      "next": "التالي",
+      "addExternalLink": "إضافة رابط خارجي",
+      "externalLinkDialogTitle": "إضافة رابط خارجي",
+      "externalLinkInputLabel": "رابط الصورة أو الفيديو",
+      "externalLinkInputPlaceholder": "https://...",
+      "addLink": "إضافة",
+      "cancel": "إلغاء",
+      "fetchingMetadata": "جاري جلب البيانات...",
+      "invalidUrl": "الرابط غير صحيح",
+      "unsupportedDomain": "النطاق غير مدعوم. المدعومة: Facebook, YouTube, Twitter, Instagram, TikTok",
+      "fetchError": "فشل في جلب بيانات الرابط",
+      "linkAddedSuccess": "تم إضافة الرابط بنجاح"
     },
     "price": {
       "price": "السعر (بالدولار الأمريكي)",

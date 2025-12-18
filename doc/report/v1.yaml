@@ -1,32 +1,19 @@
-new report:
-  web:    
-    views:
-      - title: "المشاهدات"
-      - description: "المشاهدات"
-      - steps:
-        - عمل viewerStorage للمشاهدات لاجل الاستخدام المتكرر في نفس الجلسة
-        - خلال الجلسة الواحدة يمكن استخدام عرض واحد مشان ما بيصير عرض كثير
-        details listing:
-          - عمل كاش على السيرفر لمدة 5 دقائق
-          - استخدم كاش محلي للاستخدام مع الكلاينت
-          - استخدام api POST `/user/listings/view` [{id, count, viewed_at}]
-        list listings:
-          - استخدام api POST `/user/listings/view` [{id, count, viewed_at}]
-          - استخدمه ضمن الصفحة الرئيسي والمفضلة فقط
-          - يجب تخزين id للاعلان عندما نشاهده او عندما يكون ضمن view الخاص بالشاشة 
-          - التخزين يكون ضمن الجلسات فقط وليس تخزين محلي دائم
-          - استفد من هذا التخزين في في تفاصيل الاعلان
-    add external link:
-      - title: "إضافة رابط صورة خارجي قصدي تضمين"
-      - description: "إضافة رابط صورة خارجي قصدي تضمين"
-      - steps:
-        - ?
-    tasks:
-    - 
-[42/48]
 next:
   dashboard integration api من احمد
   dashboard listings
     form
       sorting images
       update listing images
+new report:
+  web:    
+    add external link:
+      - title: "إضافة رابط صورة خارجي قصدي تضمين"
+      - description: "إضافة رابط صورة خارجي قصدي تضمين"
+      - steps:
+        - اضافة رابط خارجي 
+        - جيب من احد api
+    tasks:
+      - push to server
+      - map fiald
+      - req field
+[34/34]
