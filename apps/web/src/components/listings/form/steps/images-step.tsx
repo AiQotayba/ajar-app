@@ -4,7 +4,16 @@ import { useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { X, Upload, Star, Loader2, GripVertical } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { X, Upload, Star, Loader2, GripVertical, Link } from "lucide-react"
 import { toast } from "sonner"
 import { uploadImage } from "@/lib/api/listings"
 import { cn } from "@/lib/utils"
@@ -37,6 +46,9 @@ export function ImagesStep({
   const [uploadingFiles, setUploadingFiles] = useState<Set<number>>(new Set())
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [externalLinkDialogOpen, setExternalLinkDialogOpen] = useState(false)
+  const [externalLinkUrl, setExternalLinkUrl] = useState("")
+  const [fetchingMetadata, setFetchingMetadata] = useState(false)
 
   // Use external preview URLs if provided, otherwise use internal state
   const previewUrls = externalPreviewUrls || internalPreviewUrls
@@ -213,6 +225,131 @@ export function ImagesStep({
     setDragOverIndex(null)
   }
 
+  // Validate URL and check if domain is supported
+  const validateExternalUrl = (url: string): { valid: boolean; error?: string } => {
+    try {
+      const urlObj = new URL(url)
+      const hostname = urlObj.hostname.toLowerCase()
+      
+      // Remove www. prefix for comparison
+      const domain = hostname.replace(/^www\./, '')
+      
+      // Supported domains
+      const supportedDomains = [
+        'facebook.com',
+        'youtube.com',
+        'youtu.be',
+        'twitter.com',
+        'x.com',
+        'instagram.com',
+        'tiktok.com'
+      ]
+      
+      const isSupported = supportedDomains.some(supported => 
+        domain === supported || domain.endsWith('.' + supported)
+      )
+      
+      if (!isSupported) {
+        return {
+          valid: false,
+          error: t('unsupportedDomain')
+        }
+      }
+      
+      return { valid: true }
+    } catch (error) {
+      return {
+        valid: false,
+        error: t('invalidUrl')
+      }
+    }
+  }
+
+  // Handle adding external link with iframely metadata
+  const handleAddExternalLink = async () => {
+    const trimmedUrl = externalLinkUrl.trim()
+    
+    if (!trimmedUrl) {
+      toast.error(t('invalidUrl'))
+      return
+    }
+
+    // Validate URL
+    const validation = validateExternalUrl(trimmedUrl)
+    if (!validation.valid) {
+      toast.error(validation.error || t('invalidUrl'))
+      return
+    }
+
+    // Check if adding would exceed limit
+    if (media.length >= 20) {
+      toast.error(t('maxImagesError'))
+      return
+    }
+
+    setFetchingMetadata(true)
+
+    try {
+      // Fetch iframely metadata
+      const iframelyApiKey = process.env.NEXT_PUBLIC_IFRAMELY_API_KEY || '3906e9589bd2ee8d96ec9673748849cf'
+      const encodedUrl = encodeURIComponent(trimmedUrl)
+      const iframelyUrl = `https://cdn.iframe.ly/api/iframe?url=${encodedUrl}&key=${iframelyApiKey}`
+
+      const response = await fetch(iframelyUrl)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const iframelyData = await response.json()
+
+      if (!iframelyData || iframelyData.error) {
+        throw new Error(iframelyData.error || 'Failed to fetch metadata')
+      }
+
+      // Extract thumbnail URL
+      let thumbnailUrl = trimmedUrl
+      if (iframelyData.links?.thumbnail?.[0]?.href) {
+        thumbnailUrl = iframelyData.links.thumbnail[0].href
+      } else if (iframelyData.thumbnail_url) {
+        thumbnailUrl = iframelyData.thumbnail_url
+      }
+
+      // Create media object with iframely data
+      const mediaObject = {
+        type: "image",
+        url: thumbnailUrl,
+        source: "iframely",
+        iframely: {
+          url: trimmedUrl,
+          meta: iframelyData.meta || {},
+          links: iframelyData.links || {},
+          html: iframelyData.html || '',
+          rel: iframelyData.rel || [],
+          options: iframelyData.options || {}
+        }
+      }
+
+      // Add to media array
+      const newMedia = [...media, mediaObject]
+      setValue("images", newMedia as any)
+
+      // Add preview URL
+      setPreviewUrls([...previewUrls, thumbnailUrl])
+
+      // Reset dialog
+      setExternalLinkUrl("")
+      setExternalLinkDialogOpen(false)
+
+      toast.success(t('linkAddedSuccess'))
+    } catch (error: any) {
+      console.error("❌ Error fetching iframely metadata:", error)
+      toast.error(t('fetchError'))
+    } finally {
+      setFetchingMetadata(false)
+    }
+  }
+
   // Helper to get image URL for display
   const getImageUrl = (mediaItem: any, index: number) => {
     if (typeof mediaItem === 'string') {
@@ -223,11 +360,21 @@ export function ImagesStep({
       const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'https://ajar-backend.mystore.social'
       return `${baseUrl}/storage/${mediaItem}`
     }
-    if (mediaItem && typeof mediaItem === 'object' && mediaItem.full_url) {
-      return mediaItem.full_url
-    }
-    if (mediaItem && typeof mediaItem === 'object' && mediaItem.url) {
-      return mediaItem.url
+    if (mediaItem && typeof mediaItem === 'object') {
+      // Handle iframely objects
+      if (mediaItem.iframely && mediaItem.iframely.links?.thumbnail?.[0]?.href) {
+        return mediaItem.iframely.links.thumbnail[0].href
+      }
+      if (mediaItem.iframely && mediaItem.iframely.thumbnail_url) {
+        return mediaItem.iframely.thumbnail_url
+      }
+      // Handle regular objects
+      if (mediaItem.full_url) {
+        return mediaItem.full_url
+      }
+      if (mediaItem.url) {
+        return mediaItem.url
+      }
     }
     // Fallback to preview URL
     return previewUrls[index] || ''
@@ -267,23 +414,94 @@ export function ImagesStep({
               disabled={uploading}
             />
           </div>
-          <Button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            variant="outline"
-            className="mt-4"
-            disabled={uploading}
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {t('uploadingProgress')}
-              </>
-            ) : (
-              t('selectImages')
-            )}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 mt-4 justify-center">
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              disabled={uploading}
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {t('uploadingProgress')}
+                </>
+              ) : (
+                t('selectImages')
+              )}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setExternalLinkDialogOpen(true)}
+              variant="outline"
+              disabled={uploading || media.length >= 20}
+              className="gap-2"
+            >
+              <Link className="h-4 w-4" />
+              {t('addExternalLink')}
+            </Button>
+          </div>
         </div>
+
+        {/* External Link Dialog */}
+        <Dialog open={externalLinkDialogOpen} onOpenChange={setExternalLinkDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('externalLinkDialogTitle')}</DialogTitle>
+              <DialogDescription>
+                {t('externalLinkInputLabel')}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="external-link-url">{t('externalLinkInputLabel')}</Label>
+                <Input
+                  id="external-link-url"
+                  type="url"
+                  placeholder={t('externalLinkInputPlaceholder')}
+                  value={externalLinkUrl}
+                  onChange={(e) => setExternalLinkUrl(e.target.value)}
+                  disabled={fetchingMetadata}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !fetchingMetadata) {
+                      handleAddExternalLink()
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t('unsupportedDomain')}
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setExternalLinkDialogOpen(false)
+                  setExternalLinkUrl("")
+                }}
+                disabled={fetchingMetadata}
+              >
+                {t('cancel')}
+              </Button>
+              <Button
+                type="button"
+                onClick={handleAddExternalLink}
+                disabled={fetchingMetadata || !externalLinkUrl.trim()}
+              >
+                {fetchingMetadata ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t('fetchingMetadata')}
+                  </>
+                ) : (
+                  t('addLink')
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {media.length < 5 && (
           <p className="text-xs text-destructive text-start">

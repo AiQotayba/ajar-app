@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useRouter } from "next/navigation"
+import { useListingViewTracker } from "@/hooks/use-listing-view-tracker"
 
 interface ListingCardProps {
   listing: {
@@ -161,6 +162,11 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const t = useTranslations('property')
   const currentLocale = useLocale()
   const router = useRouter()
+  
+  // Track view when listing card enters viewport (only in lists, not in details)
+  const viewTrackerRef = useListingViewTracker(listing.id, {
+    enabled: !openEdit, // Only track in lists, not in edit/delete views
+  })
 
   const getLocalizedText = (text: { ar: string; en: string }) => text[(locale || currentLocale) as keyof typeof text] || text.ar
 
@@ -274,7 +280,7 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const url = openEdit ? `/my-listings/${listing.id}` : `/listings/${listing.id}`
   return (
     <Link href={url} className="block group" >
-      <div className="bg-card  overflow-hidden transition-all duration-300">
+      <div ref={viewTrackerRef} className="bg-card  overflow-hidden transition-all duration-300">
         <div className="relative h-56 overflow-hidden">
           {/* Image Layer */}
           <Image

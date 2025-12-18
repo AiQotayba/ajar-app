@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Star, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { api } from "@/lib/api" 
+import { api } from "@/lib/api"
 import { toast } from "sonner"
 
 interface Review {
@@ -122,13 +122,13 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                   {locale === 'ar' ? 'تقييمات العملاء' : 'Customer Reviews'}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {locale === 'ar' 
-                    ? 'اكتشف آراء العملاء الآخرين حول هذا العقار' 
+                  {locale === 'ar'
+                    ? 'اكتشف آراء العملاء الآخرين حول هذا العقار'
                     : 'Discover what other customers think about this property'
                   }
                 </p>
               </div>
-              
+
               {/* Rating Badge */}
               <div className="flex flex-col items-center">
                 <div className="relative">
@@ -150,11 +150,11 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                 </div>
                 <div className="mt-2 text-center">
                   <div className="text-xs font-medium text-muted-foreground">
-                    {reviewsCount > 0 
-                      ? (locale === 'ar' 
-                          ? `${reviewsCount} ${reviewsCount === 1 ? 'تقييم' : 'تقييم'}` 
-                          : `${reviewsCount} ${reviewsCount === 1 ? 'review' : 'reviews'}`
-                        )
+                    {reviewsCount > 0
+                      ? (locale === 'ar'
+                        ? `${reviewsCount} ${reviewsCount === 1 ? 'تقييم' : 'تقييم'}`
+                        : `${reviewsCount} ${reviewsCount === 1 ? 'review' : 'reviews'}`
+                      )
                       : (locale === 'ar' ? 'لا توجد تقييمات' : 'No reviews yet')
                     }
                   </div>
@@ -175,7 +175,7 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                     </span>
                   </div>
                   <div className="w-full bg-muted/30 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-gradient-to-r from-primary to-primary/80 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${(rating / 5) * 100}%` }}
                     />
@@ -191,8 +191,8 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {locale === 'ar' 
-                      ? 'آخر تحديث اليوم' 
+                    {locale === 'ar'
+                      ? 'آخر تحديث اليوم'
                       : 'Updated today'
                     }
                   </div>
@@ -207,15 +207,15 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                   {locale === 'ar' ? 'كن أول من يقيم!' : 'Be the first to review!'}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                  {locale === 'ar' 
-                    ? 'شاركنا تجربتك مع هذا العقار وساعد الآخرين في اتخاذ قرارهم' 
+                  {locale === 'ar'
+                    ? 'شاركنا تجربتك مع هذا العقار وساعد الآخرين في اتخاذ قرارهم'
                     : 'Share your experience with this property and help others make their decision'
                   }
                 </p>
               </div>
             )}
           </div>
-          
+
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/10 to-transparent rounded-full -translate-y-16 translate-x-16" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/5 to-transparent rounded-full translate-y-12 -translate-x-12" />
@@ -229,13 +229,13 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                 {locale === 'ar' ? 'آراء العملاء' : 'Customer Feedback'}
               </h3>
               <div className="text-sm text-muted-foreground">
-                {locale === 'ar' 
-                  ? `عرض ${reviews.length} من ${reviewsCount} تقييم` 
+                {locale === 'ar'
+                  ? `عرض ${reviews.length} من ${reviewsCount} تقييم`
                   : `Showing ${reviews.length} of ${reviewsCount} reviews`
                 }
               </div>
             </div>
-            
+
             <div className="lg:max-h-96 lg:overflow-y-auto lg:pr-2 space-y-4">
               {reviews.map((review: Review) => (
                 <div key={review.id} className="group relative p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/20 hover:shadow-md transition-all duration-200">
@@ -275,7 +275,7 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Rating Badge */}
                     <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10">
                       <Star className="h-4 w-4 fill-primary text-primary" />
@@ -296,31 +296,33 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
 
                   {/* Review Footer */}
                   <div className="flex items-center justify-between pt-3 border-t border-border/30">
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    {/* <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span>
                         {locale === 'ar' ? 'مفيد' : 'Helpful'}
                       </span>
                       <span>
                         {locale === 'ar' ? 'مشاركة' : 'Share'}
                       </span>
-                    </div>
-                    
+                    </div> */}
+
                     {/* Delete button for current user's reviews */}
                     {currentUserId && review.user.id === currentUserId && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteReview(review.id)}
-                        disabled={deletingReviewId === review.id}
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title={locale === 'ar' ? 'حذف التقييم' : 'Delete review'}
-                      >
-                        {deletingReviewId === review.id ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
-                        ) : (
-                          <Trash2 className="h-4 w-4" />
-                        )}
-                      </Button>
+                      <div className="flex items-center gap-2 w-full justify-end">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteReview(review.id)}
+                          disabled={deletingReviewId === review.id}
+                          className="h-8 w-8 p-0  text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title={locale === 'ar' ? 'حذف التقييم' : 'Delete review'}
+                        >
+                          {deletingReviewId === review.id ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>

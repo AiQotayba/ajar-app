@@ -581,7 +581,18 @@
       "dragToReorder": "Drag images to reorder",
       "imageUrlNotReturned": "Image URL was not returned",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "addExternalLink": "Add External Link",
+      "externalLinkDialogTitle": "Add External Link",
+      "externalLinkInputLabel": "Image or Video URL",
+      "externalLinkInputPlaceholder": "https://...",
+      "addLink": "Add",
+      "cancel": "Cancel",
+      "fetchingMetadata": "Fetching metadata...",
+      "invalidUrl": "Invalid URL",
+      "unsupportedDomain": "Domain not supported. Supported: Facebook, YouTube, Twitter, Instagram, TikTok",
+      "fetchError": "Failed to fetch link metadata",
+      "linkAddedSuccess": "Link added successfully"
     },
     "price": {
       "price": "Price (in USD)",

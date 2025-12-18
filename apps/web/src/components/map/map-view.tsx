@@ -52,9 +52,13 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
   const mapInstanceRef = useRef<google.maps.Map | null>(null)
   const markersRef = useRef<google.maps.Marker[]>([])
   const [currentZoom, setCurrentZoom] = useState(12)
+  const [debouncedZoom, setDebouncedZoom] = useState(12)
   const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null)
+  const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null)
   const [propertyType, setPropertyType] = useState<'all' | 'rent' | 'sell'>('all')
   const router = useRouter()
+  const boundsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Initialize map
   useEffect(() => {
@@ -86,17 +90,53 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
 
         mapInstanceRef.current = map
 
+        // Track previous zoom to detect zoom changes
+        let previousZoom = map.getZoom() || 12
+
         // Add map event listeners
         map.addListener('bounds_changed', () => {
           const bounds = map.getBounds()
-          if (bounds) {
-            const north = bounds.getNorthEast().lat()
-            const south = bounds.getSouthWest().lat()
-            const east = bounds.getNorthEast().lng()
-            const west = bounds.getSouthWest().lng()
+          if (!bounds) return
 
-            setCurrentBounds({ north, south, east, west })
-            setCurrentZoom(map.getZoom() || 12)
+          const north = bounds.getNorthEast().lat()
+          const south = bounds.getSouthWest().lat()
+          const east = bounds.getNorthEast().lng()
+          const west = bounds.getSouthWest().lng()
+
+          const newBounds = { north, south, east, west }
+          const newZoom = map.getZoom() || 12
+
+          // Check if zoom changed
+          const zoomChanged = newZoom !== previousZoom
+          previousZoom = newZoom
+
+          // Update current zoom immediately for UI
+          setCurrentZoom(newZoom)
+
+          // Clear existing timeouts
+          if (boundsTimeoutRef.current) {
+            clearTimeout(boundsTimeoutRef.current)
+          }
+          if (zoomTimeoutRef.current) {
+            clearTimeout(zoomTimeoutRef.current)
+          }
+
+          if (zoomChanged) {
+            // If zoom changed, debounce both zoom and bounds update
+            zoomTimeoutRef.current = setTimeout(() => {
+              setDebouncedZoom(newZoom)
+            }, 400) // 400ms debounce for zoom
+
+            boundsTimeoutRef.current = setTimeout(() => {
+              setCurrentBounds(newBounds)
+              setDebouncedBounds(newBounds)
+            }, 400) // 400ms debounce for zoom-related bounds
+          } else {
+            // If only panning (no zoom), debounce the bounds update
+            boundsTimeoutRef.current = setTimeout(() => {
+              setCurrentBounds(newBounds)
+              setDebouncedBounds(newBounds)
+            }, 500) // 500ms debounce for panning
           }
         })
       }
@@ -111,25 +151,43 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
       script.onload = initMap
       document.head.appendChild(script)
     }
+
+    // Cleanup function
+    return () => {
+      if (boundsTimeoutRef.current) {
+        clearTimeout(boundsTimeoutRef.current)
+      }
+      if (zoomTimeoutRef.current) {
+        clearTimeout(zoomTimeoutRef.current)
+      }
+    }
   }, [hasPermission])
 
-  // React Query for map data
+  // Initialize debouncedBounds and debouncedZoom when map is first loaded
+  useEffect(() => {
+    if (mapInstanceRef.current && currentBounds && !debouncedBounds) {
+      setDebouncedBounds(currentBounds)
+      setDebouncedZoom(currentZoom)
+    }
+  }, [currentBounds, currentZoom, debouncedBounds])
+
+  // React Query for map data - uses debouncedBounds and debouncedZoom to reduce API calls
   const {
     data: mapDataResponse,
     isLoading: loading,
     isFetching,
   } = useQuery({
-    queryKey: ['map-listings', currentBounds, propertyType, currentZoom],
+    queryKey: ['map-listings', debouncedBounds, propertyType, debouncedZoom],
     queryFn: async () => {
-      if (!currentBounds) return null
+      if (!debouncedBounds) return null
 
       const params = new URLSearchParams({
         map_mode: '1',
-        north: currentBounds.north.toString(),
-        south: currentBounds.south.toString(),
-        east: currentBounds.east.toString(),
-        west: currentBounds.west.toString(),
-        zoom: currentZoom.toString(),
+        north: debouncedBounds.north.toString(),
+        south: debouncedBounds.south.toString(),
+        east: debouncedBounds.east.toString(),
+        west: debouncedBounds.west.toString(),
+        zoom: debouncedZoom.toString(),
         max_items: '400',
         radius_px: '48',
         merge_factor: '1.1'
@@ -147,7 +205,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
 
       return response.data as MapData[]
     },
-    enabled: !!currentBounds && !!mapInstanceRef.current,
+    enabled: !!debouncedBounds && !!mapInstanceRef.current,
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
