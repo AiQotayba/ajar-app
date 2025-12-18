@@ -63,7 +63,7 @@ export default async function LocaleLayout({
                 {/* Structured Data */}
                 <JsonLd data={generateOrganizationStructuredData()} />
                 <JsonLd data={generateLocalBusinessStructuredData()} />
-                
+                <meta name="v-app" content="Ajar-1" />
                 {/* Additional SEO Meta Tags */}
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <meta name="format-detection" content="telephone=no" />
