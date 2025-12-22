@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { ChevronLeft, ChevronRight, TvIcon, ZoomIn, ZoomOut } from "lucide-react"
@@ -13,6 +14,7 @@ import { shareContent } from "@/components/shared/share-content"
 import { HeartIcon } from "../icons/heart"
 import { HeartFillIcon } from "../icons/heart-fill"
 import CachedImage from "../CachedImage"
+import { FullscreenImageViewer } from "./fullscreen-image-viewer"
 
 interface GalleryImage {
   id: number
@@ -71,6 +73,7 @@ export function ListingsGallery({
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set())
+  const [showAllImagesDialog, setShowAllImagesDialog] = useState(false)
 
   // Prepare images array - use cover image as first if available, then add other images
   const allImages = images
@@ -161,8 +164,17 @@ export function ListingsGallery({
     setMousePosition(null)
     setIsAutoPlaying(true) // Resume auto-play when leaving
   }
-  
-  console.log(images);
+
+  const handleOpenAllImagesDialog = () => {
+    setShowAllImagesDialog(true)
+  }
+
+  const handleSelectImageFromDialog = (index: number) => {
+    scrollToIndex(index)
+    setShowAllImagesDialog(false)
+    // Open fullscreen viewer after selecting from dialog
+    setShowFullscreen(true)
+  }
   
   const handleShare = async () => {
     const listingUrl = window.location.href
@@ -458,7 +470,10 @@ export function ListingsGallery({
               ))}
             </div>
             {sortedImages.length > 4 && (
-              <button className="flex-shrink-0 w-20 h-20 rounded-2xl bg-foreground/90 text-background flex items-center justify-center text-sm font-bold">
+              <button 
+                onClick={handleOpenAllImagesDialog}
+                className="flex-shrink-0 w-20 h-20 rounded-2xl bg-foreground/90 text-background flex items-center justify-center text-sm font-bold hover:bg-foreground transition-colors cursor-pointer"
+              >
                 +{sortedImages.length - 4} {locale === 'ar' ? 'صورة' : 'images'}
               </button>
             )}
@@ -466,53 +481,71 @@ export function ListingsGallery({
         )}
       </div>
 
-      {/* Fullscreen Modal */}
-      {showFullscreen && (
-        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setShowFullscreen(false)}
-              className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/20 hover:bg-white/30 text-white z-10"
-            >
-              <ZoomOut className="h-5 w-5" />
-            </Button>
+      {/* Fullscreen Image Viewer */}
+      <FullscreenImageViewer
+        images={sortedImages}
+        initialIndex={currentIndex}
+        isOpen={showFullscreen}
+        onClose={() => setShowFullscreen(false)}
+        locale={locale}
+        onIndexChange={(index) => {
+          setCurrentIndex(index)
+          scrollToIndex(index)
+        }}
+      />
 
-            <div className="relative w-full h-full flex items-center justify-center p-4">
-              <CachedImage
-                src={sortedImages[currentIndex]?.full_url || sortedImages[currentIndex]?.url || "/images/placeholder.svg"}
-                alt={`Property image ${currentIndex + 1}`}
-                fill
-                className="object-contain"
-                sizes="100vw"
-              />
-            </div>
-
-            {/* Fullscreen Navigation */}
-            {sortedImages.length > 1 && (
-              <>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => carouselApi?.scrollPrev()}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/20 hover:bg-white/30 text-white z-10"
-                >
-                  <ChevronLeft className="h-6 w-6" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => carouselApi?.scrollNext()}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/20 hover:bg-white/30 text-white z-10"
-                >
-                  <ChevronRight className="h-6 w-6" />
-                </Button>
-              </>
-            )}
+      {/* All Images Dialog */}
+      <Dialog open={showAllImagesDialog} onOpenChange={setShowAllImagesDialog}>
+        <DialogContent className="max-w-[98vw] w-full h-[95vh] max-h-[95vh] overflow-y-auto p-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              {locale === 'ar' ? `جميع الصور (${sortedImages.length})` : `All Images (${sortedImages.length})`}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6 mt-4">
+            {sortedImages.map((image, index) => (
+              <button
+                key={image.id || index}
+                onClick={() => handleSelectImageFromDialog(index)}
+                className={cn(
+                  "relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer group",
+                  currentIndex === index
+                    ? "border-primary ring-2 ring-primary/20 scale-105"
+                    : "border-transparent hover:border-primary/50 hover:scale-105"
+                )}
+              >
+                <CachedImage
+                  src={image.full_url || image.url || "/images/placeholder.svg"}
+                  alt={`Image ${index + 1}`}
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-200"
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                  onError={() => setImageErrors(prev => new Set(prev).add(index))}
+                />
+                {imageErrors.has(index) && (
+                  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center rounded-xl">
+                    <div className="flex flex-col items-center">
+                      <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="text-xs mt-1 text-muted-foreground">
+                        {locale === 'ar' ? 'فشل' : 'Failed'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {currentIndex === index && (
+                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                    <div className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs font-medium">
+                      {locale === 'ar' ? 'الحالية' : 'Current'}
+                    </div>
+                  </div>
+                )}
+              </button>
+            ))}
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

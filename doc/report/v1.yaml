@@ -1,19 +1,28 @@
 next:
-  dashboard integration api من احمد
-  dashboard listings
-    form
-      sorting images
-      update listing images
+  add external link:
+    - title: "إضافة رابط صورة خارجي قصدي تضمين"
+    - description: "إضافة رابط صورة خارجي قصدي تضمين"
+    - steps:
+      - اضافة رابط خارجي 
+      - جيب من احد api
+  dashboard integration api: من احمد
+  dashboard listings:
+    form:
+      - sorting images
+      - update listing images
 new report:
-  web:    
-    add external link:
-      - title: "إضافة رابط صورة خارجي قصدي تضمين"
-      - description: "إضافة رابط صورة خارجي قصدي تضمين"
-      - steps:
-        - اضافة رابط خارجي 
-        - جيب من احد api
-    tasks:
-      - push to server
-      - map fiald
-      - req field
-[34/34]
+  dashboard: 
+    categories: 
+      - السحب والافلات فعال بس عالشي الرئيسي
+      - بدي غير ترتيب هدول الخيارات الفرعية ماعبقدر رغم اني فعلت السحب والافلات 
+    sliders:  
+      - الخصائص بدي تكون إما إجبارية أو اختيارية
+  web: 
+    - معرض الصور 
+  tasks:
+    push to server: 
+      v2:
+        - git push
+        - deploy dashboard
+        - deploy web  
+[40/40]

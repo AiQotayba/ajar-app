@@ -4,7 +4,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Calendar, Image as ImageIcon, Link2, Languages, AlertCircle, Star } from "lucide-react"
+import { Calendar, Image as ImageIcon, Link2 } from "lucide-react"
 import { format } from "date-fns"
 import { ar } from "date-fns/locale"
 import { toast } from "sonner"
@@ -33,20 +33,23 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
 import type { Slider } from "@/lib/types/slider"
+import { ApiResponse } from "@/lib/api-client"
 
 // Form validation schema
 const sliderFormSchema = z.object({
     title_ar: z.string().min(3, "العنوان بالعربية يجب أن يكون 3 أحرف على الأقل"),
     title_en: z.string().min(3, "العنوان بالإنجليزية يجب أن يكون 3 أحرف على الأقل"),
-    description_ar: z.string().min(10, "الوصف بالعربية يجب أن يكون 10 أحرف على الأقل"),
-    description_en: z.string().min(10, "الوصف بالإنجليزية يجب أن يكون 10 أحرف على الأقل"),
+    description_ar: z.string().optional().or(z.literal("")),
+    description_en: z.string().optional().or(z.literal("")),
     image_url: z.string().min(1, "يجب رفع صورة السلايد"), // Can be image_name (path) or full URL
-    target_url: z.string().url("يجب إدخال رابط صحيح"),
+    target_url: z.union([
+        z.string().url("يجب إدخال رابط صحيح"),
+        z.literal("")
+    ]).optional(),
     start_at: z.date({
         required_error: "يجب تحديد تاريخ البداية",
     }),
@@ -61,6 +64,22 @@ const sliderFormSchema = z.object({
     })
 
 type SliderFormValues = z.infer<typeof sliderFormSchema>
+
+type SliderPayload = {
+    title: {
+        ar: string
+        en: string
+    }
+    description: {
+        ar: string
+        en: string
+    }
+    image_url?: string
+    target_url?: string
+    start_at: string
+    end_at: string
+    active: boolean
+}
 
 interface SliderFormProps {
     open: boolean
@@ -92,30 +111,28 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
     })
 
     // Create mutation
-    const createMutation = useMutation({
-        mutationFn: (data: any) => api.post(`/admin/sliders`, data),
-        onSuccess: (data: any) => {
-            toast.success("تم إضافة السلايد بنجاح")
+    const createMutation = useMutation<ApiResponse<Slider>, ApiResponse<Slider>, SliderPayload>({
+        mutationFn: (data: SliderPayload) => api.post(`/admin/sliders`, data),
+        onSuccess: (response: ApiResponse<Slider>) => {
+            toast.success(response?.message || "تم إضافة السلايد بنجاح")
             onOpenChange(false)
             form.reset()
         },
-        onError: (error: any) => {
-            toast.error("حدث خطأ أثناء إضافة السلايد", {
-                description: error.message,
-            })
+        onError: (error: ApiResponse<Slider>) => {
+            toast.error(error?.message || "حدث خطأ أثناء إضافة السلايد")
         },
     })
 
     // Update mutation
-    const updateMutation = useMutation({
-        mutationFn: (data: any) => api.put(`/admin/sliders/${slider!.id}`, data),
+    const updateMutation = useMutation<ApiResponse<Slider>, ApiResponse<Slider>, SliderPayload>({
+        mutationFn: (data: SliderPayload) => api.put(`/admin/sliders/${slider!.id}`, data),
         onSuccess: () => {
             // Invalidate all table-data queries for this endpoint
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             // toast.success("تم تحديث السلايد بنجاح")
             onOpenChange(false)
         },
-        onError: (error: any) => {
+        onError: (error: ApiResponse<Slider>) => {
             toast.error("حدث خطأ أثناء تحديث السلايد", {
                 description: error.message,
             })
@@ -129,7 +146,6 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
         const minStartDate = new Date(now.getTime() + 5 * 60 * 1000) // +5 minutes
 
         let startAt = values.start_at
-        const originalStartAt = new Date(startAt)
 
 
         // Check if start_at is less than 5 minutes from now (to account for server timezone differences)
@@ -141,19 +157,23 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
             form.setValue("start_at", startAt)
         }
 
-        const formattedData: any = {
+        const formattedData: SliderPayload = {
             title: {
                 ar: values.title_ar,
                 en: values.title_en,
             },
             description: {
-                ar: values.description_ar,
-                en: values.description_en,
+                ar: values.description_ar || "",
+                en: values.description_en || "",
             },
-            target_url: values.target_url,
             start_at: startAt.toISOString(),
             end_at: values.end_at.toISOString(),
             active: values.active,
+        }
+
+        // Only include target_url if it's provided and not empty
+        if (values.target_url && values.target_url.trim() !== "") {
+            formattedData.target_url = values.target_url
         }
 
         console.info("📦 [DEBUG] Formatted data to send:", {
@@ -255,86 +275,70 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <Tabs defaultValue="ar" dir="rtl">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="ar" className="gap-2">
-                                    <Languages className="h-4 w-4" />
-                                    العربية
-                                </TabsTrigger>
-                                <TabsTrigger value="en" className="gap-2">
-                                    <Languages className="h-4 w-4" />
-                                    English
-                                </TabsTrigger>
-                            </TabsList>
+                        <FormField
+                            control={form.control}
+                            name="title_ar"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>العنوان بالعربية</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="أدخل عنوان السلايد" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                            <TabsContent value="ar" className="space-y-4 mt-4">
-                                <FormField
-                                    control={form.control}
-                                    name="title_ar"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>العنوان بالعربية</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="أدخل عنوان السلايد" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        <FormField
+                            control={form.control}
+                            name="title_en"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Title in English</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter slide title" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="description_ar"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>الوصف بالعربية</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="أدخل وصف السلايد (اختياري)"
+                                            className="min-h-[100px]"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>الوصف اختياري</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                                <FormField
-                                    control={form.control}
-                                    name="description_ar"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>الوصف بالعربية</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="أدخل وصف السلايد"
-                                                    className="min-h-[100px]"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </TabsContent>
-
-                            <TabsContent value="en" className="space-y-4 mt-4">
-                                <FormField
-                                    control={form.control}
-                                    name="title_en"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Title in English</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Enter slide title" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="description_en"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Description in English</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    placeholder="Enter slide description"
-                                                    className="min-h-[100px]"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </TabsContent>
-                        </Tabs>
+                        <FormField
+                            control={form.control}
+                            name="description_en"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Description in English</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Enter slide description (optional)"
+                                            className="min-h-[100px]"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>Description is optional</FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         <FormField
                             control={form.control}
@@ -351,11 +355,11 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                                             onChange={field.onChange}
                                             folder="sliders"
                                             aspectRatio="landscape"
-                                            maxSize={5}
+                                            maxSize={25}
                                             disabled={isLoading}
                                         />
                                     </FormControl>
-                                    <FormDescription>قم برفع صورة السلايد (حد أقصى 5MB)</FormDescription>
+                                    <FormDescription>قم برفع صورة السلايد (حد أقصى 25MB)</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -373,7 +377,7 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                                     <FormControl>
                                         <Input placeholder="https://example.com" {...field} />
                                     </FormControl>
-                                    <FormDescription>الرابط عند النقر على السلايد</FormDescription>
+                                    <FormDescription>الرابط عند النقر على السلايد (اختياري)</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -425,8 +429,7 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                                                             const isToday = selectedDay.getTime() === today.getTime()
 
                                                             if (isToday) {
-                                                                // Today: set to now + 5 minutes (to account for server timezone differences)
-                                                                const beforeAdjust = new Date(selectedDate)
+                                                                // Today: set to now + 5 minutes (to account for server timezone differences) 
                                                                 const futureTime = new Date(now.getTime() + 5 * 60 * 1000) // +5 minutes
                                                                 selectedDate.setHours(futureTime.getHours())
                                                                 selectedDate.setMinutes(futureTime.getMinutes())
@@ -435,7 +438,6 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
 
                                                             } else {
                                                                 // Future date: set to start of day (00:00:00)
-                                                                const beforeAdjust = new Date(selectedDate)
                                                                 selectedDate.setHours(0)
                                                                 selectedDate.setMinutes(0)
                                                                 selectedDate.setSeconds(0)
@@ -527,8 +529,8 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
                         <div className="space-y-2">
 
                             {form.formState.errors && Object.keys(form.formState.errors).length > 0 &&
-                                Object.values(form.formState.errors).map((error) => (
-                                    <p className="text-destructive text-xs">
+                                Object.values(form.formState.errors).map((error, index) => (
+                                    <p key={index} className="text-destructive text-xs">
                                         - {error.message}
                                     </p>
                                 ))}

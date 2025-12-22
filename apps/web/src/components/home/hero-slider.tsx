@@ -7,7 +7,6 @@ import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { api as Api } from "@/lib/api"
 import { useLocale } from "next-intl"
-import { useRouter } from "next/navigation"
 
 
 interface Slider {
@@ -37,7 +36,6 @@ export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefin
   const [carouselApi, setCarouselApi] = useState<any>(null)
   const locale = useLocale()
   const [clickedSliders, setClickedSliders] = useState<Set<number>>(new Set())
-  const router = useRouter()
 
   // تحديث المؤشر عند تغيير السلايد
   useEffect(() => {
@@ -72,7 +70,7 @@ export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefin
     } catch (error) {
       console.error('Error tracking slider click:', error)
       // فتح الرابط حتى لو فشل تتبع النقر
-      // window.open(slide.target_url, '_blank')
+      window.open(slide.target_url, '_blank')
     }
   }
 
@@ -122,11 +120,11 @@ export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefin
 
                 {/* Content */}
                 <div className="absolute bottom-0 right-0 left-0 p-4 sm:p-6 text-white">
-                  <div className="space-y-2 sm:space-y-3">
-                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+                  <div className="space-y-2 sm:space-y-3  ltr:text-right">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight ltr:text-left">
                       {slide.title[locale as keyof typeof slide.title]}
                     </h2>
-                    <p className="text-sm sm:text-base text-white/90 leading-relaxed max-w-2xl">
+                    <p className="text-sm sm:text-base text-white/90 leading-relaxed ltr:text-left w-full ltr:left-0">
                       {slide.description[locale as keyof typeof slide.description]}
                     </p>
                   </div>
@@ -198,7 +196,7 @@ function HeroSliderSkeleton() {
           <div className="relative h-64 sm:h-72 md:h-80 lg:h-96 rounded-3xl overflow-hidden bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse">
             {/* Shimmer effect */}
             <div className="absolute inset-0 animate-shimmer opacity-50" />
-            
+
             {/* Content skeleton */}
             <div className="absolute bottom-0 right-0 left-0 p-4 sm:p-6">
               <div className="space-y-3 animate-pulse">

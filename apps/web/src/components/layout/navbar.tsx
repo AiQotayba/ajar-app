@@ -236,16 +236,6 @@ export function Navbar({ className }: NavbarProps) {
                           </Link>
                         )
                       })}
-                      {isAuthenticated && (
-                        <Link
-                          href={`/${locale}/my-listings/create`}
-                          className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          <Plus className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                          {isRTL ? "إضافة إعلان" : "Add listing"}
-                        </Link>
-                      )}
                     </div>
                   </nav>
                 </div>
@@ -307,11 +297,21 @@ export function Navbar({ className }: NavbarProps) {
               </Button>
             </div>
 
+            {/* {isAuthenticated && ( */}
+            <Link
+              href={`/${locale}/my-listings/create`} 
+              className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center max-w-max text-xs"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Plus className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-0 rtl:md:ml-2  " />
+              <span className="hidden sm:block">{isRTL ? "إضافة إعلان" : "Add listing"}</span>
+            </Link>
+            {/* )} */}
             {/* Mobile Search Icon */}
             <div className="lg:hidden">
               <SearchBar />
             </div>
-
+ 
             {/* Language Switcher */}
             <div className="hidden sm:flex">
               <LanguageSwitcher />
@@ -323,17 +323,6 @@ export function Navbar({ className }: NavbarProps) {
             )}
 
             {/* Add Property Button - Only show if authenticated */}
-            {isAuthenticated && (
-              <Button
-                asChild
-                className="hidden sm:flex bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
-              >
-                <Link href={`/${locale}/my-listings/create`}>
-                  <Plus className="w-4 h-4 mx-1" />
-                  {isRTL ? "إضافة اعلان" : "Add listing"}
-                </Link>
-              </Button>
-            )}
 
             {/* User Menu */}
             <div className="relative items-center flex mx-2">

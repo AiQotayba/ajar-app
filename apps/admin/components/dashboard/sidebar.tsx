@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Bell,
+  ExternalLink,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { authApi } from "@/lib/auth"
@@ -32,6 +33,8 @@ interface MenuItem {
   onClick?: () => void
   isDestructive?: boolean
   children?: MenuItem[]
+  target?: string
+  rel?: string
 }
 
 const menuItems: MenuItem[] = [
@@ -75,6 +78,13 @@ const menuItems: MenuItem[] = [
     icon: Bell,
     label: "الإشعارات",
     href: "/notifications",
+  },
+  {
+    icon: ExternalLink,
+    label: "عرض الموقع",
+    href: "https://ajarsyria.com",
+    target: "_blank",
+    rel: "noopener noreferrer",
   },
 ]
 
@@ -172,7 +182,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     },
   ]
 
-  const NavItem = ({ item, showLabel = true, index = 0 }: { item: MenuItem; showLabel?: boolean; index?: number }) => {
+  const NavItem = ({ item, showLabel = true, }: { item: MenuItem; showLabel?: boolean; index?: number }) => {
     const Icon = item.icon
     const isActive = item.href ? pathname === item.href : false
     const isButton = !item.href && !!item.onClick
@@ -214,6 +224,8 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           item.className
         )}
         aria-current={isActive ? "page" : undefined}
+        target={item.target}
+        rel={item.rel}
       >
         <Icon className="h-5 w-5 shrink-0 text-white/90" />
         {showLabel && (
