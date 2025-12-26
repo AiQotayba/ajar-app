@@ -1,16 +1,7 @@
 # new report
 
 **web**
-
-- المشاهدات
-  - عمل viewerStorage للمشاهدات لاجل الاستخدام المتكرر في نفس الجلسة
-    - خلال الجلسة الواحدة يمكن استخدام عرض واحد مشان ما بيصير عرض كثير
-  - details listing
-    - عمل كاش على السيرفر لمدة 5 دقائق
-    - استخدم كاش محلي للاستخدام مع الكلاينت
-    - استخدام api POST `/user/listings/view` [{id, count, viewed_at}]
-  - list listings
-    - استخدام api POST `/user/listings/view` [{id, count, viewed_at}]
+ ء
 - إضافة رابط صورة خارجي قصدي تضمين
 - الرفع على السيرفر
 
@@ -28,3 +19,26 @@
   - form
     - sorting images
     - update listing images
+# reposrt
+/api/v1/admin/properties
+{
+  "name": { "ar": "الاسم بالعربية", "en": "الاسم بالانجليزية" }, 
+  "description": { "ar": "الوصف بالعربية", "en": "الوصف بالانجليزية" },
+  "category_id": 522,
+  "icon": "properties/694e45e3d69a4.webp",
+  "type": "enum",
+  "is_filter": false,
+  "options": [
+    "q1",
+    "a1"
+  ]
+}
+
+{
+  "message": "الحقل type المحدد غير صالح.",
+  "errors": {
+    "type": [
+      "الحقل type المحدد غير صالح."
+    ]
+  }
+}

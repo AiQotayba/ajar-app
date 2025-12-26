@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { X, Plus } from "lucide-react"
 import { api } from "@/lib/api"
+import type { ApiResponse } from "@/lib/api-client"
 
 const propertyFormSchema = z.object({
 	name_ar: z.string().min(1, "الاسم بالعربية مطلوب"),
@@ -60,6 +61,7 @@ interface PropertyFormDrawerProps {
 export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }: PropertyFormDrawerProps) {
 	const queryClient = useQueryClient()
 	const [newOptionValue, setNewOptionValue] = React.useState("")
+	const [ErrorRes, setErrorRes] = React.useState("")
 
 	const form = useForm<PropertyFormValues>({
 		resolver: zodResolver(propertyFormSchema),
@@ -69,7 +71,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 			description_ar: property?.description.ar || "",
 			description_en: property?.description.en || "",
 			icon: property?.icon || "",
-			type: (property?.type as any) || "int",
+			type: (property?.type === "select" ? "enum" : property?.type) as PropertyFormValues["type"] || "int",
 			is_filter: property?.is_filter || false,
 			options: property?.options || [],
 			sort_order: property?.sort_order || 0,
@@ -85,7 +87,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 				description_ar: property.description.ar || "",
 				description_en: property.description.en || "",
 				icon: property.icon || "",
-				type: (property.type as any) || "int",
+				type: (property.type === "select" ? "enum" : property.type) as PropertyFormValues["type"] || "int",
 				is_filter: property.is_filter || false,
 				options: property.options || [],
 				sort_order: property.sort_order || 0,
@@ -132,7 +134,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 				throw new Error("الأيقونة مطلوبة")
 			}
 			// Ensure type is not empty
-			if (!data.type || data.type.trim() === "") {
+			if (!data.type) {
 				throw new Error("النوع مطلوب")
 			}
 			return api.post('/admin/properties', {
@@ -145,13 +147,19 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 				options: data.options || [],
 			})
 		},
-		onSuccess: (data: any) => {
-			queryClient.invalidateQueries({ queryKey: ["categories"] })
-			toast.success(data?.message)
-			onOpenChange(false)
-			form.reset()
+		onSuccess: (data: ApiResponse) => {
+			console.info("✅ Property created:", data)
+			if (!data.isError) {
+				queryClient.invalidateQueries({ queryKey: ["categories"] })
+				toast.success(data?.message || "تم إنشاء الخاصية بنجاح")
+				onOpenChange(false)
+				form.reset()
+			}
+			else {
+				setErrorRes(data.message || "حدث خطأ غير معروف")
+			}
 		},
-		onError: (error: any) => {
+		onError: (error: { message?: string; response?: { data?: { message?: string; errors?: Record<string, string[]> } } }) => {
 			const errorMessage = error?.message || error?.response?.data?.message || "فشل إنشاء الخاصية"
 			toast.error(errorMessage)
 
@@ -163,6 +171,11 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 						form.setError("icon", {
 							type: "manual",
 							message: errors[key][0] || "الأيقونة مطلوبة"
+						})
+					} else if (key === "type") {
+						form.setError("type", {
+							type: "manual",
+							message: errors[key][0] || "النوع المحدد غير صالح"
 						})
 					}
 				})
@@ -177,7 +190,7 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 				throw new Error("الأيقونة مطلوبة")
 			}
 			// Ensure type is not empty
-			if (!data.type || data.type.trim() === "") {
+			if (!data.type) {
 				throw new Error("النوع مطلوب")
 			}
 			return api.put(`/admin/properties/${property!.id}`, {
@@ -189,13 +202,13 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 				options: data.options || [],
 			})
 		},
-		onSuccess: (data: any) => {
+		onSuccess: (data: { message?: string }) => {
 			queryClient.invalidateQueries({ queryKey: ["categories"] })
-			toast.success(data?.message)
+			toast.success(data?.message || "تم تحديث الخاصية بنجاح")
 			onOpenChange(false)
 			form.reset()
 		},
-		onError: (error: any) => {
+		onError: (error: { message?: string; response?: { data?: { message?: string; errors?: Record<string, string[]> } } }) => {
 			const errorMessage = error?.message || error?.response?.data?.message || "فشل تحديث الخاصية"
 			toast.error(errorMessage)
 
@@ -207,6 +220,11 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 						form.setError("icon", {
 							type: "manual",
 							message: errors[key][0] || "الأيقونة مطلوبة"
+						})
+					} else if (key === "type") {
+						form.setError("type", {
+							type: "manual",
+							message: errors[key][0] || "النوع المحدد غير صالح"
 						})
 					}
 				})
@@ -243,7 +261,6 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 	}
 
 	const isLoading = createMutation.isPending || updateMutation.isPending
-	console.log(form.getValues("type"), property);
 
 	return (
 		<Drawer open={open} onOpenChange={onOpenChange} direction="left">
@@ -471,6 +488,9 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 							/>
 						) : null}
 
+						{ErrorRes && (
+							<div className="text-red-500 text-sm">{ErrorRes}</div>
+						)}
 						<DrawerFooter className="grid grid-cols-2 gap-4">
 							<DrawerClose asChild>
 								<Button type="button" variant="outline">

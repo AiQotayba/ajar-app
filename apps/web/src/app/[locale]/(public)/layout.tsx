@@ -56,6 +56,7 @@ export default async function LocaleLayout({
     const isRTL = locale === 'ar';
     const dir = isRTL ? 'rtl' : 'ltr';
     const lang = locale;
+console.log("public layout");
 
     return (
         <html lang={lang} dir={dir}>

@@ -53,9 +53,9 @@ export function FullscreenImageViewer({
         isUserScrollingRef.current = false
         setCurrentIndex(newIndex)
         onIndexChange?.(newIndex)
-        // Scroll thumbnail to new index
+        // Scroll thumbnail to new index - use scrollTo without jump
         if (thumbnailCarouselApi) {
-            thumbnailCarouselApi.scrollTo(newIndex, true)
+            thumbnailCarouselApi.scrollTo(newIndex)
         }
     }
 
@@ -65,9 +65,9 @@ export function FullscreenImageViewer({
         isUserScrollingRef.current = false
         setCurrentIndex(newIndex)
         onIndexChange?.(newIndex)
-        // Scroll thumbnail to new index
+        // Scroll thumbnail to new index - use scrollTo without jump
         if (thumbnailCarouselApi) {
-            thumbnailCarouselApi.scrollTo(newIndex, true)
+            thumbnailCarouselApi.scrollTo(newIndex)
         }
     }
 
@@ -124,99 +124,27 @@ export function FullscreenImageViewer({
         }
     }
 
-    // Sync thumbnail carousel with current index (only when needed, not during user drag)
-    useEffect(() => {
-        if (thumbnailCarouselApi && shouldSyncRef.current && !isDraggingRef.current && !isUserScrollingRef.current) {
-            // Use scrollTo with jump option to avoid snap behavior
-            thumbnailCarouselApi.scrollTo(currentIndex, true)
-        }
-    }, [currentIndex, thumbnailCarouselApi])
+    // Don't auto-sync - only sync on explicit user actions (click, navigation buttons)
+    // This prevents the carousel from snapping back when user scrolls
 
-    // Listen to thumbnail carousel changes and detect user interaction
+    // Listen to thumbnail carousel changes - only update main image when user clicks thumbnail
+    // Don't update during scroll/drag to allow free scrolling
     useEffect(() => {
         if (!thumbnailCarouselApi) return
 
-        let isPointerDown = false
-        let scrollTimeout: NodeJS.Timeout | null = null
-
-        const onPointerDown = () => {
-            isPointerDown = true
-            isDraggingRef.current = true
-            isUserScrollingRef.current = true
-            shouldSyncRef.current = false
-        }
-
-        const onPointerUp = () => {
-            isPointerDown = false
-            // Clear any existing timeout
-            if (scrollTimeout) {
-                clearTimeout(scrollTimeout)
-            }
-            // Wait a bit before allowing sync again
-            scrollTimeout = setTimeout(() => {
-                isDraggingRef.current = false
-                isUserScrollingRef.current = false
-                // Don't re-enable sync immediately - let user finish their interaction
-            }, 300)
-        }
-
-        const onScroll = () => {
-            if (isPointerDown) {
-                isUserScrollingRef.current = true
-                shouldSyncRef.current = false
-            }
-        }
-
-        const onSettle = () => {
-            // When carousel settles after user interaction, update current index
-            if (isUserScrollingRef.current) {
-                const selectedIndex = thumbnailCarouselApi.selectedScrollSnap()
-                if (selectedIndex !== currentIndex) {
-                    shouldSyncRef.current = false
-                    setCurrentIndex(selectedIndex)
-                    onIndexChange?.(selectedIndex)
-                }
-                // Re-enable sync after a delay
-                setTimeout(() => {
-                    isUserScrollingRef.current = false
-                    shouldSyncRef.current = true
-                }, 500)
-            }
-        }
-
-        // Use pointer events to detect dragging
-        const carouselElement = thumbnailCarouselApi.containerNode()
-        if (carouselElement) {
-            carouselElement.addEventListener("pointerdown", onPointerDown)
-            carouselElement.addEventListener("pointerup", onPointerUp)
-            carouselElement.addEventListener("pointercancel", onPointerUp)
-        }
-
-        thumbnailCarouselApi.on("scroll", onScroll)
-        thumbnailCarouselApi.on("settle", onSettle)
-        
-        return () => {
-            if (scrollTimeout) {
-                clearTimeout(scrollTimeout)
-            }
-            if (carouselElement) {
-                carouselElement.removeEventListener("pointerdown", onPointerDown)
-                carouselElement.removeEventListener("pointerup", onPointerUp)
-                carouselElement.removeEventListener("pointercancel", onPointerUp)
-            }
-            thumbnailCarouselApi.off("scroll", onScroll)
-            thumbnailCarouselApi.off("settle", onSettle)
-        }
-    }, [thumbnailCarouselApi, currentIndex, onIndexChange])
+        // Only update when user explicitly selects a thumbnail (not during drag)
+        // We'll handle clicks separately in handleThumbnailClick
+        // This effect is mainly for cleanup
+    }, [thumbnailCarouselApi])
 
     const handleThumbnailClick = (index: number) => {
         shouldSyncRef.current = true
         isUserScrollingRef.current = false
         setCurrentIndex(index)
         onIndexChange?.(index)
-        // Scroll to clicked thumbnail
+        // Scroll to clicked thumbnail - use scrollTo without jump to allow smooth scroll
         if (thumbnailCarouselApi) {
-            thumbnailCarouselApi.scrollTo(index, true)
+            thumbnailCarouselApi.scrollTo(index)
         }
     }
 
@@ -311,11 +239,9 @@ export function FullscreenImageViewer({
                             <Carousel
                                 setApi={setThumbnailCarouselApi}
                                 opts={{
-                                    align: "start",
                                     dragFree: true,
                                     containScroll: "trimSnaps",
-                                    skipSnaps: false,
-                                    watchDrag: true,
+                                    skipSnaps: true,
                                 }}
                                 className="w-full"
                             >

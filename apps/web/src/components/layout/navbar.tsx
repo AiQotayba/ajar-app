@@ -303,7 +303,7 @@ export function Navbar({ className }: NavbarProps) {
               className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center max-w-max text-xs"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Plus className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-0 rtl:md:ml-2  " />
+              <Plus className="w-4 h-4 mr-2 rtl:mr-0 ltr:mr-0 rtl:ml-0 rtl:md:ml-2  " />
               <span className="hidden sm:block">{isRTL ? "إضافة إعلان" : "Add listing"}</span>
             </Link>
             {/* )} */}

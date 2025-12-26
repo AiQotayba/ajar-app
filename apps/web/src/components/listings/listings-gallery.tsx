@@ -68,6 +68,7 @@ export function ListingsGallery({
   const [isLoading, setIsLoading] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [thumbnailCarouselApi, setThumbnailCarouselApi] = useState<CarouselApi>()
   const [showFullscreen, setShowFullscreen] = useState(false)
   const [hoveredImageIndex, setHoveredImageIndex] = useState<number | null>(null)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
@@ -93,6 +94,13 @@ export function ListingsGallery({
       carouselApi.off("select", onSelect)
     }
   }, [carouselApi])
+
+  // Sync thumbnail carousel with current index
+  useEffect(() => {
+    if (thumbnailCarouselApi && currentIndex < 4) {
+      thumbnailCarouselApi.scrollTo(currentIndex)
+    }
+  }, [currentIndex, thumbnailCarouselApi])
 
   // Auto-play effect
   useEffect(() => {
@@ -430,45 +438,54 @@ export function ListingsGallery({
 
         {/* Thumbnail Gallery */}
         {sortedImages.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide flex-row ">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide   rtl:justify-end">
-              {sortedImages.slice(0, 4).map((image, index) => (
-                <button
-                  key={image.id || index}
-                  onClick={() => scrollToIndex(index)}
-                  //  onMouseEnter={(e) => handleImageHover(index, e)}
-                  //  onMouseMove={handleImageMouseMove}
-                  //  onMouseLeave={handleImageLeave}
-                  className={cn(
-                    "relative flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer",
-                    currentIndex === index
-                      ? "border-primary ring-2 ring-primary/20"
-                      : "border-transparent opacity-60 hover:opacity-100",
-                  )}
-                >
-                  <CachedImage
-                    src={image.full_url || image.url || "/images/placeholder.svg"}
-                    alt={`Thumbnail ${index + 1}`}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover"
-                    onError={() => setImageErrors(prev => new Set(prev).add(index))}
-                  />
-                  {imageErrors.has(index) && (
-                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center rounded-2xl">
-                      <div className="flex flex-col items-center">
-                        <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-xs mt-1 text-muted-foreground">
-                          {locale === 'ar' ? 'فشل' : 'Failed'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-2 items-center">
+            <Carousel
+              setApi={setThumbnailCarouselApi}
+              opts={{
+                align: "start",
+                dragFree: true,
+                containScroll: "trimSnaps",
+                skipSnaps: true,
+              }}
+              className="flex-1"
+            >
+              <CarouselContent className="gap-2 rtl:justify-end">
+                {sortedImages.slice(0, 4).map((image, index) => (
+                  <CarouselItem key={image.id || index} className="basis-auto">
+                    <button
+                      onClick={() => scrollToIndex(index)}
+                      className={cn(
+                        "relative flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer",
+                        currentIndex === index
+                          ? "border-primary ring-2 ring-primary/20"
+                          : "border-transparent opacity-60 hover:opacity-100",
+                      )}
+                    >
+                      <CachedImage
+                        src={image.full_url || image.url || "/images/placeholder.svg"}
+                        alt={`Thumbnail ${index + 1}`}
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover"
+                        onError={() => setImageErrors(prev => new Set(prev).add(index))}
+                      />
+                      {imageErrors.has(index) && (
+                        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center rounded-2xl">
+                          <div className="flex flex-col items-center">
+                            <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p className="text-xs mt-1 text-muted-foreground">
+                              {locale === 'ar' ? 'فشل' : 'Failed'}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
             {sortedImages.length > 4 && (
               <button 
                 onClick={handleOpenAllImagesDialog}

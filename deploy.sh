@@ -65,7 +65,7 @@ pm2 save
 pm2 startup
 
 ssh -t ajarsyria-dashboard@82.29.178.80
-cd ~/htdocs/dashboard.ajarsyria.com/ajar-app ; git pull ; cd apps/admin ; pm2 stop app;pnpm i ; pnpm run build ; pm2 restart app
+cd ~/htdocs/dashboard.ajarsyria.com/ajar-app ; git pull ; cd apps/admin ;  pnpm i ; pnpm run build ; pm2 restart app
 
 ssh -t ajarsyria@82.29.178.80
 cd ~/htdocs/ajarsyria.com/ajar-app ; git pull ; cd apps/web ; pm2 stop app ; pnpm i ; pnpm run build ; pm2 restart app
