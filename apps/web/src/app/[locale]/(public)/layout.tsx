@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import "../globals.css";
 import { MainLayout } from "@/components/layout";
 import ForegroundNotificationListenerProvider from "@/components/notifications/foreground-notification-listener-provider";
+import { LogRocketProvider } from "@/components/logrocket-provider";
 
 export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
@@ -102,6 +103,7 @@ console.log("public layout");
                 <ReduxProvider>
                     <QueryProvider>
                         <NextIntlClientProvider locale={locale} messages={messages}>
+                            <LogRocketProvider />
                             <ForegroundNotificationListenerProvider />
                             <LocaleSaver />
                             <MainLayout>

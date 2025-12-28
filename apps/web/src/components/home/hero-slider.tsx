@@ -7,6 +7,7 @@ import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { api as Api } from "@/lib/api"
 import { useLocale } from "next-intl"
+import { toast } from "sonner"
 
 
 interface Slider {
@@ -58,7 +59,12 @@ export function HeroSlider({ sliders, isLoading }: { sliders: Slider[] | undefin
         await Api.post(`/user/sliders/${slide.id}/click`)
           .then(() => {
             setClickedSliders(prev => new Set(Array.from(prev).concat(slide.id)))
-            window.open(slide.target_url, '_blank')
+            if (slide.target_url) {
+              window.open(slide.target_url, '_blank')
+            }
+            else {  
+              toast.warning(locale === 'ar' ? 'لا يوجد رابط مستهدف لهذا السلايد' : 'No target URL for this slider')
+            }
           })
           .catch((error) => {
             console.error('Error tracking slider click:', error)

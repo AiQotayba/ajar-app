@@ -57,6 +57,7 @@
     "geist": "^1.5.1",
     "input-otp": "1.4.1",
     "js-cookie": "^3.0.5",
+    "logrocket": "^11.0.0",
     "lucide-react": "^0.454.0",
     "next": "^15.5.8",
     "next-intl": "^4.3.9",

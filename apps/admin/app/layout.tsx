@@ -8,6 +8,7 @@ import { Suspense } from "react"
 import "./globals.css"
 import { Toaster } from "sonner"
 import ForegroundNotificationListenerProvider from "@/components/notifications/foreground-notification-listener-provider"
+import { LogRocketProvider } from "@/components/logrocket-provider"
 
 export const metadata: Metadata = {
   title: "Ajar Admin Panel",
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>
           <QueryProvider>
+            <LogRocketProvider />
             <ForegroundNotificationListenerProvider />
             {children}
             <Toaster position="top-center" richColors />

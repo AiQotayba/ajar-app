@@ -20,7 +20,7 @@
     - sorting images
     - update listing images
 # reposrt
-/api/v1/admin/properties
+# POST /api/v1/admin/properties
 {
   "name": { "ar": "الاسم بالعربية", "en": "الاسم بالانجليزية" }, 
   "description": { "ar": "الوصف بالعربية", "en": "الوصف بالانجليزية" },
@@ -42,3 +42,6 @@
     ]
   }
 }
+
+# شغلة الورتة من الأب ما عبتصير categories  
+# إضافة رابط خارجي قصدي تضمين

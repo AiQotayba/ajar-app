@@ -11,6 +11,7 @@ import type React from "react";
 import { Toaster } from "sonner";
 import "../globals.css";
 import { MainLayout } from "@/components/layout";
+import { LogRocketProvider } from "@/components/logrocket-provider";
 
 export function generateStaticParams() {
     return routing.locales.map((locale) => ({ locale }));
@@ -80,6 +81,7 @@ export default async function LocaleLayout({
                 <ReduxProvider>
                     <QueryProvider>
                         <NextIntlClientProvider locale={locale} messages={messages}>
+                            <LogRocketProvider />
                             <LocaleSaver />
                             <MainLayout>
                                 <main className="min-h-screen">{children}</main>

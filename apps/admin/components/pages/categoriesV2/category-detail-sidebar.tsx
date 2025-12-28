@@ -4,7 +4,7 @@ import * as React from "react"
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { Folder, Package, Star, Info, FolderTree, Edit, Trash2, Plus, Sparkles, ArrowRight } from "lucide-react"
+import { Folder, Package, Star, Info, FolderTree, Edit, Trash2, Plus, Sparkles, ArrowRight, GripVertical } from "lucide-react"
 import type { Category, CategoryProperty, CategoryFeature } from "@/lib/types/category"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -26,6 +26,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import Images from "@/components/ui/image"
+import { ApiResponse } from "@/lib/api-client"
 
 
 interface CategoriesDetailSidebarProps {
@@ -34,7 +35,7 @@ interface CategoriesDetailSidebarProps {
     onDelete?: (category: Category) => void
 }
 
-export function CategoriesDetailSidebar({ category, onEdit, onDelete }: CategoriesDetailSidebarProps) {
+export function CategoriesDetailSidebar({ category, onDelete }: CategoriesDetailSidebarProps) {
     const queryClient = useQueryClient()
 
     const [isPropertyDrawerOpen, setIsPropertyDrawerOpen] = useState(false)
@@ -51,6 +52,12 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
     const [deletingProperty, setDeletingProperty] = useState<CategoryProperty | null>(null)
     const [deletingFeature, setDeletingFeature] = useState<CategoryFeature | null>(null)
     const [deletingChild, setDeletingChild] = useState<Category | null>(null)
+
+    // Drag and drop states
+    const [draggedPropertyIndex, setDraggedPropertyIndex] = useState<number | null>(null)
+    const [draggedFeatureIndex, setDraggedFeatureIndex] = useState<number | null>(null)
+    const [hoveredPropertyIndex, setHoveredPropertyIndex] = useState<number | null>(null)
+    const [hoveredFeatureIndex, setHoveredFeatureIndex] = useState<number | null>(null)
 
     const handleEditClick = () => {
         if (category) {
@@ -89,13 +96,13 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
     // Delete Property Mutation
     const deletePropertyMutation = useMutation({
         mutationFn: (id: number) => api.delete(`/admin/properties/${id}`),
-        onSuccess: (data: any) => {
+        onSuccess: (data: ApiResponse) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
             toast.success(data?.message)
             setIsDeletePropertyDialogOpen(false)
             setDeletingProperty(null)
         },
-        onError: (error: any) => {
+        onError: (error: { message?: string; response?: { data?: { message?: string; errors?: Record<string, string[]> } } }) => {
             const errorMessage = error?.response?.data?.message
             toast.error(errorMessage)
         },
@@ -104,13 +111,13 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
     // Delete Feature Mutation
     const deleteFeatureMutation = useMutation({
         mutationFn: (id: number) => api.delete(`/admin/features/${id}`),
-        onSuccess: (data: any) => {
+        onSuccess: (data: ApiResponse) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
             toast.success(data?.message)
             setIsDeleteFeatureDialogOpen(false)
             setDeletingFeature(null)
         },
-        onError: (error: any) => {
+        onError: (error: { message?: string; response?: { data?: { message?: string; errors?: Record<string, string[]> } } }) => {
             const errorMessage = error?.response?.data?.message
             toast.error(errorMessage)
         },
@@ -141,13 +148,13 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
     // Delete Child Category Mutation
     const deleteChildMutation = useMutation({
         mutationFn: (id: number) => api.delete(`/admin/categories/${id}`),
-        onSuccess: (data: any) => {
+        onSuccess: (data: ApiResponse) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
             toast.success(data?.message || "تم حذف الفئة الفرعية بنجاح")
             setIsDeleteChildDialogOpen(false)
             setDeletingChild(null)
         },
-        onError: (error: any) => {
+        onError: (error: { message?: string; response?: { data?: { message?: string; errors?: Record<string, string[]> } } }) => {
             const errorMessage = error?.response?.data?.message || "فشل حذف الفئة الفرعية"
             toast.error(errorMessage)
         },
@@ -204,6 +211,17 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
     const handleCreateCategory = () => {
         setIsCategoryFormOpen(true)
     }
+
+    // Sort properties and features by sort_order - Must be before any early return
+    const sortedProperties = React.useMemo(() => {
+        if (!category?.properties) return []
+        return [...category.properties].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    }, [category?.properties])
+
+    const sortedFeatures = React.useMemo(() => {
+        if (!category?.features) return []
+        return [...category.features].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    }, [category?.features])
 
     if (!category) {
         return (
@@ -341,7 +359,134 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
         }
         return colors[type] || "bg-slate-500/10 text-slate-700 dark:text-slate-400"
     }
-    console.log(category.properties)
+
+    // Property drag and drop handlers
+    const handlePropertyDragStart = (index: number) => {
+        setDraggedPropertyIndex(index)
+    }
+
+    const handlePropertyDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault()
+        setHoveredPropertyIndex(index)
+    }
+
+    const handlePropertyDragLeave = () => {
+        setHoveredPropertyIndex(null)
+    }
+
+    const handlePropertyDrop = async (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault()
+        if (draggedPropertyIndex === null || draggedPropertyIndex === dropIndex || !category) {
+            setDraggedPropertyIndex(null)
+            setHoveredPropertyIndex(null)
+            return
+        }
+
+        const properties = [...sortedProperties]
+        const [reorderedProperty] = properties.splice(draggedPropertyIndex, 1)
+        properties.splice(dropIndex, 0, reorderedProperty)
+
+        // Calculate new sort_order based on position
+        // If dropping at the end, use the last item's sort_order + 1
+        // Otherwise, use the target property's sort_order
+        let newSortOrder: number
+        if (dropIndex >= sortedProperties.length - 1) {
+            const lastProperty = sortedProperties[sortedProperties.length - 1]
+            newSortOrder = (lastProperty.sort_order || 0) + 1
+        } else {
+            const targetProperty = sortedProperties[dropIndex]
+            newSortOrder = targetProperty.sort_order || dropIndex
+        }
+
+        setDraggedPropertyIndex(null)
+        setHoveredPropertyIndex(null)
+
+        try {
+            // Update sort_order on server
+            await api.put(`/admin/properties/${reorderedProperty.id}`, {
+                sort_order: newSortOrder,
+            })
+
+            toast.success("تم تحديث ترتيب الخاصية بنجاح")
+            queryClient.invalidateQueries({ queryKey: ["categories"] })
+        } catch (error: unknown) {
+            console.error("Error updating property sort order:", error)
+            const errorMessage = (error as { message?: string; response?: { data?: { message?: string } } })?.response?.data?.message ||
+                (error as { message?: string })?.message ||
+                "فشل في تحديث الترتيب"
+            toast.error(errorMessage)
+            queryClient.invalidateQueries({ queryKey: ["categories"] })
+        }
+    }
+
+    const handlePropertyDragEnd = () => {
+        setDraggedPropertyIndex(null)
+        setHoveredPropertyIndex(null)
+    }
+
+    // Feature drag and drop handlers
+    const handleFeatureDragStart = (index: number) => {
+        setDraggedFeatureIndex(index)
+    }
+
+    const handleFeatureDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault()
+        setHoveredFeatureIndex(index)
+    }
+
+    const handleFeatureDragLeave = () => {
+        setHoveredFeatureIndex(null)
+    }
+
+    const handleFeatureDrop = async (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault()
+        if (draggedFeatureIndex === null || draggedFeatureIndex === dropIndex || !category) {
+            setDraggedFeatureIndex(null)
+            setHoveredFeatureIndex(null)
+            return
+        }
+
+        const features = [...sortedFeatures]
+        const [reorderedFeature] = features.splice(draggedFeatureIndex, 1)
+        features.splice(dropIndex, 0, reorderedFeature)
+
+        // Calculate new sort_order based on position
+        // If dropping at the end, use the last item's sort_order + 1
+        // Otherwise, use the target feature's sort_order
+        let newSortOrder: number
+        if (dropIndex >= sortedFeatures.length - 1) {
+            const lastFeature = sortedFeatures[sortedFeatures.length - 1]
+            newSortOrder = (lastFeature.sort_order || 0) + 1
+        } else {
+            const targetFeature = sortedFeatures[dropIndex]
+            newSortOrder = targetFeature.sort_order || dropIndex
+        }
+
+        setDraggedFeatureIndex(null)
+        setHoveredFeatureIndex(null)
+
+        try {
+            // Update sort_order on server
+            await api.put(`/admin/features/${reorderedFeature.id}`, {
+                sort_order: newSortOrder,
+            })
+
+            toast.success("تم تحديث ترتيب المميزة بنجاح")
+            queryClient.invalidateQueries({ queryKey: ["categories"] })
+        } catch (error: unknown) {
+            console.error("Error updating feature sort order:", error)
+            const errorMessage = (error as { message?: string; response?: { data?: { message?: string } } })?.response?.data?.message ||
+                (error as { message?: string })?.message ||
+                "فشل في تحديث الترتيب"
+            toast.error(errorMessage)
+            queryClient.invalidateQueries({ queryKey: ["categories"] })
+        }
+    }
+
+    const handleFeatureDragEnd = () => {
+        setDraggedFeatureIndex(null)
+        setHoveredFeatureIndex(null)
+    }
 
     return (
         <>
@@ -384,7 +529,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                 حذف التصنيف
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                                هل أنت متأكد من حذف التصنيف "{category.name.ar || category.name.en}"؟
+                                هل أنت متأكد من حذف التصنيف &quot;{category.name.ar || category.name.en}&quot;؟
                                 هذا الإجراء لا يمكن التراجع عنه.
                                 {category.listings_count > 0 && (
                                     <span className="block mt-2 text-destructive font-semibold">
@@ -433,7 +578,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                             حذف الخاصية
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            هل أنت متأكد من حذف الخاصية "{deletingProperty?.name.ar || deletingProperty?.name.en}"؟
+                            هل أنت متأكد من حذف الخاصية &quot;{deletingProperty?.name.ar || deletingProperty?.name.en}&quot;؟
                             هذا الإجراء لا يمكن التراجع عنه.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -473,7 +618,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                             حذف المميزة
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            هل أنت متأكد من حذف المميزة "{deletingFeature?.name.ar || deletingFeature?.name.en}"؟
+                            هل أنت متأكد من حذف المميزة &quot;{deletingFeature?.name.ar || deletingFeature?.name.en}&quot;؟
                             هذا الإجراء لا يمكن التراجع عنه.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -513,7 +658,7 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                             حذف الفئة الفرعية
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            هل أنت متأكد من حذف الفئة الفرعية "{deletingChild?.name.ar || deletingChild?.name.en}"؟
+                            هل أنت متأكد من حذف الفئة الفرعية &quot;{deletingChild?.name.ar || deletingChild?.name.en}&quot;؟
                             هذا الإجراء لا يمكن التراجع عنه.
                             {deletingChild && deletingChild.listings_count > 0 && (
                                 <span className="block mt-2 text-destructive font-semibold">
@@ -654,15 +799,24 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                     </Button>
 
                                     {/* Properties List */}
-                                    {category.properties && category.properties.length > 0 ? (
+                                    {sortedProperties && sortedProperties.length > 0 ? (
                                         <div className="space-y-2">
-                                            {category.properties.map((property: CategoryProperty) => (
+                                            {sortedProperties.map((property: CategoryProperty, index: number) => (
                                                 <div
                                                     key={property.id}
-                                                    className="border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors"
+                                                    draggable
+                                                    onDragStart={() => handlePropertyDragStart(index)}
+                                                    onDragOver={(e) => handlePropertyDragOver(e, index)}
+                                                    onDragLeave={handlePropertyDragLeave}
+                                                    onDrop={(e) => handlePropertyDrop(e, index)}
+                                                    onDragEnd={handlePropertyDragEnd}
+                                                    className={`border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-move ${draggedPropertyIndex === index ? "opacity-50" : ""
+                                                        } ${hoveredPropertyIndex === index ? "border-primary ring-2 ring-primary/20" : ""
+                                                        }`}
                                                 >
                                                     <div className="flex items-start justify-between mb-2">
                                                         <div className="flex items-center gap-2 flex-1">
+                                                            <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                                             {renderPropertyIcon(property.icon)}
                                                             <div className="flex-1">
                                                                 <h5 className="font-medium text-sm">
@@ -735,13 +889,22 @@ export function CategoriesDetailSidebar({ category, onEdit, onDelete }: Categori
                                     </Button>
 
                                     {/* Features List */}
-                                    {category.features && category.features.length > 0 ? (
+                                    {sortedFeatures && sortedFeatures.length > 0 ? (
                                         <div className="grid grid-cols-2 gap-2">
-                                            {category.features.map((feature: CategoryFeature) => (
+                                            {sortedFeatures.map((feature: CategoryFeature, index: number) => (
                                                 <div
                                                     key={feature.id}
-                                                    className="border rounded-lg flex flex-row gap-4 items-center justify-start p-2 bg-muted/30 hover:bg-muted/50 transition-colors text-center relative group"
+                                                    draggable
+                                                    onDragStart={() => handleFeatureDragStart(index)}
+                                                    onDragOver={(e) => handleFeatureDragOver(e, index)}
+                                                    onDragLeave={handleFeatureDragLeave}
+                                                    onDrop={(e) => handleFeatureDrop(e, index)}
+                                                    onDragEnd={handleFeatureDragEnd}
+                                                    className={`border rounded-lg flex flex-row gap-4 items-center justify-start p-2 bg-muted/30 hover:bg-muted/50 transition-colors text-center relative group cursor-move ${draggedFeatureIndex === index ? "opacity-50" : ""
+                                                        } ${hoveredFeatureIndex === index ? "border-primary ring-2 ring-primary/20" : ""
+                                                        }`}
                                                 >
+                                                    <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                                                     <div className="absolute top-1 left-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Button
                                                             variant="ghost"
