@@ -132,11 +132,9 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
     const createMutation = useMutation({
         mutationFn: (data: CreateUserFormValues) => api.post(`/admin/users`, data),
         onSuccess: (response: ApiResponse<User>) => {
-            console.info("📥 Create User Response:", response)
 
             // Check if response indicates an error
             if (response?.isError || (response?.status && response.status >= 400)) {
-                console.error("❌ Create User Failed:", response)
 
                 // Handle validation errors
                 if (response?.errors) {
@@ -149,14 +147,12 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
                 return
             }
 
-            console.info("✅ Create User Success")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
             form.reset()
             toast.success(response?.message || "تم إضافة المستخدم بنجاح")
         },
         onError: (error: ApiResponse<User>) => {
-            console.error("❌ Create User Error:", error)
             const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء إضافة المستخدم"
             toast.error(errorMessage)
         },
@@ -166,11 +162,9 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
     const updateMutation = useMutation({
         mutationFn: (data: UpdateUserFormValues) => api.put(`/admin/users/${user!.id}`, data),
         onSuccess: (response: ApiResponse<User>) => {
-            console.info("📥 Update User Response:", response)
 
             // Check if response indicates an error
             if (response?.isError || (response?.status && response.status >= 400)) {
-                console.error("❌ Update User Failed:", response)
 
                 // Handle validation errors
                 if (response?.errors) {
@@ -183,13 +177,11 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
                 return
             }
 
-            console.info("✅ Update User Success")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             onOpenChange(false)
             toast.success(response?.message || "تم تحديث المستخدم بنجاح")
         },
         onError: (error: ApiResponse<User>) => {
-            console.error("❌ Update User Error:", error)
             const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء تحديث المستخدم"
             toast.error(errorMessage)
         },
@@ -202,8 +194,6 @@ export function UserForm({ open, onOpenChange, urlEndpoint, user, mode }: UserFo
             ...values,
             phone: cleanPhone
         }
-
-        console.info("📤 Submitting User Data:", submitData)
 
         if (mode === "create") {
             createMutation.mutate(submitData as CreateUserFormValues)

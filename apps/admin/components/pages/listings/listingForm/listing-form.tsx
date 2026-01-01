@@ -212,7 +212,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             
             // Only reset if we haven't reset for this specific listing
             if (hasResetRef.current !== listingKey) {
-                console.info("📥 [LOAD LISTING] Setting up form with listing data:", listing)
 
                 // Ensure status, properties, title, description, and pay_every are normalized before reset
                 const normalizedValues = {
@@ -327,13 +326,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             const categoryIdToLoad = formCategoryId || ""
             const subCategoryIdToLoad = formSubCategoryId || ""
             const subSubCategoryIdToLoad = formSubSubCategoryId || ""
-
-            console.info("🔄 [LOAD HIERARCHY] Loading category hierarchy:", {
-                categoryIdToLoad,
-                subCategoryIdToLoad,
-                subSubCategoryIdToLoad,
-                currentSelected: selectedCategory?.id?.toString(),
-            })
 
             // Load category hierarchy only if not already loaded
             if (categoryIdToLoad && categoryIdToLoad !== selectedCategory?.id?.toString()) {

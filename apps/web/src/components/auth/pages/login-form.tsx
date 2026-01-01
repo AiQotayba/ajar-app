@@ -33,7 +33,6 @@ export function LoginForm() {
         const token = await getFCMToken()
         setDeviceToken(token)
       } catch (error) {
-        console.error('Error getting FCM token:', error)
       }
     }
 
@@ -43,12 +42,6 @@ export function LoginForm() {
   const { register, handleSubmit, control, formState: { errors }, } = useForm({
     defaultValues: { phone: '', password: '' }
   })
-  // التأكد من وجود FCM Token
-  let finalDeviceToken = deviceToken
-  if (!finalDeviceToken) {
-    console.log(getFCMToken())
-  }
-
 
   const onSubmit = async (data: any) => {
     setIsLoading(true)

@@ -78,7 +78,6 @@ export default function UsersPage() {
                 return
             }
 
-            console.info("✅ Delete User Success")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             toast.success(response?.message || "تم حذف المستخدم بنجاح")
         } catch (error: any) {

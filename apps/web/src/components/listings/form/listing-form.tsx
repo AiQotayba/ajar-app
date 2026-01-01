@@ -213,8 +213,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             const listingKey = `${listingId}-${listing.id}`
 
             if (hasResetRef.current !== listingKey) {
-                console.info("📥 [LOAD LISTING] Setting up form with listing data:", listing)
-
                 // Ensure status and properties are normalized before reset
                 const normalizedValues = {
                     ...defaultValues,
@@ -333,12 +331,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             const subCategoryIdToLoad = formSubCategoryId || ""
             const subSubCategoryIdToLoad = formSubSubCategoryId || ""
 
-            console.info("🔄 [LOAD HIERARCHY] Loading category hierarchy:", {
-                categoryIdToLoad,
-                subCategoryIdToLoad,
-                subSubCategoryIdToLoad,
-            })
-
             if (categoryIdToLoad && categoryIdToLoad !== selectedCategory?.id?.toString()) {
                 handleCategoryChange(categoryIdToLoad)
             }
@@ -386,7 +378,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                     setSubCategories([])
                 }
             } catch (error) {
-                console.error("❌ Error loading sub categories:", error)
                 setSubCategories([])
             }
         }
@@ -424,7 +415,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                     setSubSubCategories([])
                 }
             } catch (error) {
-                console.error("❌ Error loading sub-sub categories:", error)
                 setSubSubCategories([])
             }
         }
@@ -448,7 +438,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                     setAvailableProperties([])
                 }
             } catch (error) {
-                console.error("❌ Error loading properties:", error)
                 setAvailableProperties([])
             }
         }
@@ -464,7 +453,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                     setAvailableFeatures([])
                 }
             } catch (error) {
-                console.error("❌ Error loading features:", error)
                 setAvailableFeatures([])
             }
         }
@@ -591,7 +579,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         const images = formData.images || []
 
         if (images.length === 0) {
-            console.error("❌ [TRANSFORM] No images found in form data")
             throw new Error(t('validation.imagesRequired'))
         }
 
@@ -599,7 +586,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             .filter((image) => image !== null && image !== undefined)
             .map((image, index) => {
                 if (image instanceof File) {
-                    console.warn("⚠️ [TRANSFORM] Found File object in images")
                     throw new Error(t('actions.uploadImagesFirst'))
                 } else if (typeof image === 'string' && image.trim() !== '') {
                     return {
@@ -636,7 +622,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                         sort_order: imageObj.sort_order || index + 1
                     }
                 } else {
-                    console.warn(`⚠️ [TRANSFORM] Invalid image format at index ${index}:`, image)
                     return null
                 }
             })
@@ -645,7 +630,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             )
 
         if (transformedImages.length === 0) {
-            console.error("❌ [TRANSFORM] No valid images after transformation")
             throw new Error(t('validation.imagesRequired'))
         }
 
@@ -834,7 +818,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         setShowSuccess(false)
         router.push("/my-listings")
     }
-    console.log(methods.formState.errors);
 
     const renderStep = () => {
         switch (currentStep) {

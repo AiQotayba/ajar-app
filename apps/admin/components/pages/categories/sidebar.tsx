@@ -22,9 +22,6 @@ interface TreeNode extends Category {
 }
 
 function buildTree(categories: BaseCategory[]): TreeNode[] {
-	console.group("[buildTree] بناء شجرة الفئات")
-	console.info("عدد الفئات:", categories.length)
-	
 	// تحويل BaseCategory إلى TreeNode بشكل مباشر (بما أن BaseCategory يحتوي على children بالفعل)
 	const convertToTreeNode = (category: BaseCategory): TreeNode => {
 		return {
@@ -41,44 +38,16 @@ function buildTree(categories: BaseCategory[]): TreeNode[] {
 		.filter((c) => c.parent_id === null)
 		.map(convertToTreeNode)
 	
-	console.info("عدد الفئات الجذر:", roots.length)
-	roots.forEach((root) => {
-		console.debug(`✓ فئة جذر: ${root.name.ar} (ID: ${root.id}) - ${root.children.length} ابن`)
-		if (root.children.length > 0) {
-			root.children.forEach((child) => {
-				console.debug(`  ↳ ${child.name.ar} (ID: ${child.id}) - ${child.children.length} ابن`)
-			})
-		}
-	})
-	
-	console.table(roots.map(r => ({ id: r.id, name: r.name.ar, children: r.children.length })))
-	console.groupEnd()
-	
 	return roots
 }
 
 export function CategoriesSidebar({ categories, selectedCategory, onSelectCategory, onBackToRoot, onReorder }: CategoriesSidebarProps) {
-	console.group("[CategoriesSidebar] Render المكون الرئيسي")
-	console.info("عدد الفئات المدخلة:", categories.length)
-	console.info("الفئة المحددة:", selectedCategory ? `${selectedCategory.name.ar} (ID: ${selectedCategory.id})` : "لا يوجد")
-	
 	const tree = React.useMemo(() => {
-		console.debug("[useMemo] إعادة بناء الشجرة")
 		return buildTree(categories)
 	}, [categories])
 	
-	console.info("الشجرة الناتجة:", tree.length, "فئة جذر")
 	const [dragId, setDragId] = useState<number | null>(null)
 	
-	React.useEffect(() => {
-		console.debug("[CategoriesSidebar] تم render المكون")
-		return () => {
-			console.debug("[CategoriesSidebar] تم unmount المكون")
-		}
-	}, [])
-	
-	console.groupEnd()
-
 	const handleDragStart = (id: number) => setDragId(id)
 	const handleDragEnd = () => setDragId(null)
 
@@ -130,37 +99,14 @@ export function CategoriesSidebar({ categories, selectedCategory, onSelectCatego
 	}
 
 	function TreeNodeComponent({ node, level = 0 }: { node: TreeNode; level?: number }) {
-		console.debug(`[TreeNode] Render: ${node.name.ar} (ID: ${node.id}, Level: ${level})`)
-		
-		const [isOpen, setIsOpen] = useState(() => {
-			const initial = false
-			console.debug(`[TreeNode] useState initial: ${node.name.ar} (ID: ${node.id}) = ${initial}`)
-			return initial
-		})
+		const [isOpen, setIsOpen] = useState(() => false)
 		
 		const hasChildren = node.children.length > 0
 		const isSelected = selectedCategory?.id === node.id
 
 		// تتبع حالة الفتح/الطي للاختبار
 		React.useEffect(() => {
-			console.group(`[TreeNode Effect] ${node.name.ar} (ID: ${node.id})`)
-			console.info("التغييرات:", { 
-				isOpen, 
-				hasChildren, 
-				childrenCount: node.children.length,
-				isSelected,
-				level 
-			})
-			
-			if (hasChildren) {
-				if (isOpen) {
-					console.info(`✓ الفئة مفتوحة - سيتم عرض ${node.children.length} فئة فرعية`)
-				} else {
-					console.info("✗ الفئة مغلقة - لن يتم عرض الأبناء")
-				}
-			}
-			
-			console.groupEnd()
+			if (hasChildren) {} else {}
 		}, [isOpen, node.id, node.name.ar, hasChildren, node.children.length, isSelected, level])
 
 		if (!hasChildren) {
@@ -223,28 +169,13 @@ export function CategoriesSidebar({ categories, selectedCategory, onSelectCatego
 							<button
 								type="button"
 								onClick={(e) => {
-									console.group(`[Button Click] ${node.name.ar} (ID: ${node.id})`)
-									console.info("حدث النقر:", {
-										timestamp: new Date().toISOString(),
-										currentState: isOpen,
-										targetState: !isOpen,
-										hasChildren,
-										childrenCount: node.children.length
-									})
-									
 									e.preventDefault()
 									e.stopPropagation()
 									
 									const newState = !isOpen
-									console.info(`تغيير الحالة: ${isOpen ? "مفتوح" : "مغلق"} → ${newState ? "مفتوح" : "مغلق"}`)
-									
 									setIsOpen(newState)
-									
-									console.info("✓ تم استدعاء setIsOpen")
-									console.groupEnd()
 								}}
 								onMouseDown={(e) => {
-									// منع drag عند النقر على الزر
 									e.stopPropagation()
 								}}
 								className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors cursor-pointer"
@@ -259,17 +190,9 @@ export function CategoriesSidebar({ categories, selectedCategory, onSelectCatego
 						<span
 							onClick={() => {
 								const found = categories.find((c) => c.id === node.id)
-								console.group(`[Text Click] ${node.name.ar} (ID: ${node.id})`)
-								console.info("النقر على النص - عرض التفاصيل")
-								console.info("الفئة المُعثرة:", found ? `${found.name.ar} (ID: ${found.id})` : "غير موجودة!")
-								
 								if (found) {
 									onSelectCategory(found)
-									console.info("✓ تم استدعاء onSelectCategory")
-								} else {
-									console.error("✗ لم يتم العثور على الفئة في categories!")
-								}
-								console.groupEnd()
+								} else {}
 							}}
 							className={`font-medium text-right flex-1 cursor-pointer transition-colors ${
 								isSelected
@@ -288,20 +211,6 @@ export function CategoriesSidebar({ categories, selectedCategory, onSelectCatego
 
 					{/* محتوى الأبناء - يظهر عند التوسيع */}
 					{isOpen && (() => {
-						console.group(`[Render Children] ${node.name.ar} (ID: ${node.id})`)
-						console.info("عرض الأبناء:", {
-							childrenCount: node.children.length,
-							level: level + 1,
-							isOpen: true
-						})
-						
-						if (node.children.length === 0) {
-							console.warn("⚠ الفئة مفتوحة لكن لا يوجد أبناء!")
-						} else {
-							console.table(node.children.map(c => ({ id: c.id, name: c.name.ar, hasChildren: c.children.length > 0 })))
-						}
-						
-						console.groupEnd()
 						
 						return (
 							<div 
@@ -313,7 +222,6 @@ export function CategoriesSidebar({ categories, selectedCategory, onSelectCatego
 								{node.children.length > 0 ? (
 									<>
 										{node.children.map((child, idx) => {
-											console.debug(`[Map Child] ${idx + 1}/${node.children.length}: ${child.name.ar} (ID: ${child.id})`)
 											return (
 												<div key={child.id}>
 													<SiblingDropZone parentId={node.id} index={idx} />

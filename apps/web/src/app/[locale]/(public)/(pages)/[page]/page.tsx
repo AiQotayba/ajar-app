@@ -112,7 +112,6 @@ async function fetchPageContent(page: string, locale: string): Promise<SettingDa
     const settingKey = `${page}-${locale}`
 
     try {
-        console.log(`${baseUrl}/general/settings/${settingKey}`);
         const response = await fetch(
             `${baseUrl}/general/settings/${settingKey}`,
             {
@@ -154,7 +153,6 @@ export default async function DynamicPage({ params }: PageProps) {
 
     // Fetch page content from API
     const pageContent = await fetchPageContent(page, locale)
-    console.log(pageContent)
     // Error state - return 404 if content not found
     if (!pageContent || !pageContent.value) {
         notFound()

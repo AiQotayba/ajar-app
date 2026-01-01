@@ -176,52 +176,28 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
             formattedData.target_url = values.target_url
         }
 
-        console.info("📦 [DEBUG] Formatted data to send:", {
-            ...formattedData,
-            start_at: formattedData.start_at,
-            end_at: formattedData.end_at
-        })
-
         // Only include image_url if it's a new image or in create mode
         if (mode === "create") {
             // In create mode, always include image_url
             formattedData.image_url = values.image_url
-            console.info("📝 Creating slider with image:", values.image_url)
         } else {
             // In update mode, only send image_url if it's different from the original
             // and not empty (to avoid sending empty strings)
             if (values.image_url && values.image_url !== slider?.image_url) {
                 formattedData.image_url = values.image_url
-                console.info("🔄 Updating slider with new image:", values.image_url)
-            } else {
-                console.info("⏭️ Skipping image update - no changes detected")
             }
         }
 
-        if (mode === "create") {
-            console.info("🚀 [DEBUG] Creating slider with data:", formattedData)
-            createMutation.mutate(formattedData)
-        } else {
-            console.info("🔄 [DEBUG] Updating slider with data:", formattedData)
-            updateMutation.mutate(formattedData)
-        }
+        if (mode === "create") createMutation.mutate(formattedData)
+        else updateMutation.mutate(formattedData)
     }
 
     const isLoading = createMutation.isPending || updateMutation.isPending
 
     React.useEffect(() => {
-        console.info("🔄 [DEBUG] useEffect triggered:", { mode, hasSlider: !!slider })
-
         if (slider && mode === "update") {
             const startAtDate = new Date(slider.start_at)
             const endAtDate = new Date(slider.end_at)
-
-            console.info("📝 [DEBUG] Resetting form for update mode:", {
-                sliderStartAt: slider.start_at,
-                parsedStartAt: startAtDate.toISOString(),
-                sliderEndAt: slider.end_at,
-                parsedEndAt: endAtDate.toISOString()
-            })
 
             form.reset({
                 title_ar: slider.title.ar,
@@ -237,11 +213,6 @@ export function SliderForm({ open, onOpenChange, urlEndpoint, slider, mode }: Sl
         } else if (mode === "create") {
             const defaultStart = getDefaultStartDate()
             const defaultEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-            console.info("📝 [DEBUG] Resetting form for create mode:", {
-                defaultStart: defaultStart.toISOString(),
-                defaultEnd: defaultEnd.toISOString()
-            })
 
             // Reset form for create mode
             form.reset({

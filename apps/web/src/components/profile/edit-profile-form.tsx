@@ -115,8 +115,6 @@ export function EditProfileForm() {
       return response
     },
     onSuccess: (data: any) => {
-      console.log(data);
-
       refreshUser()
       toast.success(data.message)
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
@@ -246,7 +244,6 @@ export function EditProfileForm() {
       fileInput.click()
     }
   }
-  console.log(userData);
   return (
     <div className="min-h-screen max-w-2xl mx-auto bg-background" dir={direction}>
       <form onSubmit={handleSubmit} className="p-6 space-y-6" dir={direction}>

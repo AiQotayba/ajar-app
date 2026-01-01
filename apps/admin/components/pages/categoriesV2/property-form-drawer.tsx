@@ -148,7 +148,6 @@ export function PropertyFormDrawer({ open, onOpenChange, categoryId, property }:
 			})
 		},
 		onSuccess: (data: ApiResponse) => {
-			console.info("✅ Property created:", data)
 			if (!data.isError) {
 				queryClient.invalidateQueries({ queryKey: ["categories"] })
 				toast.success(data?.message || "تم إنشاء الخاصية بنجاح")

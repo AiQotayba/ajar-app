@@ -23,10 +23,6 @@ const urlEndpoint = "/admin/categories"
 export function CategoriesAccordion({ categories, onSelectCategory, selectedCategory, onReorder }: CategoriesAccordionProps) {
 	const [isDragEnabled, setIsDragEnabled] = React.useState(false)
 	
-	// Debug: Log isDragEnabled changes
-	React.useEffect(() => {
-		console.info("🔄 [isDragEnabled changed]", { isDragEnabled })
-	}, [isDragEnabled])
 	const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null)
 	const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null)
 	const [localCategories, setLocalCategories] = React.useState<Category[]>(categories)
@@ -97,7 +93,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 						element.scrollLeft = left
 					}
 				} catch (e) {
-					console.log(e)
+					console.error(e)
 					// تجاهل الأخطاء
 				}
 			})
@@ -131,7 +127,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 
 	// Handle drag and drop
 	const handleDragStart = (index: number, e?: React.DragEvent) => {
-		console.log(e)
 		if (!isDragEnabled) {
 			return
 		}
@@ -225,7 +220,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 	}
 
 	const handleDragEnd = (e?: React.DragEvent) => {
-		console.log(e)
 		setDraggedIndex(null)
 		setHoveredIndex(null)
 		setDraggedChildIndex(null)
@@ -234,55 +228,38 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 
 	// Child category drag and drop handlers - same pattern as parent
 	const handleChildDragStart = (parentId: number, index: number) => {
-		console.info("🔵 [Child Drag Start]", { parentId, index, isDragEnabled })
 		if (!isDragEnabled) {
-			console.warn("⚠️ [Child Drag Start] Drag is not enabled")
 			return
 		}
 		setDraggedChildIndex({ parentId, index })
-		console.info("✅ [Child Drag Start] State updated", { parentId, index })
 	}
 
 
 	const handleChildDrop = async (e: React.DragEvent, parentId: number, dropIndex: number) => {
-		console.info("🟢 [Child Drop]", { parentId, dropIndex, draggedChildIndex, isDragEnabled })
 		if (!isDragEnabled) {
-			console.warn("⚠️ [Child Drop] Drag is not enabled")
 			return
 		}
 		e.preventDefault()
 		e.stopPropagation()
 
 		if (draggedChildIndex === null) {
-			console.warn("⚠️ [Child Drop] No dragged item")
 			setDraggedChildIndex(null)
 			return
 		}
 
 		// Only allow reordering within the same parent
 		if (draggedChildIndex.parentId !== parentId) {
-			console.warn("⚠️ [Child Drop] Different parent", { 
-				draggedParentId: draggedChildIndex.parentId, 
-				dropParentId: parentId 
-			})
 			setDraggedChildIndex(null)
 			setHoveredChildIndex(null)
 			return
 		}
 
 		if (draggedChildIndex.index === dropIndex) {
-			console.warn("⚠️ [Child Drop] Same index", { index: dropIndex })
 			setDraggedChildIndex(null)
 			setHoveredChildIndex(null)
 			return
 		}
 		
-		console.info("✅ [Child Drop] Proceeding with reorder", {
-			fromIndex: draggedChildIndex.index,
-			toIndex: dropIndex,
-			parentId
-		})
-
 		// Find parent category and update its children
 		const updateCategoryChildren = (cats: Category[]): Category[] => {
 			return cats.map(cat => {
@@ -374,7 +351,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 	}
 
 	const handleChildDragEnd = (e?: React.DragEvent) => {
-		console.log(e)
 		setDraggedChildIndex(null)
 		setHoveredChildIndex(null)
 	}
@@ -411,13 +387,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 
 		// Debug: Check if isDragEnabled is accessible in CategoryItem
 		if (level > 0) {
-			console.info("🔎 [CategoryItem] isDragEnabled check", {
-				categoryName: category.name.ar || category.name.en,
-				level,
-				isDragEnabled: typeof isDragEnabled !== 'undefined' ? isDragEnabled : 'UNDEFINED',
-				providedParentId,
-				index
-			})
 		}
 
 		// للفئات الفرعية (level > 0)، نستخدم عرض بسيط بدون Accordion
@@ -428,22 +397,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 			
 			// Check if drag is enabled for this child
 			const canDrag = isDragEnabled && parentId > 0 && childIndex >= 0
-			
-			// Debug: Log drag state for children - check if isDragEnabled is accessible
-			console.info("🔍 [Child Render]", {
-				categoryName: category.name.ar || category.name.en,
-				categoryId: category.id,
-				level,
-				parentId,
-				childIndex,
-				providedParentId,
-				index,
-				isDragEnabled: typeof isDragEnabled !== 'undefined' ? isDragEnabled : 'UNDEFINED',
-				canDrag,
-				parentIdValid: parentId > 0,
-				childIndexValid: childIndex >= 0,
-				reason: !isDragEnabled ? 'isDragEnabled is false' : (parentId <= 0 ? 'parentId <= 0' : (childIndex < 0 ? 'childIndex < 0' : 'OK'))
-			})
 			
 			const isExpanded = expandedCategories.has(category.id)
 
@@ -510,7 +463,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 									element.scrollLeft = left
 								}
 							} catch (err) {
-								console.log(err)
+								console.error(err)
 								// تجاهل الأخطاء
 							}
 						})
@@ -531,15 +484,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 			const handleDragOver = (e: React.DragEvent) => {
 				// MUST call preventDefault ALWAYS to allow drop - this is critical for drag to work
 				// Without preventDefault, drop events won't fire
-				console.info("🟡 [Child onDragOver - BEFORE]", { 
-					isDragEnabled, 
-					level, 
-					parentId, 
-					childIndex, 
-					draggedChildIndex,
-					canDrag 
-				})
-				
 				// Always prevent default for child categories to allow drop
 				if (level > 0) {
 					e.preventDefault()
@@ -547,31 +491,26 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 					
 					if (isDragEnabled) {
 						e.dataTransfer.dropEffect = "move"
-						console.info("🟡 [Child onDragOver - AFTER]", { canDrag, parentId, childIndex, draggedChildIndex, isDragEnabled, hasDraggedItem: draggedChildIndex !== null })
 						// Update hover state if we have a dragged item and it's different from current
 						if (draggedChildIndex !== null && draggedChildIndex.parentId === parentId && draggedChildIndex.index !== childIndex) {
 							setHoveredChildIndex({ parentId, index: childIndex })
 						}
 					} else {
 						e.dataTransfer.dropEffect = "none"
-						console.warn("⚠️ [Child onDragOver] Drag not enabled", { isDragEnabled, level })
 					}
 				}
 			}
 
 			const handleDrop = (e: React.DragEvent) => {
-				console.info("🟢 [Child onDrop]", { canDrag, parentId, childIndex, draggedChildIndex, isDragEnabled })
 				if (canDrag) {
 					e.preventDefault()
 					e.stopPropagation()
 					handleChildDrop(e, parentId, childIndex)
 				} else {
-					console.warn("⚠️ [Child onDrop] canDrag is false", { canDrag, isDragEnabled, parentId, childIndex })
 				}
 			}
 
 			const handleDragEnter = (e: React.DragEvent) => {
-				console.info("🟠 [Child onDragEnter]", { canDrag, parentId, childIndex, draggedChildIndex, isDragEnabled })
 				if (isDragEnabled && level > 0) {
 					e.preventDefault()
 					e.stopPropagation()
@@ -620,7 +559,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 								<div
 									draggable={true}
 									onDragStart={(e) => {
-										console.info("🟣 [Child Element onDragStart]", { parentId, childIndex, categoryId: category.id })
 										e.stopPropagation()
 										e.dataTransfer.effectAllowed = "move"
 										e.dataTransfer.setData("text/plain", childIndex.toString())
@@ -628,7 +566,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 										handleChildDragStart(parentId, childIndex)
 									}}
 									onDragEnd={(e) => {
-										console.info("🔴 [Child Element onDragEnd]")
 										e.stopPropagation()
 										handleChildDragEnd(e)
 									}}
@@ -735,7 +672,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 					hoveredIndex === index && draggedIndex !== null && draggedIndex !== index && "border-primary border-2 bg-primary/10 scale-[1.02]"
 				)}
 				onDragStart={(e) => {
-					console.log(e)
 					// Allow drag to propagate to handle
 				}}
 				onDragOver={(e) => {
@@ -873,7 +809,6 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 					size="sm"
 					onClick={() => {
 						const newState = !isDragEnabled
-						console.info("🔄 [Toggle Drag]", { oldState: isDragEnabled, newState })
 						setIsDragEnabled(newState)
 					// Reset drag state when disabling
 					if (!newState) {

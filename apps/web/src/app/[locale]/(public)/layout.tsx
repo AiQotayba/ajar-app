@@ -1,4 +1,3 @@
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { QueryProvider } from "@/components/QueryProvider";
 import { ReduxProvider } from "@/components/ReduxProvider";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -57,7 +56,6 @@ export default async function LocaleLayout({
     const isRTL = locale === 'ar';
     const dir = isRTL ? 'rtl' : 'ltr';
     const lang = locale;
-console.log("public layout");
 
     return (
         <html lang={lang} dir={dir}>

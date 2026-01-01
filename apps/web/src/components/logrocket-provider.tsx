@@ -11,13 +11,11 @@ import '@/lib/logrocket';
  */
 export function LogRocketProvider() {
   useEffect(() => {
-    // LogRocket is initialized in the imported module
-    // This effect ensures it runs on mount
-    if (process.env.NEXT_PUBLIC_LOGROCKET_APP_ID) {
-      console.info('🔍 LogRocket is active');
-    }
+    if (process.env.NEXT_PUBLIC_LOGROCKET_APP_ID) {}
   }, []);
 
   return null;
 }
+
+
 

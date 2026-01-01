@@ -123,7 +123,6 @@ export function useAuth(): UseAuthReturn {
   const refreshUser = useCallback(async () => {
     try {
       const currentUser = await queryClient.getQueryData(['user-profile'])
-      console.log(currentUser)
       if (currentUser) {
         const user = currentUser as User
         

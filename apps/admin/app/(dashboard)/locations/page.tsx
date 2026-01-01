@@ -25,7 +25,6 @@ export default function LocationsPage() {
 
     const handleSelectGovernorate = (governorate: Governorate | null) => {
         setSelectedGovernorate(governorate)
-        console.info("✅ Selected governorate:", governorate?.name.ar || governorate?.name.en)
     }
 
     // Governorates Skeleton Component

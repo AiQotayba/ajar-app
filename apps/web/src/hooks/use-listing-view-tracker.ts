@@ -63,7 +63,6 @@ export function useListingViewTracker(
             const wasNew = trackView(listingId)
             if (wasNew) {
               hasTrackedRef.current = true
-              console.info(`✅ Tracked view for listing ${listingId} in list`)
             }
           }
         })

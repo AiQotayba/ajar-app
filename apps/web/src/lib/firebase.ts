@@ -84,7 +84,6 @@ export const getFCMToken = async (): Promise<string | null> => {
             try {
                 // Get registration token with proper error handling
                 const token = await getToken(messaging, { vapidKey: VAPID_KEY });
-                console.log(token);
                 if (token) {
                     return token;
                 } else {

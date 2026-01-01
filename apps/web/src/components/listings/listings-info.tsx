@@ -50,7 +50,6 @@ export function ListingsInfo({
   property,
 }: ListingsInfoProps) {
   const locale = useLocale()
-  console.log({ property })
   return (
     <div className="space-y-4">
       {/* Title & Description */}

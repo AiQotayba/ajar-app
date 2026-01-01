@@ -68,9 +68,6 @@ if (typeof window !== 'undefined') {
       mergeIframes: true,
     });
 
-    console.info('✅ LogRocket initialized');
-  } else {
-    console.warn('⚠️ LogRocket app ID not found. Set NEXT_PUBLIC_LOGROCKET_APP_ID in your environment variables.');
   }
 }
 
@@ -86,7 +83,6 @@ export function identifyUser(
 ) {
   if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_LOGROCKET_APP_ID) {
     LogRocket.identify(userId, userData);
-    console.info('✅ LogRocket user identified:', userId);
   }
 }
 
@@ -98,7 +94,6 @@ export function clearUser() {
   if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_LOGROCKET_APP_ID) {
     // LogRocket doesn't have clearUser, so we identify with empty data
     LogRocket.identify('', {});
-    console.info('✅ LogRocket user cleared');
   }
 }
 
@@ -119,4 +114,6 @@ export function captureException(
 }
 
 export default LogRocket;
+
+
 

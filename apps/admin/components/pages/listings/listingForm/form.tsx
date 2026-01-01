@@ -456,43 +456,21 @@ export function ListingForm({
     // Mutations
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
-            console.group("📤 [CREATE MUTATION] Creating listing")
-            console.info("📦 [FORM DATA] Raw form data:", data)
-            
             const transformedData = transformFormDataToAPI(data)
-            console.info("📦 [PAYLOAD] Transformed data being sent to API:", transformedData)
-            
             const result = await api.post(`/admin/listings`, transformedData)
-            console.info("✅ [RESPONSE] API response:", result)
-            console.groupEnd()
             return result
         },
         onSuccess: (data) => {
-            console.group("✅ [CREATE SUCCESS] Listing created successfully")
-            console.info("📊 [RESPONSE DATA] Created listing data:", data)
-            
-            // Auto-refresh: Invalidate and refetch queries
-            console.info("🔄 [AUTO-REFRESH] Invalidating queries for auto-update")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
             queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
             
-            // Refetch immediately for better UX
             queryClient.refetchQueries({ queryKey: ["table-data", urlEndpoint] })
-            
-            console.info("✨ [SUCCESS] All queries invalidated and refetched")
-            console.groupEnd()
             
             setShowSuccess(true)
             setIsLoading(false)
         },
         onError: (error: any) => {
-            console.group("❌ [CREATE ERROR] Error creating listing")
-            console.error("🔴 [ERROR DETAILS] Full error object:", error)
-            console.error("📝 [ERROR MESSAGE] Error message:", error?.message)
-            console.error("📋 [ERROR RESPONSE] API response:", error?.response?.data)
-            console.groupEnd()
-            
             const errorMessage = error?.response?.data?.message || error?.message || "فشل إنشاء الإعلان"
             toast.error(errorMessage)
             setIsLoading(false)
@@ -503,46 +481,22 @@ export function ListingForm({
         mutationFn: async (data: ListingFormData) => {
             if (!listing?.id) throw new Error("Listing ID is required")
             
-            console.group("📤 [UPDATE MUTATION] Updating listing")
-            console.info("🆔 [LISTING ID] Listing ID:", listing.id)
-            console.info("📦 [FORM DATA] Raw form data:", data)
-            
             const transformedData = transformFormDataToAPI(data)
-            console.info("📦 [PAYLOAD] Transformed data being sent to API:", transformedData)
-            
             const result = await api.put(`/admin/listings/${listing.id}`, transformedData)
-            console.info("✅ [RESPONSE] API response:", result)
-            console.groupEnd()
             return result
         },
         onSuccess: (data) => {
-            console.group("✅ [UPDATE SUCCESS] Listing updated successfully")
-            console.info("📊 [RESPONSE DATA] Updated listing data:", data)
-            
-            // Auto-refresh: Invalidate and refetch queries
-            console.info("🔄 [AUTO-REFRESH] Invalidating queries for auto-update")
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
             queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
             queryClient.invalidateQueries({ queryKey: ["listing", listing?.id] })
             
-            // Refetch immediately for better UX
             queryClient.refetchQueries({ queryKey: ["table-data", urlEndpoint] })
             queryClient.refetchQueries({ queryKey: ["listing", listing?.id] })
-            
-            console.info("✨ [SUCCESS] All queries invalidated and refetched")
-            console.groupEnd()
-            
             setShowSuccess(true)
             setIsLoading(false)
         },
         onError: (error: any) => {
-            console.group("❌ [UPDATE ERROR] Error updating listing")
-            console.error("🔴 [ERROR DETAILS] Full error object:", error)
-            console.error("📝 [ERROR MESSAGE] Error message:", error?.message)
-            console.error("📋 [ERROR RESPONSE] API response:", error?.response?.data)
-            console.groupEnd()
-            
             const errorMessage = error?.response?.data?.message || error?.message || "فشل تحديث الإعلان"
             toast.error(errorMessage)
             setIsLoading(false)
@@ -585,7 +539,6 @@ export function ListingForm({
                     setSubCategories([])
                 }
             } catch (error) {
-                console.error("❌ Error loading sub categories:", error)
                 setSubCategories([])
             }
             setSelectedSubCategory(null)
@@ -629,7 +582,6 @@ export function ListingForm({
                     setSubSubCategories([])
                 }
             } catch (error) {
-                console.error("❌ Error loading sub-sub categories:", error)
                 setSubSubCategories([])
             }
             setSelectedSubSubCategory(null)
@@ -655,7 +607,6 @@ export function ListingForm({
                     setAvailableProperties([])
                 }
             } catch (error) {
-                console.error("❌ Error loading properties:", error)
                 setAvailableProperties([])
             }
         }
@@ -670,8 +621,7 @@ export function ListingForm({
                 } else {
                     setAvailableFeatures([])
                 }
-            } catch (error) {
-                console.error("❌ Error loading features:", error)
+            } catch (error) {   
                 setAvailableFeatures([])
             }
         }
@@ -687,25 +637,10 @@ export function ListingForm({
 
     // Form submission
     const onSubmit = async (data: ListingFormData) => {
-        console.group("🚀 [FORM SUBMISSION] Starting form submission")
-        console.info("📋 [FORM DATA] Raw form data:", {
-            mode: isEditing ? "update" : "create",
-            listingId: listing?.id,
-            data: {
-                ...data,
-                images: data.images?.length || 0,
-                properties: data.properties?.length || 0,
-                features: data.features?.length || 0,
-            }
-        })
-
         const isValid = await methods.trigger()
-        console.info("✅ [VALIDATION] Form validation result:", isValid)
 
         if (!isValid) {
             const validationErrors = methods.formState.errors
-            console.error("❌ [VALIDATION ERRORS] Form validation failed:", validationErrors)
-
             if (validationErrors.images) {
                 toast.error(`خطأ في الصور: ${validationErrors.images.message || 'يجب رفع صورة واحدة على الأقل'}`)
             } else if (validationErrors.category_id) {
@@ -715,26 +650,21 @@ export function ListingForm({
             } else {
                 toast.error("يرجى تصحيح الأخطاء في النموذج")
             }
-            console.groupEnd()
             return
         }
 
         setIsLoading(true)
         try {
             if (isEditing && listing?.id) {
-                console.info("🔄 [UPDATE] Updating existing listing:", listing.id)
                 await updateMutation.mutateAsync(data)
             } else {
-                console.info("🆕 [CREATE] Creating new listing")
                 await createMutation.mutateAsync(data)
             }
         } catch (error: any) {
-            console.error("❌ [SUBMISSION ERROR] Form submission error:", error)
             const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء حفظ الإعلان"
             toast.error(errorMessage)
             setIsLoading(false)
         } finally {
-            console.groupEnd()
         }
     }
 

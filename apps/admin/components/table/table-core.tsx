@@ -111,7 +111,6 @@ function useTableData<T>(apiEndpoint: string) {
     const params = Object.fromEntries(searchParams.entries())
     return ["table-data", apiEndpoint, params]
   }, [apiEndpoint, searchParams])
-  console.log(queryKey);
 
   // Fetch function using API client
   const fetchData = React.useCallback(async () => {
@@ -501,13 +500,12 @@ export function TableCore<T extends Record<string, any>>({
 
     try {
       // Call API to update sort order on server using the target item's ID
-      console.info(`Updating sort order for item ${reorderedItem.id} to position of item ${targetItem.id}`)
 
       const response = await api.put(`${apiEndpoint}/${reorderedItem.id}/reorder?sort_field=sort_order&sort_order=asc`, {
         sort_order: targetItem.sort_order
       })
+      
 
-      console.info("Sort order update response:", response)
       toast.success("تم تحديث الترتيب بنجاح")
 
       // Refetch data to ensure consistency

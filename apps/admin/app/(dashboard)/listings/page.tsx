@@ -30,7 +30,6 @@ export default function ListingsPage() {
     mutationFn: ({ id, status, reason }: { id: number; status: Listing["status"]; reason?: string }) =>
       api.put(`/admin/listings/${id}/status`, { status, reason }),
     onSuccess: (data) => {
-      console.log(data);
       queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
       setActionDialog({ listing: null, action: null, open: false })
     },

@@ -23,7 +23,7 @@ interface SettingViewProps {
     setting: Setting | null
 }
 
-export function SettingView({ open, onOpenChange, urlEndpoint, setting }: SettingViewProps) {
+export function SettingView({ open, onOpenChange, setting }: SettingViewProps) {
     if (!setting) return null
 
     const TypeIcon = getTypeIcon(setting.type)
@@ -39,7 +39,6 @@ export function SettingView({ open, onOpenChange, urlEndpoint, setting }: Settin
         html: { label: "HTML", className: "bg-orange-500" },
     }
     const config = typeConfig[setting.type as keyof typeof typeConfig] || typeConfig.text
-    console.log(setting);
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">

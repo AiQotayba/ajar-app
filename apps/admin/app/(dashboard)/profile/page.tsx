@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import "react-phone-number-input/style.css"
 import "@/styles/phone-input.css"
+import { ApiResponse } from "@/lib/api-client"
 
 export default function MyAccountPage() {
   const queryClient = useQueryClient()
@@ -36,8 +37,7 @@ export default function MyAccountPage() {
     queryFn: () => api.get(`/user/me`),
   })
 
-  const profile = profileData?.data as AdminUser | undefined
-  console.log({ profile });
+  const profile = profileData?.data as AdminUser | undefined  
   // Profile form state
   const [profileForm, setProfileForm] = React.useState<UpdateProfileData>({
     first_name: "",
@@ -67,12 +67,10 @@ export default function MyAccountPage() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: (data: UpdateProfileData) => api.put(`/user/me`, data),
-    onSuccess: (response: any) => {
-      console.info("📥 Update Profile Response:", response)
+    onSuccess: (response: ApiResponse<AdminUser>) => {
 
       // Check if response indicates an error
       if (response?.isError || (response?.status && response.status >= 400)) {
-        console.error("❌ Update Profile Failed:", response)
 
         // Handle validation errors
         if (response?.errors) {
@@ -85,13 +83,11 @@ export default function MyAccountPage() {
         return
       }
 
-      console.info("✅ Update Profile Success")
       queryClient.invalidateQueries({ queryKey: ["profile"] })
       toast.success(response?.message || "تم تحديث الملف الشخصي بنجاح")
       setIsEditingProfile(false)
     },
-    onError: (error: any) => {
-      console.error("❌ Update Profile Error:", error)
+    onError: (error: ApiResponse<AdminUser>) => {
       const errorMessage = error?.response?.data?.message || error?.message || "فشل تحديث الملف الشخصي"
       toast.error(errorMessage)
     },
@@ -100,12 +96,10 @@ export default function MyAccountPage() {
   // Reset password mutation
   const resetPasswordMutation = useMutation({
     mutationFn: (data: ResetPasswordData) => api.put(`/user/me/reset-password`, data),
-    onSuccess: (response: any) => {
-      console.info("📥 Reset Password Response:", response)
+    onSuccess: (response: ApiResponse<AdminUser>) => {
 
       // Check if response indicates an error
       if (response?.isError || (response?.status && response.status >= 400)) {
-        console.error("❌ Reset Password Failed:", response)
 
         // Handle validation errors
         if (response?.errors) {
@@ -118,13 +112,11 @@ export default function MyAccountPage() {
         return
       }
 
-      console.info("✅ Reset Password Success")
       toast.success(response?.message || "تم تغيير كلمة المرور بنجاح")
       resetPasswordForm()
       setIsEditingPassword(false)
     },
-    onError: (error: any) => {
-      console.error("❌ Reset Password Error:", error)
+    onError: (error: ApiResponse<AdminUser>) => {
       const errorMessage = error?.response?.data?.message || error?.message || "فشل تغيير كلمة المرور"
       toast.error(errorMessage)
     },
@@ -146,7 +138,6 @@ export default function MyAccountPage() {
         : profileForm.phone
     }
 
-    console.info("📤 Updating Profile:", submitData)
     updateProfileMutation.mutate(submitData)
   }
 
@@ -172,7 +163,6 @@ export default function MyAccountPage() {
       return
     }
 
-    console.info("📤 Resetting Password")
     resetPasswordMutation.mutate(passwordForm)
   }
 
@@ -586,7 +576,7 @@ export default function MyAccountPage() {
                 <div className="p-8 text-center bg-muted/30 rounded-lg border border-border/50 transition-all duration-300 hover:bg-muted/50">
                   <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground">
-                    انقر على زر "تغيير" لتحديث كلمة المرور
+                    انقر على زر &quot;تغيير&quot; لتحديث كلمة المرور
                   </p>
                 </div>
               )}

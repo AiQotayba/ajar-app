@@ -52,20 +52,17 @@ export function useListingViews(options: UseListingViewsOptions = {}) {
    */
   const submitViews = useCallback(async () => {
     if (isSubmittingRef.current) {
-      console.info('⏸️ Already submitting, skipping...')
       return
     }
 
     const listings = getViewedListingsForAPI()
     if (listings.length === 0) {
-      console.info('⏸️ No listings to submit')
       return
     }
 
     // Filter out listings that were already submitted in this hook instance
     const newListings = listings.filter(item => !submittedListingIdsRef.current.has(item.id))
     if (newListings.length === 0) {
-      console.info('⏸️ All listings already submitted in this session')
       return
     }
 
@@ -102,7 +99,6 @@ export function useListingViews(options: UseListingViewsOptions = {}) {
     isSubmittingRef.current = true
 
     try {
-      console.info('📤 Sending views to API:', validatedListings.map(l => ({ id: l.id, viewed_at: l.viewed_at })))
       const response = await api.post('/user/listings/view', { listings: validatedListings })
       
       if (!response.isError) {
@@ -111,12 +107,8 @@ export function useListingViews(options: UseListingViewsOptions = {}) {
         markListingsAsSent(listingIds)
         // Track submitted IDs in this hook instance to prevent duplicate sends
         listingIds.forEach(id => submittedListingIdsRef.current.add(id))
-        console.info('✅ Views submitted successfully', validatedListings.length)
-      } else {
-        console.error('❌ Error submitting views:', response.message)
-      }
+      } else {}
     } catch (error) {
-      console.error('❌ Error submitting views:', error)
     } finally {
       isSubmittingRef.current = false
     }
