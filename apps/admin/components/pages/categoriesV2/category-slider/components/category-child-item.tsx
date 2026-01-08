@@ -74,7 +74,7 @@ export const CategoryChildItem = React.memo<CategoryChildItemProps>(
 						isSelected && "bg-primary/5"
 					)}
 				>
-					<div className="flex items-center gap-2 flex-1 text-right">
+					<div className="flex items-center gap-2 flex-1 text-right w-full">
 						{isDragEnabled ? (
 							<div
 								draggable={true}
@@ -113,7 +113,7 @@ export const CategoryChildItem = React.memo<CategoryChildItemProps>(
 						</Button>
 						<span
 							className={cn(
-								"font-medium cursor-pointer hover:text-primary transition-colors flex-1 text-right",
+								"font-medium cursor-pointer hover:text-primary transition-colors flex-1 text-right w-full",
 								isSelected && "text-primary font-semibold"
 							)}
 							onClick={(e) => {

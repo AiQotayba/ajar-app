@@ -138,11 +138,11 @@ export const CategoryItem = React.memo<CategoryItemProps>(
 								<GripVertical className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors pointer-events-none" />
 							</div>
 						) : null}
-						<div className="flex items-center gap-2 flex-1 text-right">
+						<div className="flex items-center gap-2 flex-1 text-right w-full">
 							<CategoryIcon icon={category.icon} hasChildren={hasChildren} />
 							<span
 								className={cn(
-									"font-medium cursor-pointer hover:text-primary transition-colors",
+									"font-medium cursor-pointer hover:text-primary transition-colors w-full",
 									isSelected && "text-primary font-semibold"
 								)}
 								onClick={(e) => {

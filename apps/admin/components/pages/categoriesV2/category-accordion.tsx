@@ -554,7 +554,7 @@ export function CategoriesAccordion({ categories, onSelectCategory, selectedCate
 						onDrop={handleDrop}
 						onDragEnter={handleDragEnter}
 					>
-						<div className="flex items-center gap-2 flex-1 text-right">
+						<div className="flex items-center gap-2 flex-1 text-right w-full">
 							{canDrag ? (
 								<div
 									draggable={true}

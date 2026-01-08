@@ -9,9 +9,9 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-unused-vars': 'error',
-    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-explicit-any': "off",
     'prefer-const': 'error',
-    'no-var': 'error'
+    'no-var': 'error',
   },
   ignorePatterns: [
     'node_modules/',

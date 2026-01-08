@@ -1,26 +1,7 @@
 # new report
-
-**web**
- ء
-- إضافة رابط صورة خارجي قصدي تضمين
-- الرفع على السيرفر
-
-**admin**
-
-- تحديث صور التصنيف
-  - عم بيصير في مشكلة بتحديث الصورة عم ينرسل الصورة لحتى توصل الى السيرفر "https://ajar-backend.mystore.social/storage/https://ajar-backend.mystore.social/storage/https://ajar-backend.mystore.social/storage/listings/69298938ef630.webp" وهيك تعتبر مشكلة
-- الضغط على التصنيف لاضهاره وتعديله
-- الرفع على السيرفر
-
-# next
-
-- dashboard integration api من احمد
-- dashboard listings
-  - form
-    - sorting images
-    - update listing images
-# reposrt
-# POST /api/v1/admin/properties
+ 
+# POST /api/v1/admin/properties 
+ في هاي المشكلة بس ماني عارف حلها مع انه هاي القيم موجودة في قاعدة البيانات
 {
   "name": { "ar": "الاسم بالعربية", "en": "الاسم بالانجليزية" }, 
   "description": { "ar": "الوصف بالعربية", "en": "الوصف بالانجليزية" },
@@ -42,6 +23,8 @@
     ]
   }
 }
-
-# شغلة الورتة من الأب ما عبتصير categories  
-# إضافة رابط خارجي قصدي تضمين
+ 
+# إضافة رابط خارجي قصدي تضمين ماني عارف كيف اعملها
+# بدي api تبع الصفحة الرئيسية للوحة التحكم
+# ترتيب sort_order فيه مشاكل بالتصنيفات
+- يمكن المشكة انه sort_order غير صحيح  

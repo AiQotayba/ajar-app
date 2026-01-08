@@ -10,6 +10,7 @@ import { api, ApiResponse } from "@/lib/api-client"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { CategoryApiService } from "./services/category-api.service"
 
 interface CategoriesSliderProps {
     categories: Category[]
@@ -152,39 +153,42 @@ export function CategoriesSlider({ categories, onSelectCategory, selectedCategor
         const [reorderedItem] = items.splice(draggedIndex, 1)
         items.splice(dropIndex, 0, reorderedItem)
 
+        // Get the target item (the one we dropped on) - BEFORE reordering
         const targetItem = localCategories[dropIndex]
 
+        // Update local state immediately for better UX
         setLocalCategories(items)
         setDraggedIndex(null)
         setHoveredIndex(null)
 
         try {
+            // Call API to update sort order on server
+            // API expects: PUT /{urlEndpoint}/{id}/reorder with body: { sort_order: value }
+            // We use targetItem.sort_order to place the reordered item at the target position
             const response = await api.put(`${urlEndpoint}/${reorderedItem.id}/reorder`, {
-                sort_order: targetItem.id,
+                sort_order: targetItem.sort_order,
             })
 
             if (response.isError) {
-                toast.error(response.message || "فشل في تحديث الترتيب")
-                setLocalCategories(categories)
-                if (onReorder) {
-                    await onReorder()
-                } else {
-                    await queryClient.refetchQueries({ queryKey: ["categories"] })
-                }
-                return
+                throw new Error(response.message || "فشل في تحديث الترتيب")
             }
 
             toast.success("تم تحديث ترتيب التصنيف بنجاح")
 
+            // Refetch data to ensure consistency with server
             if (onReorder) {
                 await onReorder()
             } else {
                 await queryClient.refetchQueries({ queryKey: ["categories"] })
             }
-        } catch (error) {
-            const errorMessage = (error as ApiResponse<Category>)?.message || "فشل في تحديث الترتيب"
+        } catch (error: any) {
+            console.error("Error updating sort order:", error)
+
+            // Show more specific error message
+            const errorMessage = error?.response?.data?.message || error?.message || "فشل في تحديث الترتيب"
             toast.error(errorMessage)
-            setLocalCategories(categories)
+
+            // Revert local changes on error by refetching
             if (onReorder) {
                 await onReorder()
             } else {
@@ -254,38 +258,57 @@ export function CategoriesSlider({ categories, onSelectCategory, selectedCategor
             return
         }
 
+        // Get the target item (the one we dropped on) - BEFORE reordering
         const targetItem = parentCategory.children[dropIndex]
         const reorderedItem = parentCategory.children[draggedChildIndex.index]
 
         const updatedCategories = updateCategoryChildren(localCategories)
+        // Update local state immediately for better UX
         setLocalCategories(updatedCategories)
         setDraggedChildIndex(null)
         setHoveredChildIndex(null)
 
         try {
-            const response = await api.put(`${urlEndpoint}/${reorderedItem.id}/reorder`, {
-                sort_order: targetItem.id,
-            })
+            // Use CategoryApiService with index-based calculation
+            const success = await CategoryApiService.reorderChildCategory(
+                reorderedItem,
+                targetItem,
+                dropIndex, // Pass target index for calculation
+                parentCategory,
+                async () => {
+                    // Refetch data to ensure consistency with server
+                    if (onReorder) {
+                        await onReorder()
+                    } else {
+                        await queryClient.refetchQueries({ queryKey: ["categories"] })
+                    }
+                },
+                async () => {
+                    // Revert local changes on error by refetching
+                    if (onReorder) {
+                        await onReorder()
+                    } else {
+                        await queryClient.refetchQueries({ queryKey: ["categories"] })
+                    }
+                }
+            )
 
-            if (response.isError) {
-                toast.error(response.message || "فشل في تحديث ترتيب الفئة الفرعية")
-                setLocalCategories(categories)
+            if (!success) {
+                // Error already handled in service
                 if (onReorder) {
                     await onReorder()
                 } else {
                     await queryClient.refetchQueries({ queryKey: ["categories"] })
                 }
-                return
             }
+        } catch (error: any) {
+            console.error("Error updating child category sort order:", error)
 
-            toast.success("تم تحديث ترتيب الفئة الفرعية بنجاح")
-
-            if (onReorder) await onReorder()
-            else await queryClient.refetchQueries({ queryKey: ["categories"] })
-        } catch (error: unknown) {
-            const errorMessage = (error as ApiResponse<Category>)?.message || "فشل في تحديث ترتيب الفئة الفرعية"
+            // Show more specific error message
+            const errorMessage = error?.response?.data?.message || error?.message || "فشل في تحديث ترتيب الفئة الفرعية"
             toast.error(errorMessage)
-            setLocalCategories(categories)
+
+            // Revert local changes on error by refetching
             if (onReorder) {
                 await onReorder()
             } else {
@@ -435,7 +458,7 @@ export function CategoriesSlider({ categories, onSelectCategory, selectedCategor
                             isSelected && "bg-primary/5"
                         )}
                     >
-                        <div className="flex items-center gap-2 flex-1 text-right">
+                        <div className="flex items-center gap-2 flex-1 text-right w-full">
                             {canDrag ? (
                                 <div
                                     draggable={true}
@@ -483,7 +506,7 @@ export function CategoriesSlider({ categories, onSelectCategory, selectedCategor
                             </Button>
                             <span
                                 className={cn(
-                                    "font-medium cursor-pointer hover:text-primary transition-colors flex-1 text-right",
+                                    "font-medium cursor-pointer hover:text-primary transition-colors flex-1 text-right w-full",
                                     isSelected && "text-primary font-semibold"
                                 )}
                                 onClick={(e) => {
@@ -601,11 +624,11 @@ export function CategoriesSlider({ categories, onSelectCategory, selectedCategor
                                 <GripVertical className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors pointer-events-none" />
                             </div>
                         ) : null}
-                        <div className="flex items-center gap-2 flex-1 text-right">
+                        <div className="flex items-center gap-2 flex-1 text-right w-full">
                             {renderCategoryIcon(category.icon, hasChildren)}
                             <span
                                 className={cn(
-                                    "font-medium cursor-pointer hover:text-primary transition-colors",
+                                    "font-medium cursor-pointer hover:text-primary transition-colors w-full",
                                     isSelected && "text-primary font-semibold"
                                 )}
                                 onClick={(e) => {

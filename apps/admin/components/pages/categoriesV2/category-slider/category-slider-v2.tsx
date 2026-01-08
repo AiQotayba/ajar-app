@@ -101,10 +101,11 @@ export function CategoriesSliderV2({ categories, onSelectCategory, selectedCateg
 			actions.setDraggedIndex(null)
 			actions.setHoveredIndex(null)
 
-			// API call
+			// API call - pass categories array for validation
 			const success = await CategoryApiService.reorderCategory(
 				reorderedItem,
 				targetItem,
+				state.categories, // Pass categories array for validation
 				async () => {
 					if (onReorder) {
 						await onReorder()
@@ -247,10 +248,12 @@ export function CategoriesSliderV2({ categories, onSelectCategory, selectedCateg
 			actions.setDraggedChildIndex(null)
 			actions.setHoveredChildIndex(null)
 
-			// API call
+			// API call - pass dropIndex and parentCategory for index-based calculation
 			const success = await CategoryApiService.reorderChildCategory(
 				reorderedItem,
 				targetItem,
+				dropIndex, // Pass target index for calculation
+				parentCategory, // Pass parentCategory for validation
 				async () => {
 					if (onReorder) {
 						await onReorder()

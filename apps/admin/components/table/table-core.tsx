@@ -491,7 +491,7 @@ export function TableCore<T extends Record<string, any>>({
     const [reorderedItem] = items.splice(draggedIndex, 1)
     items.splice(dropIndex, 0, reorderedItem)
 
-    // Get the target item (the one we dropped on)
+    // Get the target item (the one we dropped on) - BEFORE reordering
     const targetItem = data[dropIndex]
 
     // Update local state immediately for better UX
@@ -499,16 +499,20 @@ export function TableCore<T extends Record<string, any>>({
     setDraggedIndex(null)
 
     try {
-      // Call API to update sort order on server using the target item's ID
-
-      const response = await api.put(`${apiEndpoint}/${reorderedItem.id}/reorder?sort_field=sort_order&sort_order=asc`, {
-        sort_order: targetItem.sort_order
+      // Call API to update sort order on server
+      // API expects: PUT /{apiEndpoint}/{id}/reorder with body: { sort_order: value }
+      // We use targetItem.sort_order to place the reordered item at the target position
+      const response = await api.put(`${apiEndpoint}/${reorderedItem.id}/reorder`, {
+        sort_order: targetItem.sort_order,
       })
-      
+
+      if (response.isError) {
+        throw new Error(response.message || "فشل في تحديث الترتيب")
+      }
 
       toast.success("تم تحديث الترتيب بنجاح")
 
-      // Refetch data to ensure consistency
+      // Refetch data to ensure consistency with server
       refetch()
     } catch (error: any) {
       console.error("Error updating sort order:", error)
@@ -517,7 +521,7 @@ export function TableCore<T extends Record<string, any>>({
       const errorMessage = error?.response?.data?.message || error?.message || "فشل في تحديث الترتيب"
       toast.error(errorMessage)
 
-      // Revert local changes on error
+      // Revert local changes on error by refetching
       refetch()
     }
   }

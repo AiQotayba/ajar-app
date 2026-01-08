@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { useLocale, useTranslations } from "next-intl"
 import type { ListingFormData, Category, Property, Feature } from "../types"
+import Image from "next/image"
 
 interface BasicInfoStepProps {
   onNext: () => void
@@ -117,7 +118,12 @@ export function BasicInfoStep({
               <SelectContent>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id.toString()}>
-                    {category.name[locale]}
+                    <div className="flex flex-row gap-2 items-center justify-start">
+                      {(category as any)?.icon && (
+                        <Image src={(category as any)?.icon} alt={category.name[locale]} width={20} height={20} />
+                      )} 
+                      <span className="text-sm">{category.name[locale]}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -153,7 +159,12 @@ export function BasicInfoStep({
                 <SelectContent>
                   {subCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.name[locale]}
+                      <div className="flex flex-row gap-2 items-center justify-start">
+                        {(category as any)?.icon && (
+                          <Image src={(category as any)?.icon} alt={category.name[locale]} width={20} height={20} />
+                        )} 
+                        <span className="text-sm">{category.name[locale]}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -379,6 +390,9 @@ export function BasicInfoStep({
                   }}
                 />
                 <Label htmlFor={`feature_${feature.id}`} className="cursor-pointer text-sm flex-1">
+                    {(feature as any)?.icon && (
+                      <Image src={(feature as any)?.icon} alt={feature.name[locale]} width={20} height={20} />
+                    )}  
                   {feature.name[locale]}
                   {feature.description && (
                     <span className="block text-xs text-gray-500 mt-1">

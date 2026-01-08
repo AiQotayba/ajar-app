@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { ListingFormData, Category, Property, Feature } from "../types"
+import Image from "next/image"
 
 interface BasicInfoStepProps {
   onNext: () => void
@@ -146,7 +147,12 @@ export function BasicInfoStep({
               <SelectContent>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id.toString()}>
-                    {category.name.ar}
+                    {(category as any)?.icon && (
+                      <div className="flex flex-row gap-2 items-center justify-start">
+                        <Image src={(category as any)?.icon} alt={category.name.ar} width={20} height={20} />
+                      </div>
+                    )}
+                    <span className="text-sm">{category.name.ar}</span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -182,7 +188,12 @@ export function BasicInfoStep({
                 <SelectContent>
                   {subCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.name.ar}
+                      {(category as any)?.icon && (
+                        <div className="flex flex-row gap-2 items-center justify-start">
+                          <Image src={(category as any)?.icon} alt={category.name.ar} width={20} height={20} />
+                        </div>
+                      )}
+                      <span className="text-sm">{category.name.ar}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -216,7 +227,12 @@ export function BasicInfoStep({
                 <SelectContent>
                   {subSubCategories.map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
-                      {category.name.ar}
+                      {(category as any)?.icon && (
+                        <div className="flex flex-row gap-2 items-center justify-start">
+                          <Image src={(category as any)?.icon} alt={category.name.ar} width={20} height={20} />
+                        </div>
+                      )}
+                      <span className="text-sm">{category.name.ar}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -354,13 +370,24 @@ export function BasicInfoStep({
                       }}
                     >
                       <SelectTrigger className="text-right">
+                        <div className="flex flex-row gap-2 items-center justify-start">
+                          {(property as any)?.icon && (
+                            <Image src={(property as any)?.icon} alt={property.name.ar} width={20} height={20} />
+                          )}
+                          <p>{property.name.ar}</p>
+                        </div>
                         <SelectValue placeholder={`اختر ${property.name.ar}`} />
                       </SelectTrigger>
                       <SelectContent>
                         {property.options && property.options.length > 0 ? (
                           property.options.map((option, index) => (
                             <SelectItem key={index} value={option.ar}>
-                              {option.ar}
+                              {(option as any)?.icon && (
+                                <div className="flex flex-row gap-2 items-center justify-start">
+                                  <Image src={(option as any)?.icon} alt={option.ar} width={20} height={20} />
+                                </div>
+                              )}
+                              <p>{option.ar}</p>
                             </SelectItem>
                           ))
                         ) : (
@@ -408,6 +435,11 @@ export function BasicInfoStep({
                   }}
                 />
                 <Label htmlFor={`feature_${feature.id}`} className="cursor-pointer text-sm flex-1">
+                  <div className="flex flex-row gap-2 items-center justify-start">
+                    {(feature as any)?.icon && (
+                      <Image src={(feature as any)?.icon} alt={feature.name.ar} width={20} height={20} />
+                    )} 
+                  </div>
                   {feature.name.ar}
                   {feature.description && (
                     <span className="block text-xs text-gray-500 mt-1">
