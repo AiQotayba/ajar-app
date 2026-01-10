@@ -143,36 +143,6 @@ export function ListingsGallery({
     }
   }
 
-  const handleImageHover = (index: number, event: React.MouseEvent) => {
-    setHoveredImageIndex(index)
-    setIsAutoPlaying(false) // Stop auto-play when hovering
-
-    // Calculate precise mouse position
-    const position = calculateMousePosition(event)
-    setMousePosition(position)
-
-    // Change the main view image
-    if (carouselApi) {
-      carouselApi.scrollTo(index)
-    }
-  }
-
-  const handleImageMouseMove = (event: React.MouseEvent) => {
-    if (hoveredImageIndex === null) return
-
-    // Throttle mouse move events for better performance
-    requestAnimationFrame(() => {
-      const position = calculateMousePosition(event)
-      setMousePosition(position)
-    })
-  }
-
-  const handleImageLeave = () => {
-    setHoveredImageIndex(null)
-    setMousePosition(null)
-    setIsAutoPlaying(true) // Resume auto-play when leaving
-  }
-
   const handleOpenAllImagesDialog = () => {
     setShowAllImagesDialog(true)
   }
@@ -183,7 +153,7 @@ export function ListingsGallery({
     // Open fullscreen viewer after selecting from dialog
     setShowFullscreen(true)
   }
-  
+
   const handleShare = async () => {
     const listingUrl = window.location.href
     const mainImage = coverImage || (sortedImages[0]?.full_url || sortedImages[0]?.url)
@@ -447,7 +417,7 @@ export function ListingsGallery({
                 containScroll: "trimSnaps",
                 skipSnaps: true,
               }}
-              className="flex-1"
+              className="flex-1 min-w-0"
             >
               <CarouselContent className="gap-2 rtl:justify-end">
                 {sortedImages.slice(0, 4).map((image, index) => (
@@ -455,7 +425,7 @@ export function ListingsGallery({
                     <button
                       onClick={() => scrollToIndex(index)}
                       className={cn(
-                        "relative flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer",
+                        "relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer",
                         currentIndex === index
                           ? "border-primary ring-2 ring-primary/20"
                           : "border-transparent opacity-60 hover:opacity-100",
@@ -487,9 +457,9 @@ export function ListingsGallery({
               </CarouselContent>
             </Carousel>
             {sortedImages.length > 4 && (
-              <button 
+              <button
                 onClick={handleOpenAllImagesDialog}
-                className="flex-shrink-0 w-20 h-20 rounded-2xl bg-foreground/90 text-background flex items-center justify-center text-sm font-bold hover:bg-foreground transition-colors cursor-pointer"
+                className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-foreground/90 text-background flex items-center justify-center text-sm font-bold hover:bg-foreground transition-colors cursor-pointer"
               >
                 +{sortedImages.length - 4} {locale === 'ar' ? 'صورة' : 'images'}
               </button>

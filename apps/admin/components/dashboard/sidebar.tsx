@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils"
 import { authApi } from "@/lib/auth"
 import { toast } from "sonner"
-import { Logo } from "@/components/logo"
+import { Logo, LogoWhite } from "@/components/logo"
 
 interface MenuItem {
   icon: React.ComponentType<{ className?: string }>
@@ -270,7 +270,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
       >
         {/* Background Logo */}
         <div className="absolute top-0 right-0 opacity-50 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none">
-          <Logo width={300} height={300} className="text-white hover:rotate-45 translate-x-1/4 -translate-y-1/4" />
+          <Logo width={300} height={300} className="opacity-20 hover:rotate-45 translate-x-1/4 -translate-y-1/4" />
         </div>
 
         <div className="relative z-10 flex h-full flex-col md:p-2">
@@ -280,7 +280,7 @@ export function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             isOpen ? "flex items-center justify-between gap-2 p-2" : "flex flex-col items-center gap-3 p-2"
           )}>
             <Link href="/dashboard" className="flex items-center flex-1 justify-center gap-3 transition-transform duration-200 hover:scale-105">
-              <Logo width={100} height={100} className="text-white *:fill-white" />
+              <LogoWhite width={100} height={100} />
               {/* <span className="text-xl font-bold text-foreground">أجار</span> */}
             </Link>
           </div>

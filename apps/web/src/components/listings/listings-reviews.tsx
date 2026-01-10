@@ -200,7 +200,10 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
               </div>
             ) : (
               <div className="text-center py-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center">
+                <div
+                  onClick={() => setShowAddReview(true)}
+                  className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center cursor-pointer hover:bg-muted/50 hover:scale-110 active:scale-95 transition-all duration-300"
+                >
                   <Star className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">

@@ -170,7 +170,7 @@ export default async function DynamicPage({ params }: PageProps) {
     // The value field contains HTML with escaped quotes that need to be unescaped
     return (
         <div
-            className="min-h-screen/50 page-content px-4 md:px-8 lg:px-12 mx-auto max-w-4xl py-8 bg-white shadow-md my-4 rounded-lg"
+            className="min-h-screen/50 page-content px-4 md:px-8 lg:px-12 mx-auto max-w-4xl py-8 my-4 rounded-lg"
             dir={locale === 'ar' ? 'rtl' : 'ltr'}
             dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
         />
