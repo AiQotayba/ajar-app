@@ -72,11 +72,10 @@ export const CategoryItem = React.memo<CategoryItemProps>(
 
 		const hasChildren = category.children && category.children.length > 0
 
-		// Sort children by sort_order
+		// Use children order as provided by state
 		const sortedChildren = React.useMemo(() => {
 			if (!category.children || category.children.length === 0) return []
-			const sorted = [...category.children].sort((a, b) => a.sort_order - b.sort_order)
-			return sorted
+			return category.children
 		}, [category.children])
 
 		return (

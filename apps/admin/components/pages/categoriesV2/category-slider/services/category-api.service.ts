@@ -35,13 +35,13 @@ export class CategoryApiService {
 
 			// Validation: Ensure targetItem has valid sort_order
 			let sortOrder: number
-			
+
 			if (typeof targetItem.sort_order === "number" && !isNaN(targetItem.sort_order)) {
 				sortOrder = Math.round(targetItem.sort_order) // Ensure integer
 			} else if (targetItem.sort_order === null || targetItem.sort_order === undefined) {
 				// If sort_order is null/undefined, try to calculate a default value from categories array
 				console.warn("targetItem.sort_order is null/undefined, attempting to calculate default value")
-				
+
 				if (categories.length > 0) {
 					// Find targetItem in categories array
 					const targetInArray = categories.find(c => c.id === targetItem.id)
@@ -124,12 +124,12 @@ export class CategoryApiService {
 	}
 
 	/**
-	 * Reorders a child category based on index position
-	 * Calculates sort_order based on the target index in the children array
+	 * Reorders a child category
+	 * Uses targetItem.sort_order to place the reordered item at the target position
 	 * 
 	 * @param reorderedItem The child category being moved
 	 * @param targetItem The target position category
-	 * @param targetIndex The target index position (0-based)
+	 * @param targetIndex The target index position (0-based) - kept for compatibility but checking targetItem.sort_order first
 	 * @param parentCategory Optional: parent category for validation
 	 * @param onSuccess Callback on success
 	 * @param onError Callback on error
@@ -149,66 +149,31 @@ export class CategoryApiService {
 				return false
 			}
 
-			// Validation: Ensure targetIndex is valid
-			if (typeof targetIndex !== "number" || targetIndex < 0 || !Number.isInteger(targetIndex)) {
-				console.error("Invalid targetIndex:", targetIndex)
-				toast.error("موضع غير صالح")
-				return false
-			}
-
-			// Calculate sort_order based on index
+			// Validation: Ensure targetItem has valid sort_order - same logic as parent categories
 			let sortOrder: number
 
-			if (parentCategory?.children && parentCategory.children.length > 0) {
-				// Get the children array (sorted by current sort_order)
-				const children = [...parentCategory.children].sort((a, b) => {
-					const aOrder = typeof a.sort_order === "number" ? a.sort_order : 0
-					const bOrder = typeof b.sort_order === "number" ? b.sort_order : 0
-					return aOrder - bOrder
-				})
-
-				// Remove reorderedItem from the array for calculation
-				const childrenWithoutReordered = children.filter(c => c.id !== reorderedItem.id)
-
-				// Calculate sort_order based on target index
-				if (targetIndex === 0) {
-					// Placing at the beginning
-					if (childrenWithoutReordered.length > 0) {
-						const firstChild = childrenWithoutReordered[0]
-						const firstOrder = typeof firstChild.sort_order === "number" ? firstChild.sort_order : 0
-						sortOrder = Math.max(0, firstOrder - 10) // Place before first item
-					} else {
-						sortOrder = 0
-					}
-				} else if (targetIndex >= childrenWithoutReordered.length) {
-					// Placing at the end
-					const lastChild = childrenWithoutReordered[childrenWithoutReordered.length - 1]
-					const lastOrder = typeof lastChild.sort_order === "number" ? lastChild.sort_order : 0
-					sortOrder = lastOrder + 10 // Place after last item
-				} else {
-					// Placing between items
-					const prevChild = childrenWithoutReordered[targetIndex - 1]
-					const nextChild = childrenWithoutReordered[targetIndex]
-					
-					const prevOrder = typeof prevChild.sort_order === "number" ? prevChild.sort_order : 0
-					const nextOrder = typeof nextChild.sort_order === "number" ? nextChild.sort_order : prevOrder + 10
-					
-					// Calculate middle value
-					sortOrder = Math.round((prevOrder + nextOrder) / 2)
-					
-					// If values are too close, add spacing
-					if (sortOrder === prevOrder || sortOrder === nextOrder) {
-						sortOrder = prevOrder + Math.round((nextOrder - prevOrder) / 2)
-					}
-				}
-
-				// Ensure sort_order is a positive integer
-				sortOrder = Math.max(0, Math.round(sortOrder))
+			if (typeof targetItem.sort_order === "number" && !isNaN(targetItem.sort_order)) {
+				sortOrder = Math.round(targetItem.sort_order) // Ensure integer
 			} else {
-				// Fallback: use index * 10 if no parentCategory provided
-				sortOrder = targetIndex * 10
-				console.warn("No parentCategory provided, using index-based calculation:", sortOrder)
+				// Fallback: try to calculate from parent category children or target index
+				console.warn("targetItem.sort_order is null/undefined/invalid for child, attempting calculation")
+
+				if (parentCategory?.children && parentCategory.children.length > 0) {
+					// Find targetItem in parent children
+					const targetInArray = parentCategory.children.find(c => c.id === targetItem.id)
+					if (targetInArray && typeof targetInArray.sort_order === "number" && !isNaN(targetInArray.sort_order)) {
+						sortOrder = Math.round(targetInArray.sort_order)
+					} else {
+						// Fallback to index based if sort_order is missing
+						sortOrder = targetIndex
+					}
+				} else {
+					sortOrder = targetIndex
+				}
 			}
+
+			// Ensure sort_order is a positive integer
+			sortOrder = Math.max(0, Math.round(sortOrder))
 
 			// Optional: Validate items exist in parent's children if provided
 			if (parentCategory?.children) {
@@ -226,10 +191,9 @@ export class CategoryApiService {
 				sort_order: sortOrder,
 			}
 
-			console.info("Sending reorder request (index-based):", {
+			console.info("Sending reorder request (child):", {
 				reorderedItemId: reorderedItem.id,
-				targetIndex: targetIndex,
-				calculatedSortOrder: sortOrder,
+				sortOrder: sortOrder,
 				targetItemId: targetItem.id,
 			})
 

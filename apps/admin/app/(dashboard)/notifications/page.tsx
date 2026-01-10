@@ -261,7 +261,7 @@ export default function NotificationsPage() {
                                 className="gap-2"
                             >
                                 <CheckCheck className="h-4 w-4" />
-                                {markLastAsReadMutation.isPending ? "جاري التحديد..." : "تحديد الكل كمقروء"}    
+                                {markLastAsReadMutation.isPending ? "جاري التحديد..." : "تحديد الكل كمقروء"}
                             </Button>
                         )}
                     </div>
@@ -275,7 +275,7 @@ export default function NotificationsPage() {
                             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                         >
                             الكل
-                            {notifications && notifications.length > 0 && (
+                            {filter === "all" && notifications && notifications.length > 0 && (
                                 <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">
                                     {notifications.length}
                                 </Badge>
@@ -286,9 +286,9 @@ export default function NotificationsPage() {
                             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                         >
                             غير مقروء
-                            {unreadCount > 0 && (
+                            {filter === "unread" && notifications && notifications.length > 0 && (
                                 <Badge variant="destructive" className="h-5 min-w-5 px-1.5 text-xs">
-                                    {unreadCount}
+                                    {notifications.filter((n: Notification) => !n.is_read).length}
                                 </Badge>
                             )}
                         </TabsTrigger>
@@ -297,7 +297,7 @@ export default function NotificationsPage() {
                             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
                         >
                             مقروء
-                            {notifications && notifications.filter((n: Notification) => n.is_read).length > 0 && (
+                            {filter === "read" && notifications && notifications.length > 0 && (
                                 <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">
                                     {notifications.filter((n: Notification) => n.is_read).length}
                                 </Badge>
@@ -354,21 +354,23 @@ export default function NotificationsPage() {
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {notifications.map((notification: Notification, index: number) => (
-                                    <NotificationsCard
-                                        key={notification.id}
-                                        notification={notification}
-                                        index={index}
-                                        // handleMarkAsRead={handleMarkAsRead}
-                                        // markAsReadMutation={markAsReadMutation}
-                                        onViewDetails={() => {
-                                            setSelectedNotification(notification)
-                                            if (!notification.is_read) {
-                                                // handleMarkAsRead(notification.id)
-                                            }
-                                        }}
-                                    />
-                                ))}
+                                {notifications
+                                    .filter((notification: Notification) => filter === "all" || notification.is_read === (filter === "read"))
+                                    .map((notification: Notification, index: number) => (
+                                        <NotificationsCard
+                                            key={notification.id}
+                                            notification={notification}
+                                            index={index}
+                                            // handleMarkAsRead={handleMarkAsRead}
+                                            // markAsReadMutation={markAsReadMutation}
+                                            onViewDetails={() => {
+                                                setSelectedNotification(notification)
+                                                if (!notification.is_read) {
+                                                    // handleMarkAsRead(notification.id)
+                                                }
+                                            }}
+                                        />
+                                    ))}
                             </div>
                         )}
                     </TabsContent>

@@ -80,25 +80,25 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
     // Helper function to normalize icon URL - extract relative path if it's a full URL
     const normalizeIconUrl = (icon: string | null | undefined): string | null => {
         if (!icon) return null
-        
+
         // If it's already a relative path (doesn't start with http), return as is
         if (!icon.startsWith('http://') && !icon.startsWith('https://')) {
             return icon
         }
-        
+
         // Extract relative path from full URL
         // Example: "https://ajar-backend.mystore.social/storage/listings/image.webp" -> "listings/image.webp"
         const storageMatch = icon.match(/\/storage\/(.+)$/)
         if (storageMatch && storageMatch[1]) {
             return storageMatch[1]
         }
-        
+
         // Fallback: try to extract path after the last /storage/
         const parts = icon.split('/storage/')
         if (parts.length > 1) {
             return parts[parts.length - 1]
         }
-        
+
         // If we can't extract, return null to avoid duplication
         return null
     }
@@ -325,7 +325,7 @@ export function CategoryFormDrawer({ open, onOpenChange, category }: CategoryFor
                                                 <SelectValue />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent dir="rtl">
                                             <SelectItem value="custom">مخصصة</SelectItem>
                                             <SelectItem value="parent">من الأب</SelectItem>
                                             <SelectItem value="parent_and_custom">من الأب ومخصصة</SelectItem>

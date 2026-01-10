@@ -30,6 +30,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { api } from "@/lib/api"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 
 const childCategoryFormSchema = z.object({
     name_ar: z.string().min(1, "الاسم بالعربية مطلوب"),
@@ -38,6 +40,8 @@ const childCategoryFormSchema = z.object({
     description_en: z.string().optional(),
     icon: z.string().optional(),
     parent_id: z.number(),
+    properties_source: z.enum(["custom", "parent", "parent_and_custom"]).default("parent_and_custom"),
+    is_visible: z.boolean().default(true),
 })
 
 type ChildCategoryFormValues = z.infer<typeof childCategoryFormSchema>
@@ -52,6 +56,32 @@ interface ChildCategoryFormDrawerProps {
 export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }: ChildCategoryFormDrawerProps) {
     const queryClient = useQueryClient()
 
+    // Helper function to normalize icon URL - extract relative path if it's a full URL
+    const normalizeIconUrl = (icon: string | null | undefined): string | null => {
+        if (!icon) return null
+
+        // If it's already a relative path (doesn't start with http), return as is
+        if (!icon.startsWith('http://') && !icon.startsWith('https://')) {
+            return icon
+        }
+
+        // Extract relative path from full URL
+        // Example: "https://ajar-backend.mystore.social/storage/listings/image.webp" -> "listings/image.webp"
+        const storageMatch = icon.match(/\/storage\/(.+)$/)
+        if (storageMatch && storageMatch[1]) {
+            return storageMatch[1]
+        }
+
+        // Fallback: try to extract path after the last /storage/
+        const parts = icon.split('/storage/')
+        if (parts.length > 1) {
+            return parts[parts.length - 1]
+        }
+
+        // If we can't extract, return null to avoid duplication
+        return null
+    }
+
     const form = useForm<ChildCategoryFormValues>({
         resolver: zodResolver(childCategoryFormSchema),
         defaultValues: {
@@ -59,8 +89,10 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
             name_en: child?.name.en || "",
             description_ar: child?.description?.ar || "",
             description_en: child?.description?.en || "",
-            icon: child?.icon || "",
+            icon: normalizeIconUrl(child?.icon) || "",
             parent_id: parentId,
+            properties_source: child?.properties_source || "parent_and_custom",
+            is_visible: child?.is_visible ?? true,
         },
     })
 
@@ -71,8 +103,10 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
                 name_en: child.name.en,
                 description_ar: child.description?.ar || "",
                 description_en: child.description?.en || "",
-                icon: child.icon || "",
+                icon: normalizeIconUrl(child.icon) || "",
                 parent_id: parentId,
+                properties_source: child.properties_source,
+                is_visible: child.is_visible,
             })
         } else {
             form.reset({
@@ -82,6 +116,8 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
                 description_en: "",
                 icon: "",
                 parent_id: parentId,
+                properties_source: "parent_and_custom",
+                is_visible: true,
             })
         }
     }, [child, parentId, form])
@@ -91,9 +127,9 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
             name: { ar: data.name_ar, en: data.name_en || "" },
             description: { ar: data.description_ar || "", en: data.description_en || "" },
             parent_id: data.parent_id,
-            icon: data.icon || null,
-            properties_source: "parent_and_custom",
-            is_visible: true,
+            icon: normalizeIconUrl(data.icon) || null,
+            properties_source: data.properties_source,
+            is_visible: data.is_visible,
         }),
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
@@ -108,7 +144,9 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
         mutationFn: (data: ChildCategoryFormValues) => api.put(`/admin/categories/${child!.id}`, {
             name: { ar: data.name_ar, en: data.name_en || "" },
             description: { ar: data.description_ar || "", en: data.description_en || "" },
-            icon: data.icon || null,
+            icon: normalizeIconUrl(data.icon) || null,
+            properties_source: data.properties_source,
+            is_visible: data.is_visible,
         }),
         onSuccess: (data: any) => {
             queryClient.invalidateQueries({ queryKey: ["categories"] })
@@ -131,7 +169,7 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
 
     return (
         <Drawer open={open} onOpenChange={onOpenChange} direction="left">
-            <DrawerContent dir="rtl">
+            <DrawerContent className="w-full sm:max-w-lg text-start" dir="rtl">
                 <DrawerHeader>
                     <DrawerTitle>{child ? "تعديل فئة فرعية" : "إضافة فئة فرعية جديدة"}</DrawerTitle>
                     <DrawerDescription>
@@ -227,6 +265,50 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
                             )}
                         />
 
+                        <FormField
+                            control={form.control}
+                            name="properties_source"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>مصدر الخصائص</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent dir="rtl">
+                                            <SelectItem value="custom">مخصصة</SelectItem>
+                                            <SelectItem value="parent">من الأب</SelectItem>
+                                            <SelectItem value="parent_and_custom">من الأب ومخصصة</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="is_visible"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base">حالة الرؤية</FormLabel>
+                                        <div className="text-sm text-muted-foreground">
+                                            إظهار أو إخفاء الفئة الفرعية في الواجهة الأمامية
+                                        </div>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+
                         <DrawerFooter>
                             <Button type="submit" disabled={isLoading} className="w-full">
                                 <Save className="w-4 h-4 mr-2" />
@@ -244,4 +326,3 @@ export function ChildCategoryFormDrawer({ open, onOpenChange, parentId, child }:
         </Drawer>
     )
 }
-

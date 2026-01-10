@@ -31,20 +31,31 @@ interface CategoriesSliderProps {
 export function CategoriesSliderV2({ categories, onSelectCategory, selectedCategory, onReorder }: CategoriesSliderProps) {
 	const queryClient = useQueryClient()
 	const containerRef = React.useRef<HTMLDivElement>(null)
-	
-	// Ensure categories is always an array
+
+	// Ensure categories is always an array and sorted
 	const safeCategories = React.useMemo(() => {
+		let data: Category[] = []
 		// Handle both array and object with data property
 		if (Array.isArray(categories)) {
-			return categories
+			data = categories
+		} else if (categories && typeof categories === 'object' && 'data' in categories) {
+			data = (categories as { data: Category[] }).data
+			data = Array.isArray(data) ? data : []
 		}
-		if (categories && typeof categories === 'object' && 'data' in categories) {
-			const data = (categories as { data: Category[] }).data
-			return Array.isArray(data) ? data : []
+
+		// Recursive sort function
+		const deepSort = (cats: Category[]): Category[] => {
+			return [...cats]
+				.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+				.map(cat => ({
+					...cat,
+					children: cat.children ? deepSort(cat.children) : []
+				}))
 		}
-		return []
+
+		return deepSort(data)
 	}, [categories])
-	
+
 	const { state, actions } = useCategoryState(safeCategories)
 	const { preserveScroll } = useScrollPreservation()
 
