@@ -1,0 +1,700 @@
+{
+    "notifications": [
+        {
+            "id": 80,
+            "title": "تم إنشاء تقييم جديد",
+            "message": "تم إنشاء تقييم جديد بواسطة Qotayba Mohammad للإعلان رقم 21 بتقييم 3، يرجى المراجعة",
+            "notificationable_id": 21,
+            "notificationable_type": "listing",
+            "read_at": null,
+            "is_read": false,
+            "metadata": {
+                "data": {
+                    "rating": 3,
+                    "user_name": "Qotayba Mohammad",
+                    "listing_id": 21
+                },
+                "replace": {
+                    "rating": 3,
+                    "user_name": "Qotayba Mohammad",
+                    "listing_id": 21
+                },
+                "notificationable": {
+                    "id": 21,
+                    "type": "listing"
+                }
+            },
+            "user": {},
+            "created_at": "2026-01-09 17:01:18",
+            "updated_at": "2026-01-09 17:01:18"
+        },
+        {
+            "id": 79,
+            "title": "تم إنشاء تقييم جديد",
+            "message": "تم إنشاء تقييم جديد بواسطة Qotayba Mohammad للإعلان رقم 21 بتقييم 3، يرجى المراجعة",
+            "notificationable_id": 21,
+            "notificationable_type": "listing",
+            "read_at": "2026-01-10 09:45:20",
+            "is_read": true,
+            "metadata": {
+                "data": {
+                    "rating": 3,
+                    "user_name": "Qotayba Mohammad",
+                    "listing_id": 21
+                },
+                "replace": {
+                    "rating": 3,
+                    "user_name": "Qotayba Mohammad",
+                    "listing_id": 21
+                },
+                "notificationable": {
+                    "id": 21,
+                    "type": "listing"
+                }
+            },
+            "user": {},
+            "created_at": "2026-01-09 17:01:18",
+            "updated_at": "2026-01-10 09:45:20"
+        },
+        {
+            "id": 78,
+            "title": "تم إنشاء تقييم جديد",
+            "message": "تم إنشاء تقييم جديد بواسطة Qotayba Mohammad للإعلان رقم 21 بتقييم 3، يرجى المراجعة",
+            "notificationable_id": 21,
+            "notificationable_type": "listing",
+            "read_at": null,
+            "is_read": false,
+            "metadata": {
+                "data": {
+                    "rating": 3,
+                    "user_name": "Qotayba Mohammad",
+                    "listing_id": 21
+                },
+                "replace": {
+                    "rating": 3,
+                    "user_name": "Qotayba Mohammad",
+                    "listing_id": 21
+                },
+                "notificationable": {
+                    "id": 21,
+                    "type": "listing"
+                }
+            },
+            "user": {},
+            "created_at": "2026-01-09 17:01:18",
+            "updated_at": "2026-01-09 17:01:18"
+        }
+    ],
+    "users": [
+        {
+            "id": 8,
+            "first_name": "Qotayba",
+            "last_name": "Mohammad",
+            "full_name": "Qotayba Mohammad",
+            "phone": "+96170723177",
+            "email": "",
+            "role": "user",
+            "status": "active",
+            "phone_verified": true,
+            "avatar": "listings/696018fc76236.webp",
+            "avatar_url": "https://backend.ajarsyria.com/storage/listings/696018fc76236.webp",
+            "language": "ar",
+            "wallet_balance": 0,
+            "sort_order": null,
+            "notifications_unread_count": 0,
+            "listings_count": 0,
+            "created_at": "2025-12-28 09:07:39",
+            "updated_at": "2026-01-08 20:52:22"
+        },
+        {
+            "id": 7,
+            "first_name": "أحمد",
+            "last_name": "خطيب",
+            "full_name": "أحمد خطيب",
+            "phone": "+963989740862",
+            "email": "",
+            "role": "user",
+            "status": "active",
+            "phone_verified": true,
+            "avatar": "avatars/default_avatar.jpg",
+            "avatar_url": "https://backend.ajarsyria.com/storage/avatars/default_avatar.jpg",
+            "language": "ar",
+            "wallet_balance": 0,
+            "sort_order": null,
+            "notifications_unread_count": 0,
+            "listings_count": 0,
+            "created_at": "2025-12-19 19:10:32",
+            "updated_at": "2025-12-19 19:10:50"
+        },
+        {
+            "id": 6,
+            "first_name": "Qotayba",
+            "last_name": "Mohammed",
+            "full_name": "Qotayba Mohammed",
+            "phone": "++96170723177",
+            "email": null,
+            "role": "admin",
+            "status": "active",
+            "phone_verified": true,
+            "avatar": null,
+            "avatar_url": "https://ui-avatars.com/api/?name=Qotayba+Mohammed&size=256&background=ff5722&color=fff",
+            "language": "ar",
+            "wallet_balance": 0,
+            "sort_order": null,
+            "notifications_unread_count": 18,
+            "listings_count": 0,
+            "created_at": "2025-11-28 11:14:16",
+            "updated_at": "2025-11-29 22:39:49"
+        }
+    ],
+    "listingsPublished": [
+        {
+            "id": 22,
+            "title": {
+                "ar": "شقة للإيجار في ضاحية قدسيا",
+                "en": null
+            },
+            "ribon_text": {
+                "ar": null,
+                "en": null
+            },
+            "ribon_color": null,
+            "description": {
+                "ar": "شقة سوبر ديلوكس للأجار بضاحية قدسيا D2 مساحة 140 متر",
+                "en": null
+            },
+            "price": 350,
+            "currency": "USD",
+            "latitude": "33.53769162101605",
+            "longitude": "36.18983421474695",
+            "status": "approved",
+            "availability_status": "available",
+            "available_from": null,
+            "available_until": null,
+            "type": "rent",
+            "pay_every": 12,
+            "insurance": 200,
+            "is_featured": false,
+            "views_count": 270,
+            "sort_order": 22,
+            "is_favorite": false,
+            "favorites_count": 0,
+            "average_rating": 0,
+            "reviews_count": 0,
+            "can_review": true,
+            "cover_image": "listings/694722f1444f3.webp",
+            "whatsapp_url": "https://wa.me/963992250848?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D9%86%D8%A7+%D9%85%D9%87%D8%AA%D9%85+%D8%A8%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%3A+%D8%B4%D9%82%D8%A9+%D9%84%D9%84%D8%A5%D9%8A%D8%AC%D8%A7%D8%B1+%D9%81%D9%8A+%D8%B6%D8%A7%D8%AD%D9%8A%D8%A9+%D9%82%D8%AF%D8%B3%D9%8A%D8%A7+%D9%81%D9%8A+.%0A%D9%83%D9%88%D8%AF+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+22%0A%D8%B1%D8%A7%D8%A8%D8%B7+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+https%3A%2F%2Fbackend.ajarsyria.com%2Flistings%2F22%0A%D9%87%D9%84+%D9%85%D8%A7+%D8%B2%D8%A7%D9%84+%D9%85%D8%AA%D8%A7%D8%AD%D8%A7%D9%8B%D8%9F",
+            "owner": {},
+            "category": {
+                "id": 12,
+                "name": {
+                    "ar": "شقق",
+                    "en": "Apartments"
+                },
+                "description": {
+                    "ar": null,
+                    "en": null
+                },
+                "parent_id": 1,
+                "icon": "https://backend.ajarsyria.com/storage/listings/694048d95bb00.webp",
+                "properties_source": "custom",
+                "sort_order": 12,
+                "is_visible": true,
+                "listings_count": 5,
+                "created_at": "2025-12-15 17:43:54",
+                "updated_at": "2026-01-10 21:11:35"
+            },
+            "governorate": {
+                "id": 2,
+                "name": {
+                    "ar": "دمشق",
+                    "en": "Damascus"
+                },
+                "code": "ChIJp8Y8QdzmGBURe4Gw1Yq45Wk",
+                "sort_order": 1,
+                "created_at": "2025-05-14 23:25:21",
+                "updated_at": "2025-05-14 23:25:21"
+            },
+            "city": null,
+            "images": [],
+            "created_at": "2025-12-20 22:29:22",
+            "updated_at": "2026-01-10 21:55:27"
+        },
+        {
+            "id": 21,
+            "title": {
+                "ar": "مرسيدس مايباخ",
+                "en": null
+            },
+            "ribon_text": {
+                "ar": null,
+                "en": null
+            },
+            "ribon_color": null,
+            "description": {
+                "ar": "مايباخ ٢٠٢٠",
+                "en": null
+            },
+            "price": 150000,
+            "currency": "USD",
+            "latitude": "34.72418652368809",
+            "longitude": "36.71248275786638",
+            "status": "approved",
+            "availability_status": "available",
+            "available_from": null,
+            "available_until": null,
+            "type": "sale",
+            "pay_every": null,
+            "insurance": null,
+            "is_featured": false,
+            "views_count": 316,
+            "sort_order": 21,
+            "is_favorite": false,
+            "favorites_count": 0,
+            "average_rating": 3,
+            "reviews_count": 1,
+            "can_review": true,
+            "cover_image": "listings/6946c7d8a7c78.webp",
+            "whatsapp_url": "https://wa.me/963992250848?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D9%86%D8%A7+%D9%85%D9%87%D8%AA%D9%85+%D8%A8%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%3A+%D9%85%D8%B1%D8%B3%D9%8A%D8%AF%D8%B3+%D9%85%D8%A7%D9%8A%D8%A8%D8%A7%D8%AE+%D9%81%D9%8A+.%0A%D9%83%D9%88%D8%AF+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+21%0A%D8%B1%D8%A7%D8%A8%D8%B7+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+https%3A%2F%2Fbackend.ajarsyria.com%2Flistings%2F21%0A%D9%87%D9%84+%D9%85%D8%A7+%D8%B2%D8%A7%D9%84+%D9%85%D8%AA%D8%A7%D8%AD%D8%A7%D9%8B%D8%9F",
+            "owner": {},
+            "category": {
+                "id": 8,
+                "name": {
+                    "ar": "مرسيدس",
+                    "en": "Mercedes"
+                },
+                "description": {
+                    "ar": null,
+                    "en": null
+                },
+                "parent_id": 2,
+                "icon": "https://backend.ajarsyria.com/storage/listings/6947413dbdba4.webp",
+                "properties_source": "parent",
+                "sort_order": 7,
+                "is_visible": true,
+                "listings_count": 1,
+                "created_at": "2025-12-07 04:58:42",
+                "updated_at": "2026-01-10 21:47:06"
+            },
+            "governorate": {
+                "id": 4,
+                "name": {
+                    "ar": "حمص",
+                    "en": "Homs"
+                },
+                "code": "ChIJpygFseoOIxURmYZ6AohbZWU",
+                "sort_order": 5,
+                "created_at": "2025-05-14 23:25:21",
+                "updated_at": "2025-05-14 23:25:21"
+            },
+            "city": null,
+            "images": [],
+            "created_at": "2025-12-20 16:00:20",
+            "updated_at": "2026-01-10 21:55:27"
+        },
+        {
+            "id": 20,
+            "title": {
+                "ar": "دمشق الملك العادل",
+                "en": null
+            },
+            "ribon_text": {
+                "ar": null,
+                "en": null
+            },
+            "ribon_color": null,
+            "description": {
+                "ar": "بمناسبة عيد تحرير سوريا حررنا الأسعار 🔥🔥🔥\nالخصم 🔥🔥🔥🔥 فقط ب !!!16\nمتواجدة 3 سيارات  العرض عليهم لمدة 24 ساعة فقط \nهونداي النترا الجديدة 2025 بشحمها زيروو\n\nشركة : #سامر_موفق_الحموي\n\n( نقطة 🔴 تكفي ليصلك السعر بلحظة ✅ )\n\nالــمـواصـــفــات : كاملة المواصفات ورقم 1 بالشركة\n\nسنة الصنع :2025 \n\nسعة المحرك : 1600cc \n\nالعداد : بشحمها زيرووو\n\nبالإضافة الى المواصفات الأساسية\nتيبترونيك , فرش جلد, مكيف ديجتال , USB و AUX , تحكم مقود , مرآيا طي كهربائية , نوافذ كهربائية , بالون عدد 2 , ABS , قفل مركزي , وريموت كنترول , هيدروليك , زجاج عازل للحرارة , كاشف ضباب  , حاملة أكواب , جهاز إنذار , بصمة خارجية وداخلية , تثبيت سرعة , بلوتوث تلفون , فتحة سقف , إنارة ليد زينون , ليد إنارة أمامي وخلفي , سبيلر خلفي , كيت Sport , شاحن للموبايل USB , جنط كروم 18 , أنظمة توفير للبنزيين , صندوق ذكي ونظام للقيادة رياضي وكومفورت وحساسات أمامية وخلفية وتابلو الكتروني\n\nســعــة الـمـحــرك : 4 سلندر , 1600 CC\n\nوضعها :  بشحمها زيروو\n\nللتواصل معنا أو لأي استفسار يرجى زيارة مقر الشركة الكائن في :\n\nدمشق - مزرعة - شارع الملك العادل - جانب بنك سوريا والمهجر\n\n📲 : 0966677754",
+                "en": null
+            },
+            "price": 16900,
+            "currency": "USD",
+            "latitude": "33.49152812615638",
+            "longitude": "36.27036552876234",
+            "status": "approved",
+            "availability_status": "available",
+            "available_from": null,
+            "available_until": null,
+            "type": "sale",
+            "pay_every": null,
+            "insurance": null,
+            "is_featured": false,
+            "views_count": 339,
+            "sort_order": 20,
+            "is_favorite": false,
+            "favorites_count": 1,
+            "average_rating": 0,
+            "reviews_count": 0,
+            "can_review": true,
+            "cover_image": "listings/6941821745525.webp",
+            "whatsapp_url": "https://wa.me/963980904583?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D9%86%D8%A7+%D9%85%D9%87%D8%AA%D9%85+%D8%A8%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%3A+%D8%AF%D9%85%D8%B4%D9%82+%D8%A7%D9%84%D9%85%D9%84%D9%83+%D8%A7%D9%84%D8%B9%D8%A7%D8%AF%D9%84+%D9%81%D9%8A+.%0A%D9%83%D9%88%D8%AF+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+20%0A%D8%B1%D8%A7%D8%A8%D8%B7+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+https%3A%2F%2Fbackend.ajarsyria.com%2Flistings%2F20%0A%D9%87%D9%84+%D9%85%D8%A7+%D8%B2%D8%A7%D9%84+%D9%85%D8%AA%D8%A7%D8%AD%D8%A7%D9%8B%D8%9F",
+            "owner": {},
+            "category": {
+                "id": 15,
+                "name": {
+                    "ar": "هيونداي",
+                    "en": "Hyundai"
+                },
+                "description": {
+                    "ar": null,
+                    "en": null
+                },
+                "parent_id": 2,
+                "icon": "https://backend.ajarsyria.com/storage/listings/6951ad7f123c9.webp",
+                "properties_source": "parent_and_custom",
+                "sort_order": 15,
+                "is_visible": true,
+                "listings_count": 3,
+                "created_at": "2025-12-15 17:53:13",
+                "updated_at": "2025-12-28 23:03:15"
+            },
+            "governorate": {
+                "id": 2,
+                "name": {
+                    "ar": "دمشق",
+                    "en": "Damascus"
+                },
+                "code": "ChIJp8Y8QdzmGBURe4Gw1Yq45Wk",
+                "sort_order": 1,
+                "created_at": "2025-05-14 23:25:21",
+                "updated_at": "2025-05-14 23:25:21"
+            },
+            "city": null,
+            "images": [],
+            "created_at": "2025-12-16 16:01:28",
+            "updated_at": "2026-01-10 21:55:27"
+        }
+    ],
+    "listingsPending": [],
+    "reviews": [
+        {
+            "id": 8,
+            "rating": 3,
+            "comment": "test test test",
+            "is_approved": true,
+            "user": {},
+            "listing": {
+                "id": 21,
+                "title": {
+                    "ar": "مرسيدس مايباخ",
+                    "en": null
+                },
+                "ribon_text": {
+                    "ar": null,
+                    "en": null
+                },
+                "ribon_color": null,
+                "description": {
+                    "ar": "مايباخ ٢٠٢٠",
+                    "en": null
+                },
+                "price": 150000,
+                "currency": "USD",
+                "latitude": "34.72418652368809",
+                "longitude": "36.71248275786638",
+                "cover_image": "listings/6946c7d8a7c78.webp",
+                "whatsapp_url": "https://wa.me/963992250848?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D9%86%D8%A7+%D9%85%D9%87%D8%AA%D9%85+%D8%A8%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%3A+%D9%85%D8%B1%D8%B3%D9%8A%D8%AF%D8%B3+%D9%85%D8%A7%D9%8A%D8%A8%D8%A7%D8%AE+%D9%81%D9%8A+.%0A%D9%83%D9%88%D8%AF+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+21%0A%D8%B1%D8%A7%D8%A8%D8%B7+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+https%3A%2F%2Fbackend.ajarsyria.com%2Flistings%2F21%0A%D9%87%D9%84+%D9%85%D8%A7+%D8%B2%D8%A7%D9%84+%D9%85%D8%AA%D8%A7%D8%AD%D8%A7%D9%8B%D8%9F",
+                "owner": {},
+                "created_at": "2025-12-20 16:00:20",
+                "updated_at": "2026-01-10 21:55:27"
+            },
+            "created_at": "2026-01-09 17:01:18"
+        },
+        {
+            "id": 5,
+            "rating": 4,
+            "comment": "حلو",
+            "is_approved": true,
+            "listing": {
+                "id": 15,
+                "title": {
+                    "ar": "دمشق المزرعه شارع الملك العادل",
+                    "en": null
+                },
+                "ribon_text": {
+                    "ar": null,
+                    "en": null
+                },
+                "ribon_color": null,
+                "description": {
+                    "ar": "HYUNDAI SANTA FE \n\nسنة الصنع : 2016  \n\nسنة التسجيل : 2020\n\nالعداد : 70  ألف km \n\n* 4 سلندر سعة 2400 cc GDI\n* فل كامل مع بصمه \n* المحرك eco اقتصاديه بالبنزين \n* علبة سرعة 6 ستيبترونيك (اوتوماتيك وعادي)\n* الزجاج الخلفي فيميه اساسي\n* المرايا كهرباء قابله للطي مزوده باشارات\n* دفع رباعي4wD و انحدار و انزلاق\n* فتحه سقف بانوراما\n* مثبت سرعه\n* تحكم كامل بالدركسيون مع تسخين دركسيون\n* بلوتوث\n* كشافات اماميه وخلفيه ليد انوار زينون \n* انوار ترحيبيه بالمرايات\n* كشافات ضباب ليد\n* تخشيب داخلي اسود ممتاز\n* كاميرا خلفيه HD\n* حساسات خلفيه واوتو بارك \n* المقاعد 3 صفوف ركاب وكرسي السائق له امكانية الرفع لاعلي ولاسفل ونفخ الظهر لمزيد من الراحه مع سخانات كراسي امامي خلفي\n* جنط 19 وكفرات جديده \n* فرامل مانعه للانغلاق ABS و ESB و EBD\n* ثلاث وضعيات قياده (مريح - عادي - سبورت)\n* مكيف بتحكم منفصل امامي وخلفي وللصف الثالث \n* منافذ للشاحن امامي وبالوسط وللمقاعد الخلفيه\n* شاشه مزوده بخرايط GPS محدثة لاخر اصدار \n\nوضعها شبه زيروو تسليم شركة وخالية من البخ \nوصيانة شركة",
+                    "en": null
+                },
+                "price": 19700,
+                "currency": "USD",
+                "latitude": "33.71320452610378",
+                "longitude": "36.10528763383627",
+                "status": "approved",
+                "availability_status": "available",
+                "available_from": null,
+                "available_until": null,
+                "type": "sale",
+                "pay_every": null,
+                "insurance": null,
+                "is_featured": false,
+                "views_count": 265,
+                "sort_order": 15,
+                "is_favorite": false,
+                "favorites_count": 0,
+                "average_rating": 4,
+                "reviews_count": 1,
+                "can_review": true,
+                "cover_image": "listings/6941565dbe3b6.webp",
+                "created_at": "2025-12-16 12:58:25",
+                "updated_at": "2026-01-09 17:06:20"
+            },
+            "created_at": "2025-12-29 21:06:09"
+        },
+        {
+            "id": 1,
+            "rating": 3,
+            "comment": "Test Test Test",
+            "is_approved": true,
+            "user": {},
+            "listing": {
+                "id": 17,
+                "title": {
+                    "ar": "دمشق المزرعه الملك العادل",
+                    "en": null
+                },
+                "ribon_text": {
+                    "ar": null,
+                    "en": null
+                },
+                "ribon_color": null,
+                "description": {
+                    "ar": "خصم على سعرها لمدة 24 ساعة 🔥🔥\nخدها سورية لوحات قديمة وريح رأسك من الغرق\nالعداد 80 ألف km تسليم وصيانة شركة وخالية من البخ\n\nبوجود شركة :  #سامر_موفق_الحموي لا تركب الصيني\n\nالميزات الخاصة بالسيارة :\n1 نايلون الوكالة وكل شي من الوكالة موجود \n2 على إسم المالك الأساسي من الوكالة\n3 السبير غير مستخدم \n4 مكرجة ضمن ظروف مناسبة\n5 صيانات شاملة ودورية بالشركة\n\nأودي A6\n\nسنة الصنع : 2011\n\nسنة التسجيل : 2013\n\nسعة المحرك: 2000cc توربو \n\nالعداد : 80   ألف km \n\nالمواصفات : كاملة رقم واحد  \nطلب شخصي مقود رياضي وشاشة عريضة اندرويد مع كميرا\n\nتيبترونيك مع فتحة سقف وفرش جلد طبيعي \nومقاعد كهرباء و6cd وتثبيت سرعة ودينامك زينون \nوتكييف خلفي وحساسات أمامية وخلفية وشاشة dvd\nوكميرا ونافغيشن ومساج وذواكر مقاعد وبرادي جانبية وخلفية وحساسات إنارة وحساسات مطرية وأنظمة أمان متكاملة ومقود فورميكا كامل وفورميكا داخلية فاخرة\nوبلوتوث تلفون ونظام إنارة ليدات أمامي وخلفي\n\nوضعها : معلمها صيانة شاملة وتسليم شركة\nخالية من البخ نهائياً\nتسليم  شركة كركور\n\nللاستفسار الهاتفي حصرا\nSamer 0966677754\nدمشق مزرعة شارع الملك العادل\nجانب بنك سوريا والمهجر",
+                    "en": null
+                },
+                "price": 13500,
+                "currency": "USD",
+                "latitude": "33.50559888332929",
+                "longitude": "36.27718470990658",
+                "status": "approved",
+                "availability_status": "available",
+                "available_from": null,
+                "available_until": null,
+                "type": "sale",
+                "pay_every": null,
+                "insurance": null,
+                "is_featured": false,
+                "views_count": 267,
+                "sort_order": 17,
+                "is_favorite": false,
+                "favorites_count": 0,
+                "average_rating": 2,
+                "reviews_count": 2,
+                "can_review": true,
+                "cover_image": "listings/69417e64440f6.webp",
+                "whatsapp_url": "https://wa.me/963980904583?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C+%D8%A3%D9%86%D8%A7+%D9%85%D9%87%D8%AA%D9%85+%D8%A8%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%B1%3A+%D8%AF%D9%85%D8%B4%D9%82+%D8%A7%D9%84%D9%85%D8%B2%D8%B1%D8%B9%D9%87+%D8%A7%D9%84%D9%85%D9%84%D9%83+%D8%A7%D9%84%D8%B9%D8%A7%D8%AF%D9%84+%D9%81%D9%8A+.%0A%D9%83%D9%88%D8%AF+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+17%0A%D8%B1%D8%A7%D8%A8%D8%B7+%D8%A7%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%3A+https%3A%2F%2Fbackend.ajarsyria.com%2Flistings%2F17%0A%D9%87%D9%84+%D9%85%D8%A7+%D8%B2%D8%A7%D9%84+%D9%85%D8%AA%D8%A7%D8%AD%D8%A7%D9%8B%D8%9F",
+                "owner": {
+                    "id": 3,
+                    "first_name": "احمد",
+                    "last_name": "بكران",
+                    "full_name": "احمد بكران",
+                    "phone": "+963980904583",
+                    "email": "",
+                    "role": "user",
+                    "status": "active",
+                    "phone_verified": true,
+                    "avatar": null,
+                    "avatar_url": "https://ui-avatars.com/api/?name=%D8%A7%D8%AD%D9%85%D8%AF+%D8%A8%D9%83%D8%B1%D8%A7%D9%86&size=256&background=00bcd4&color=fff",
+                    "language": "ar",
+                    "wallet_balance": 0,
+                    "sort_order": null,
+                    "notifications_unread_count": 6,
+                    "listings_count": 6,
+                    "created_at": "2025-11-22 14:41:42",
+                    "updated_at": "2025-11-22 14:41:47"
+                },
+                "city": null,
+                "images": [
+                    {
+                        "id": 91,
+                        "type": "image",
+                        "url": "listings/69417e64440f6.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417e64440f6.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 92,
+                        "created_at": "2025-12-16 15:46:17"
+                    },
+                    {
+                        "id": 92,
+                        "type": "image",
+                        "url": "listings/69417e7c13a9d.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417e7c13a9d.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 93,
+                        "created_at": "2025-12-16 15:46:17"
+                    },
+                    {
+                        "id": 93,
+                        "type": "image",
+                        "url": "listings/69417e9ed4fca.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417e9ed4fca.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 94,
+                        "created_at": "2025-12-16 15:46:17"
+                    },
+                    {
+                        "id": 94,
+                        "type": "image",
+                        "url": "listings/69417ea95f01d.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417ea95f01d.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 95,
+                        "created_at": "2025-12-16 15:46:17"
+                    },
+                    {
+                        "id": 95,
+                        "type": "image",
+                        "url": "listings/69417eac5dabc.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417eac5dabc.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 96,
+                        "created_at": "2025-12-16 15:46:17"
+                    },
+                    {
+                        "id": 96,
+                        "type": "image",
+                        "url": "listings/69417eb176655.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417eb176655.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 97,
+                        "created_at": "2025-12-16 15:46:17"
+                    },
+                    {
+                        "id": 97,
+                        "type": "image",
+                        "url": "listings/69417eb58d505.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417eb58d505.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 98,
+                        "created_at": "2025-12-16 15:46:17"
+                    },
+                    {
+                        "id": 98,
+                        "type": "image",
+                        "url": "listings/69417eb9139f8.webp",
+                        "full_url": "https://backend.ajarsyria.com/storage/listings/69417eb9139f8.webp",
+                        "iframely": null,
+                        "source": "file",
+                        "sort_order": 99,
+                        "created_at": "2025-12-16 15:46:18"
+                    }
+                ],
+                "created_at": "2025-12-16 15:46:17",
+                "updated_at": "2026-01-09 17:06:05"
+            },
+            "created_at": "2025-12-17 18:29:56"
+        }
+    ],
+    "counts": {
+        "listingsAll": 23,
+        "listingsPublished": 22,
+        "listongsDraft": 1,
+        "users": 8,
+        "reviews": 6,
+        "sliders": 2,
+        "categories": 60,
+        "features": 38,
+        "government": 14,
+        "reviewsAverage": 3.2,
+        "usersChange": 0,
+        "listingsPublishedChange": 0,
+        "listingsPendingChange": 0,
+        "reviewsAverageChange": 0
+    },
+    "graph": {
+        "listings": [
+            {
+                "month": "أغسطس",
+                "count": 0
+            },
+            {
+                "month": "سبتمبر",
+                "count": 0
+            },
+            {
+                "month": "أكتوبر",
+                "count": 0
+            },
+            {
+                "month": "نوفمبر",
+                "count": 0
+            },
+            {
+                "month": "ديسمبر",
+                "count": 23
+            },
+            {
+                "month": "يناير",
+                "count": 0
+            }
+        ],
+        "users": [
+            {
+                "month": "أغسطس",
+                "count": 0
+            },
+            {
+                "month": "سبتمبر",
+                "count": 0
+            },
+            {
+                "month": "أكتوبر",
+                "count": 0
+            },
+            {
+                "month": "نوفمبر",
+                "count": 6
+            },
+            {
+                "month": "ديسمبر",
+                "count": 2
+            },
+            {
+                "month": "يناير",
+                "count": 0
+            }
+        ],
+        "reviews": [
+            {
+                "month": "أغسطس",
+                "count": 0
+            },
+            {
+                "month": "سبتمبر",
+                "count": 0
+            },
+            {
+                "month": "أكتوبر",
+                "count": 0
+            },
+            {
+                "month": "نوفمبر",
+                "count": 0
+            },
+            {
+                "month": "ديسمبر",
+                "count": 5
+            },
+            {
+                "month": "يناير",
+                "count": 1
+            }
+        ]
+    },
+    "views": [],
+    "systemStatus": {
+        "maintenance": false,
+        "lastBackup": "2026-01-10"
+    }
+}

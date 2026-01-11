@@ -12,15 +12,20 @@ interface StatsCardProps {
     isPositive: boolean
   }
   className?: string
+  variant?: "default" | "secondary" | "destructive"
+  suffix?: string
 }
 
-export function StatsCard({ title, value, icon: Icon, trend, className }: StatsCardProps) {
+export function StatsCard({ title, value, icon: Icon, trend, className, variant = "default", suffix }: StatsCardProps) {
   return (
-    <Card
+    <div
       className={cn(
         "group relative overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300",
-        "bg-gradient-to-br from-primary to-primary/80",
+        variant === "default" && "!bg-primary ",
+        variant === "secondary" && "bg-primary",
+        variant === "destructive" && "bg-[#01805F]",
         "hover:scale-[1.02] active:scale-95",
+        "rounded-lg",
         className,
       )}
     >
@@ -37,34 +42,10 @@ export function StatsCard({ title, value, icon: Icon, trend, className }: StatsC
             </p>
             <p className="text-3xl md:text-4xl font-bold tracking-tight text-primary-foreground animate-in fade-in slide-in-from-right-4 delay-200">
               {value}
+              {suffix && <span className="text-xl md:text-2xl font-bold tracking-tight text-primary-foreground animate-in fade-in slide-in-from-right-4 delay-200">{suffix}</span>}
             </p>
-            {trend && (
-              <div className="flex items-center gap-1.5 animate-in fade-in slide-in-from-right-4 delay-300">
-                <div className="flex items-center gap-1">
-                  {trend.isPositive ? (
-                    <TrendingUp className="h-4 w-4 text-primary-foreground/80" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-primary-foreground/80" />
-                  )}
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold backdrop-blur-sm",
-                      "transition-all duration-200",
-                      "group-hover:scale-105",
-                      trend.isPositive 
-                        ? "bg-white/20 text-white shadow-sm" 
-                        : "bg-destructive/20 text-white shadow-sm",
-                    )}
-                  >
-                    {trend.isPositive ? "+" : ""}
-                    {trend.value}%
-                  </span>
-                </div>
-                <span className="text-xs text-primary-foreground/70">من الشهر الماضي</span>
-              </div>
-            )}
           </div>
-          <div 
+          <div
             className={cn(
               "flex h-14 w-14 md:h-16 md:w-16 items-center justify-center rounded-full",
               "bg-white/20 backdrop-blur-sm",
@@ -78,6 +59,6 @@ export function StatsCard({ title, value, icon: Icon, trend, className }: StatsC
           </div>
         </div>
       </CardContent>
-    </Card>
+    </div>
   )
 }

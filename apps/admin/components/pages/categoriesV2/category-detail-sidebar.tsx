@@ -174,21 +174,38 @@ export function CategoriesDetailSidebar({ category, onDelete }: CategoriesDetail
 
 
     const handleEditProperty = (property: CategoryProperty) => {
+        // Prevent editing inherited properties
+        if (category && property.category_id !== category.id) {
+            toast.error("لا يمكن تعديل خاصية موروثة من الأب هنا")
+            return
+        }
         setEditingProperty(property)
         setIsPropertyDrawerOpen(true)
     }
 
     const handleAddProperty = () => {
+        if (!canModifyItems) {
+            toast.error("لا يمكن إضافة خصائص لأن هذه الفئة ترث الخصائص من الأب")
+            return
+        }
         setEditingProperty(null)
         setIsPropertyDrawerOpen(true)
     }
 
     const handleEditFeature = (feature: CategoryFeature) => {
+        if (category && feature.category_id !== category.id) {
+            toast.error("لا يمكن تعديل مميزة موروثة من الأب هنا")
+            return
+        }
         setEditingFeature(feature)
         setIsFeatureDrawerOpen(true)
     }
 
     const handleAddFeature = () => {
+        if (!canModifyItems) {
+            toast.error("لا يمكن إضافة مميزات لأن هذه الفئة ترث المميزات من الأب")
+            return
+        }
         setEditingFeature(null)
         setIsFeatureDrawerOpen(true)
     }
@@ -222,6 +239,13 @@ export function CategoriesDetailSidebar({ category, onDelete }: CategoriesDetail
         if (!category?.features) return []
         return [...category.features].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
     }, [category?.features])
+
+    // Assumption: individual properties/features do not have an explicit "source/is_custom" flag
+    // in the TypeScript types. We infer whether an item is inherited from the parent by
+    // checking its `category_id` against the current category's id. If they differ the
+    // item is treated as inherited and cannot be edited/deleted here.
+    // Also assume `properties_source` controls both properties and features inheritance behavior.
+    const canModifyItems = category?.properties_source !== "parent"
 
     if (!category) {
         return (
@@ -793,6 +817,8 @@ export function CategoriesDetailSidebar({ category, onDelete }: CategoriesDetail
                                         variant="outline"
                                         className="w-full"
                                         onClick={handleAddProperty}
+                                        disabled={!canModifyItems}
+                                        title={canModifyItems ? undefined : "لا يمكن إضافة خصائص لأن هذه الفئة ترث الخصائص من الأب"}
                                     >
                                         <Plus className="w-4 h-4 mr-2" />
                                         إضافة خاصية جديدة
@@ -801,70 +827,78 @@ export function CategoriesDetailSidebar({ category, onDelete }: CategoriesDetail
                                     {/* Properties List */}
                                     {sortedProperties && sortedProperties.length > 0 ? (
                                         <div className="space-y-2">
-                                            {sortedProperties.map((property: CategoryProperty, index: number) => (
-                                                <div
-                                                    key={property.id}
-                                                    draggable
-                                                    onDragStart={() => handlePropertyDragStart(index)}
-                                                    onDragOver={(e) => handlePropertyDragOver(e, index)}
-                                                    onDragLeave={handlePropertyDragLeave}
-                                                    onDrop={(e) => handlePropertyDrop(e, index)}
-                                                    onDragEnd={handlePropertyDragEnd}
-                                                    className={`border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-move ${draggedPropertyIndex === index ? "opacity-50" : ""
-                                                        } ${hoveredPropertyIndex === index ? "border-primary ring-2 ring-primary/20" : ""
-                                                        }`}
-                                                >
-                                                    <div className="flex items-start justify-between mb-2">
-                                                        <div className="flex items-center gap-2 flex-1">
-                                                            <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                                            {renderPropertyIcon(property.icon)}
-                                                            <div className="flex-1">
-                                                                <h5 className="font-medium text-sm">
-                                                                    {property.name.ar || property.name.en}
-                                                                </h5>
-                                                                {property.description && (property.description.ar || property.description.en) && (
-                                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                                        {property.description.ar || property.description.en}
-                                                                    </p>
-                                                                )}
+                                            {sortedProperties.map((property: CategoryProperty, index: number) => {
+                                                const isInheritedProperty = property.category_id !== category.id
+                                                const draggableAttr = canModifyItems && !isInheritedProperty
+                                                return (
+                                                    <div
+                                                        key={property.id}
+                                                        draggable={draggableAttr}
+                                                        onDragStart={() => draggableAttr && handlePropertyDragStart(index)}
+                                                        onDragOver={(e) => draggableAttr && handlePropertyDragOver(e, index)}
+                                                        onDragLeave={() => draggableAttr && handlePropertyDragLeave()}
+                                                        onDrop={(e) => draggableAttr && handlePropertyDrop(e, index)}
+                                                        onDragEnd={() => draggableAttr && handlePropertyDragEnd()}
+                                                        className={`border rounded-lg p-3 bg-muted/30 hover:bg-muted/50 transition-colors ${draggableAttr ? 'cursor-move' : ''} ${draggedPropertyIndex === index ? "opacity-50" : ""
+                                                            } ${hoveredPropertyIndex === index ? "border-primary ring-2 ring-primary/20" : ""
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <div className="flex items-center gap-2 flex-1">
+                                                                <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                                                {renderPropertyIcon(property.icon)}
+                                                                <div className="flex-1">
+                                                                    <h5 className="font-medium text-sm">
+                                                                        {property.name.ar || property.name.en}
+                                                                    </h5>
+                                                                    {property.description && (property.description.ar || property.description.en) && (
+                                                                        <p className="text-xs text-muted-foreground mt-1">
+                                                                            {property.description.ar || property.description.en}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <Badge className={getTypeColor(property.type)}>
+                                                                    {getTypeLabel(property.type)}
+                                                                </Badge>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => isInheritedProperty ? undefined : handleEditProperty(property)}
+                                                                    className="h-7 w-7 p-0"
+                                                                    disabled={isInheritedProperty || !canModifyItems}
+                                                                    title={isInheritedProperty ? 'خاصية موروثة من الأب ولا يمكن تعديلها هنا' : undefined}
+                                                                >
+                                                                    <Edit className="w-3 h-3" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => isInheritedProperty ? undefined : handleDeleteProperty(property)}
+                                                                    className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                                    disabled={isInheritedProperty || !canModifyItems}
+                                                                    title={isInheritedProperty ? 'خاصية موروثة من الأب ولا يمكن حذفها هنا' : undefined}
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                </Button>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <Badge className={getTypeColor(property.type)}>
-                                                                {getTypeLabel(property.type)}
-                                                            </Badge>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleEditProperty(property)}
-                                                                className="h-7 w-7 p-0"
-                                                            >
-                                                                <Edit className="w-3 h-3" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => handleDeleteProperty(property)}
-                                                                className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                            >
-                                                                <Trash2 className="w-3 h-3" />
-                                                            </Button>
+                                                        <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                                            {property.is_filter && (
+                                                                <Badge variant="outline" className="text-xs">
+                                                                    فلتر
+                                                                </Badge>
+                                                            )}
+                                                            {property.options && property.options.length > 0 && (
+                                                                <Badge variant="secondary" className="text-xs">
+                                                                    {property.options.length} خيار
+                                                                </Badge>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                                        {property.is_filter && (
-                                                            <Badge variant="outline" className="text-xs">
-                                                                فلتر
-                                                            </Badge>
-                                                        )}
-                                                        {property.options && property.options.length > 0 && (
-                                                            <Badge variant="secondary" className="text-xs">
-                                                                {property.options.length} خيار
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                )
+                                            })}
                                         </div>
                                     ) : (
                                         <div className="text-center py-8">
@@ -883,6 +917,8 @@ export function CategoriesDetailSidebar({ category, onDelete }: CategoriesDetail
                                         variant="outline"
                                         className="w-full"
                                         onClick={handleAddFeature}
+                                        disabled={!canModifyItems}
+                                        title={canModifyItems ? undefined : "لا يمكن إضافة مميزات لأن هذه الفئة ترث المميزات من الأب"}
                                     >
                                         <Plus className="w-4 h-4 mr-2" />
                                         إضافة مميزة جديدة
@@ -891,58 +927,66 @@ export function CategoriesDetailSidebar({ category, onDelete }: CategoriesDetail
                                     {/* Features List */}
                                     {sortedFeatures && sortedFeatures.length > 0 ? (
                                         <div className="grid grid-cols-2 gap-2">
-                                            {sortedFeatures.map((feature: CategoryFeature, index: number) => (
-                                                <div
-                                                    key={feature.id}
-                                                    draggable
-                                                    onDragStart={() => handleFeatureDragStart(index)}
-                                                    onDragOver={(e) => handleFeatureDragOver(e, index)}
-                                                    onDragLeave={handleFeatureDragLeave}
-                                                    onDrop={(e) => handleFeatureDrop(e, index)}
-                                                    onDragEnd={handleFeatureDragEnd}
-                                                    className={`border rounded-lg flex flex-row gap-4 items-center justify-start p-2 bg-muted/30 hover:bg-muted/50 transition-colors text-center relative group cursor-move ${draggedFeatureIndex === index ? "opacity-50" : ""
-                                                        } ${hoveredFeatureIndex === index ? "border-primary ring-2 ring-primary/20" : ""
-                                                        }`}
-                                                >
-                                                    <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                                    <div className="absolute top-1 left-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7 w-7 p-0"
-                                                            onClick={() => handleEditFeature(feature)}
-                                                        >
-                                                            <Edit className="w-3 h-3" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                                            onClick={() => handleDeleteFeature(feature)}
-                                                        >
-                                                            <Trash2 className="w-3 h-3" />
-                                                        </Button>
-                                                    </div>
-                                                    {feature.icon && (
-                                                        <div className="flex justify-center mb-2">
-                                                            <Images
-                                                                src={feature?.icon}
-                                                                alt=""
-                                                                fill={false}
-                                                                width={20}
-                                                                height={20}
-                                                                className="w-6 h-6 object-cover"
-                                                                onError={(e) => {
-                                                                    e.currentTarget.style.display = 'none'
-                                                                }}
-                                                            />
+                                            {sortedFeatures.map((feature: CategoryFeature, index: number) => {
+                                                const isInheritedFeature = feature.category_id !== category.id
+                                                const draggableAttr = canModifyItems && !isInheritedFeature
+                                                return (
+                                                    <div
+                                                        key={feature.id}
+                                                        draggable={draggableAttr}
+                                                        onDragStart={() => draggableAttr && handleFeatureDragStart(index)}
+                                                        onDragOver={(e) => draggableAttr && handleFeatureDragOver(e, index)}
+                                                        onDragLeave={() => draggableAttr && handleFeatureDragLeave()}
+                                                        onDrop={(e) => draggableAttr && handleFeatureDrop(e, index)}
+                                                        onDragEnd={() => draggableAttr && handleFeatureDragEnd()}
+                                                        className={`border rounded-lg flex flex-row gap-4 items-center justify-start p-2 bg-muted/30 hover:bg-muted/50 transition-colors text-center relative group ${draggableAttr ? 'cursor-move' : ''} ${draggedFeatureIndex === index ? "opacity-50" : ""
+                                                            } ${hoveredFeatureIndex === index ? "border-primary ring-2 ring-primary/20" : ""
+                                                            }`}
+                                                    >
+                                                        <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                                        <div className="absolute top-1 left-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-7 w-7 p-0"
+                                                                onClick={() => isInheritedFeature ? undefined : handleEditFeature(feature)}
+                                                                disabled={isInheritedFeature || !canModifyItems}
+                                                                title={isInheritedFeature ? 'مميزة موروثة من الأب ولا يمكن تعديلها هنا' : undefined}
+                                                            >
+                                                                <Edit className="w-3 h-3" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                                onClick={() => isInheritedFeature ? undefined : handleDeleteFeature(feature)}
+                                                                disabled={isInheritedFeature || !canModifyItems}
+                                                                title={isInheritedFeature ? 'مميزة موروثة من الأب ولا يمكن حذفها هنا' : undefined}
+                                                            >
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </Button>
                                                         </div>
-                                                    )}
-                                                    <p className="text-xs font-medium">
-                                                        {feature.name.ar || feature.name.en}
-                                                    </p>
-                                                </div>
-                                            ))}
+                                                        {feature.icon && (
+                                                            <div className="flex justify-center mb-2">
+                                                                <Images
+                                                                    src={feature?.icon}
+                                                                    alt=""
+                                                                    fill={false}
+                                                                    width={20}
+                                                                    height={20}
+                                                                    className="w-6 h-6 object-cover"
+                                                                    onError={(e) => {
+                                                                        e.currentTarget.style.display = 'none'
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        <p className="text-xs font-medium">
+                                                            {feature.name.ar || feature.name.en}
+                                                        </p>
+                                                    </div>
+                                                )
+                                            })}
                                         </div>
                                     ) : (
                                         <div className="text-center py-8">
