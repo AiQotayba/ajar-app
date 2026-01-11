@@ -53,9 +53,7 @@ export function isAuthenticated(): boolean {
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
   try {
-    const state = store.getState();
-    console.log(state);
-    
+    const state = store.getState();  
     return state.auth.token;
   } catch {
     return null;

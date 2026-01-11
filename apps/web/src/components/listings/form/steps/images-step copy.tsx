@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { X, Upload, Star, Loader2, GripVertical, Link, Trash } from "lucide-react"
+import { X, Upload, Star, Loader2, GripVertical, Link } from "lucide-react"
 import { toast } from "sonner"
 import { uploadImage } from "@/lib/api/listings"
 import { api } from "@/lib/api"
@@ -57,153 +57,6 @@ export function ImagesStep({
 
   const media: any = watch("images") || []
   const isCreateMode = mode === "create"
-
-  const handleRemoveImage = (index: number) => {
-    const newImages = media.filter((_: any, i: any) => i !== index)
-    const newUrls = previewUrls.filter((_, i) => i !== index)
-
-    setValue("images", newImages)
-    setPreviewUrls(newUrls)
-
-    // Revoke the object URL to free memory
-    if (previewUrls[index] && previewUrls[index].startsWith('blob:')) {
-      URL.revokeObjectURL(previewUrls[index])
-    }
-  }
-
-  // fix ❓
-  // Validate URL and check if domain is supported
-  const validateExternalUrl = (url: string): { valid: boolean; error?: string } => {
-    try {
-      const urlObj = new URL(url)
-      const hostname = urlObj.hostname.toLowerCase()
-
-      // Remove www. prefix for comparison
-      const domain = hostname.replace(/^www\./, '')
-
-      // Supported domains
-      const supportedDomains = [
-        'facebook.com',
-        'youtube.com',
-        'youtu.be',
-        'twitter.com',
-        'x.com',
-        'instagram.com',
-        'tiktok.com'
-      ]
-
-      const isSupported = supportedDomains.some(supported =>
-        domain === supported || domain.endsWith('.' + supported)
-      )
-
-      if (!isSupported) {
-        return {
-          valid: false,
-          error: t('unsupportedDomain')
-        }
-      }
-
-      return { valid: true }
-    } catch (error) {
-      return {
-        valid: false,
-        error: t('invalidUrl')
-      }
-    }
-  }
-
-  // fix ❓
-  // Handle adding external link with iframely metadata
-  const handleAddExternalLink = async () => {
-    const trimmedUrl = externalLinkUrl.trim()
-
-    if (!trimmedUrl) {
-      toast.error(t('invalidUrl'))
-      return
-    }
-
-    // Validate URL
-    const validation = validateExternalUrl(trimmedUrl)
-    if (!validation.valid) {
-      toast.error(validation.error || t('invalidUrl'))
-      return
-    }
-
-    // Check if adding would exceed limit
-    if (media.length >= 20) {
-      toast.error(t('maxImagesError'))
-      return
-    }
-
-    setFetchingMetadata(true)
-
-    try {
-      // Fetch metadata using backend endpoint which proxies Iframely
-      const response = await api.post('/general/fetch-media', { url: trimmedUrl })
-
-      if (response.isError) {
-        throw new Error(response.message || 'Failed to fetch metadata')
-      }
-
-      // Extract iframely data - adjust based on your API response structure
-      const iframelyData = response.data?.data || response.data || response
-
-      // Validate required iframely fields
-      if (!iframelyData?.meta || !iframelyData?.links?.thumbnail?.[0]) {
-        console.error('❌ Missing required iframely fields', { iframelyData })
-        toast.error(t('fetchError'))
-        setFetchingMetadata(false)
-        return
-      }
-
-      const thumbCandidate = iframelyData.links.thumbnail[0]
-      const thumbnailUrl = thumbCandidate.href || iframelyData.thumbnail_url || trimmedUrl
-
-      // Build media object matching Flutter structure
-      const mediaObject = {
-        type: iframelyData.meta.medium === 'video' ? 'video' : 'image',
-        url: thumbnailUrl,
-        source: "iframely",
-        iframely: {
-          url: trimmedUrl,
-          meta: iframelyData.meta || {},
-          thumbnail: {
-            href: thumbCandidate.href,
-            type: thumbCandidate.type,
-            content_length: thumbCandidate.content_length,
-            media: thumbCandidate.media,
-          },
-          links: iframelyData.links || {},
-          html: iframelyData.html || '',
-          rel: iframelyData.rel || [],
-          options: iframelyData.options || {}
-        }
-      }
-
-      // Add to media array
-      const newMedia = [...media, mediaObject]
-      console.log(newMedia);
-
-      setValue("images", newMedia as any)
-
-      // Add preview URL
-      setPreviewUrls([...previewUrls, thumbnailUrl])
-
-      // Reset dialog
-      setExternalLinkUrl("")
-      setExternalLinkDialogOpen(false)
-
-      toast.success(t('linkAddedSuccess'))
-    } catch (error: any) {
-      console.error("❌ Error fetching iframely metadata:", error)
-      toast.error(t('fetchError'))
-    } finally {
-      setFetchingMetadata(false)
-    }
-  } 
-  console.log("state:" , media);
-  
-
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -308,6 +161,19 @@ export function ImagesStep({
     }
   }
 
+  const handleRemoveImage = (index: number) => {
+    const newImages = media.filter((_: any, i: any) => i !== index)
+    const newUrls = previewUrls.filter((_, i) => i !== index)
+
+    setValue("images", newImages)
+    setPreviewUrls(newUrls)
+
+    // Revoke the object URL to free memory
+    if (previewUrls[index] && previewUrls[index].startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrls[index])
+    }
+  }
+
   // Drag and drop handlers (only in create mode)
   const handleDragStart = (index: number) => {
     if (!isCreateMode) return
@@ -359,6 +225,138 @@ export function ImagesStep({
     setDraggedIndex(null)
     setDragOverIndex(null)
   }
+
+  // Validate URL and check if domain is supported
+  const validateExternalUrl = (url: string): { valid: boolean; error?: string } => {
+    try {
+      const urlObj = new URL(url)
+      const hostname = urlObj.hostname.toLowerCase()
+
+      // Remove www. prefix for comparison
+      const domain = hostname.replace(/^www\./, '')
+
+      // Supported domains
+      const supportedDomains = [
+        'facebook.com',
+        'youtube.com',
+        'youtu.be',
+        'twitter.com',
+        'x.com',
+        'instagram.com',
+        'tiktok.com'
+      ]
+
+      const isSupported = supportedDomains.some(supported =>
+        domain === supported || domain.endsWith('.' + supported)
+      )
+
+      if (!isSupported) {
+        return {
+          valid: false,
+          error: t('unsupportedDomain')
+        }
+      }
+
+      return { valid: true }
+    } catch (error) {
+      return {
+        valid: false,
+        error: t('invalidUrl')
+      }
+    }
+  }
+
+  // Handle adding external link with iframely metadata
+  // ... (الكود السابق يبقى كما هو)
+
+  // Handle adding external link with iframely metadata
+  const handleAddExternalLink = async () => {
+    const trimmedUrl = externalLinkUrl.trim()
+
+    if (!trimmedUrl) {
+      toast.error(t('invalidUrl'))
+      return
+    }
+
+    // Validate URL
+    const validation = validateExternalUrl(trimmedUrl)
+    if (!validation.valid) {
+      toast.error(validation.error || t('invalidUrl'))
+      return
+    }
+
+    // Check if adding would exceed limit
+    if (media.length >= 20) {
+      toast.error(t('maxImagesError'))
+      return
+    }
+
+    setFetchingMetadata(true)
+
+    try {
+      // Fetch metadata using backend endpoint which proxies Iframely
+      const response = await api.post('/general/fetch-media', { url: trimmedUrl })
+
+      if (response.isError) {
+        throw new Error(response.message || 'Failed to fetch metadata')
+      }
+
+      // Extract iframely data - adjust based on your API response structure
+      const iframelyData = response.data?.data || response.data || response
+
+      // Validate required iframely fields
+      if (!iframelyData?.meta || !iframelyData?.links?.thumbnail?.[0]) {
+        console.error('❌ Missing required iframely fields', { iframelyData })
+        toast.error(t('fetchError'))
+        setFetchingMetadata(false)
+        return
+      }
+
+      const thumbCandidate = iframelyData.links.thumbnail[0]
+      const thumbnailUrl = thumbCandidate.href || iframelyData.thumbnail_url || trimmedUrl
+
+      // Build media object matching Flutter structure
+      const mediaObject = {
+        type: iframelyData.meta.medium == 'video' ? 'video' : 'image',
+        url: thumbnailUrl,
+        source: "iframely",
+        iframely: {
+          url: trimmedUrl,
+          meta: iframelyData.meta || {},
+          thumbnail: {
+            href: thumbCandidate.href,
+            type: thumbCandidate.type,
+            content_length: thumbCandidate.content_length,
+            media: thumbCandidate.media,
+          },
+          links: iframelyData.links || {},
+          html: iframelyData.html || '',
+          rel: iframelyData.rel || [],
+          options: iframelyData.options || {}
+        }
+      }
+
+      // Add to media array
+      const newMedia = [...media, mediaObject]
+      setValue("images", newMedia as any)
+
+      // Add preview URL
+      setPreviewUrls([...previewUrls, thumbnailUrl])
+
+      // Reset dialog
+      setExternalLinkUrl("")
+      setExternalLinkDialogOpen(false)
+
+      toast.success(t('linkAddedSuccess'))
+    } catch (error: any) {
+      console.error("❌ Error fetching iframely metadata:", error)
+      toast.error(t('fetchError'))
+    } finally {
+      setFetchingMetadata(false)
+    }
+  }
+
+  // ... (باقي الكود يبقى كما هو)
 
   // Helper to get image URL for display
   const getImageUrl = (mediaItem: any, index: number) => {
@@ -587,16 +585,6 @@ export function ImagesStep({
                   className="absolute top-2 left-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="h-3 w-3" />
-                </Button>
-                {/* Delete Button (text) - appears on hover, for clearer action */}
-                <Button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  variant="destructive"
-                  size="sm"
-                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded"
-                >
-                  <Trash className="h-3 w-3 mr-1 inline" />
                 </Button>
               </div>
             ))}

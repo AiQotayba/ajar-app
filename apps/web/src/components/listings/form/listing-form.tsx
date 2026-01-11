@@ -605,6 +605,9 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         const transformedImages = images
             .filter((image) => image !== null && image !== undefined)
             .map((image: any, index) => {
+                console.log("transformedImages", image);
+                    console.log("iframely", image);
+
                 if (image instanceof File) {
                     throw new Error(t('actions.uploadImagesFirst'))
                 } else if (typeof image === 'string' && image.trim() !== '') {
@@ -616,6 +619,8 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                         sort_order: index + 1
                     }
                 } else if (image && typeof image === 'object' && !Array.isArray(image)) {
+                    console.log("iframely", image);
+
                     // Handle iframely objects
                     if ((image.source === 'iframely' || image.iframely) && image.iframely) {
                         // Ensure iframely object has the required structure for Flutter
@@ -702,6 +707,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             longitude: formData.longitude?.toString() || "",
         }
     }
+
     const ensureIframelyForStrings = async (formData: ListingFormData): Promise<ListingFormData> => {
         const images = formData.images || []
 
@@ -785,13 +791,15 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         mutationFn: async (data: ListingFormData) => {
             // Already normalized in onSubmit
             const transformedData = transformFormDataToAPI(data)
+            console.log(transformedData.media);
 
             // Send to API
-            const result = await api.post(`/user/listings`, transformedData)
-            if (result.isError) {
-                throw new Error(result.message || "Failed to create listing")
-            }
-            return result
+            // const result = await api.post(`/user/listings`, transformedData)
+            // if (result.isError) {
+            //     throw new Error(result.message || "Failed to create listing")
+            // }
+            // return result
+            return { data: { id: 12345 } } // Mocked response
         },
         onSuccess: (data) => {
 
