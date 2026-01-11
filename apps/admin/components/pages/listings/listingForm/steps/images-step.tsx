@@ -4,12 +4,21 @@ import { useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { X, Upload, Star, Loader2, GripVertical } from "lucide-react"
+import { X, Upload, Star, Loader2, GripVertical, Link } from "lucide-react"
 import { toast } from "sonner"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import type { ListingFormData } from "../types"
 import Images from "@/components/ui/image"
+import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface ImagesStepProps {
   onNext: () => void
@@ -35,6 +44,9 @@ export function ImagesStep({
   const [uploadingFiles, setUploadingFiles] = useState<Set<number>>(new Set())
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [externalLinkDialogOpen, setExternalLinkDialogOpen] = useState(false)
+  const [externalLinkUrl, setExternalLinkUrl] = useState("")
+  const [fetchingMetadata, setFetchingMetadata] = useState(false)
 
   // Use external preview URLs if provided, otherwise use internal state
   const previewUrls = externalPreviewUrls || internalPreviewUrls
@@ -221,6 +233,96 @@ export function ImagesStep({
     setDragOverIndex(null)
   }
 
+  // Validate URL and check supported domains (simple check)
+  const validateExternalUrl = (url: string): { valid: boolean; error?: string } => {
+    try {
+      const urlObj = new URL(url)
+      const hostname = urlObj.hostname.toLowerCase()
+      const domain = hostname.replace(/^www\./, '')
+      const supportedDomains = [
+        'facebook.com',
+        'youtube.com',
+        'youtu.be',
+        'twitter.com',
+        'x.com',
+        'instagram.com',
+        'tiktok.com'
+      ]
+      const isSupported = supportedDomains.some(supported => domain === supported || domain.endsWith('.' + supported))
+      if (!isSupported) {
+        return { valid: false, error: 'الدومين غير مدعوم' }
+      }
+      return { valid: true }
+    } catch (error) {
+      return { valid: false, error: 'رابط غير صالح' }
+    }
+  }
+
+  // Handle adding external link via backend fetch-media endpoint
+  const handleAddExternalLink = async () => {
+    const trimmedUrl = externalLinkUrl.trim()
+    if (!trimmedUrl) {
+      toast.error('الرجاء إدخال رابط صالح')
+      return
+    }
+
+    const validation = validateExternalUrl(trimmedUrl)
+    if (!validation.valid) {
+      toast.error(validation.error || 'رابط غير صالح')
+      return
+    }
+
+    if (media.length >= 20) {
+      toast.error('يمكن رفع 20 صورة كحد أقصى')
+      return
+    }
+
+    setFetchingMetadata(true)
+    try {
+      const response = await api.post('/general/fetch-media', { url: trimmedUrl })
+      if (response.isError) {
+        throw new Error(response.message || 'فشل جلب البيانات')
+      }
+
+      const iframelyData = response.data?.data || response.data || response
+
+      // Extract thumbnail
+      let thumbnailUrl = trimmedUrl
+      if (iframelyData.links?.thumbnail?.[0]?.href) {
+        thumbnailUrl = iframelyData.links.thumbnail[0].href
+      } else if (iframelyData.thumbnail_url) {
+        thumbnailUrl = iframelyData.thumbnail_url
+      }
+
+      const mediaObject = {
+        type: 'image',
+        url: thumbnailUrl,
+        source: 'iframely',
+        iframely: {
+          url: trimmedUrl,
+          meta: iframelyData.meta || {},
+          links: iframelyData.links || {},
+          html: iframelyData.html || '',
+          rel: iframelyData.rel || [],
+          options: iframelyData.options || {}
+        }
+      }
+
+      const newMedia = [...media, mediaObject]
+      setValue('images', newMedia as any)
+      setPreviewUrls([...previewUrls, thumbnailUrl])
+
+      setExternalLinkUrl('')
+      setExternalLinkDialogOpen(false)
+      toast.success('تم إضافة الرابط بنجاح')
+    } catch (error: any) {
+      console.error('❌ Error fetching external media:', error)
+      toast.error('فشل جلب بيانات الوسائط')
+    } finally {
+      setFetchingMetadata(false)
+    }
+  }
+
   // Helper to get image URL for display
   const getImageUrl = (mediaItem: any, index: number) => {
     if (typeof mediaItem === 'string') {
@@ -275,22 +377,92 @@ export function ImagesStep({
               disabled={uploading}
             />
           </div>
-          <Button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            variant="outline"
-            className="mt-4"
-            disabled={uploading}
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                جاري الرفع...
-              </>
-            ) : (
-              'اختيار الصور'
-            )}
-          </Button>
+          <div className="flex gap-3 justify-center mt-4">
+            <Button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              disabled={uploading}
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  جاري الرفع...
+                </>
+              ) : (
+                'اختيار الصور'
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setExternalLinkDialogOpen(true)}
+              variant="outline"
+              disabled={uploading || media.length >= 20}
+              className="gap-2"
+            >
+              <Link className="h-4 w-4" />
+              إضافة رابط خارجي
+            </Button>
+          </div>
+
+          {/* External Link Dialog */}
+          <Dialog open={externalLinkDialogOpen} onOpenChange={setExternalLinkDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>إضافة رابط خارجي</DialogTitle>
+                <DialogDescription>
+                  أدخل رابط فيديو أو صورة من مواقع مدعومة (يوتيوب، فيسبوك، تيك توك...)
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="external-link-url">الرابط الخارجي</Label>
+                  <Input
+                    id="external-link-url"
+                    type="url"
+                    placeholder="https://"
+                    value={externalLinkUrl}
+                    onChange={(e) => setExternalLinkUrl(e.target.value)}
+                    disabled={fetchingMetadata}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !fetchingMetadata) {
+                        handleAddExternalLink()
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground">الدومينات المدعومة: YouTube, Facebook, Instagram, TikTok, X</p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setExternalLinkDialogOpen(false)
+                    setExternalLinkUrl("")
+                  }}
+                  disabled={fetchingMetadata}
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleAddExternalLink}
+                  disabled={fetchingMetadata || !externalLinkUrl.trim()}
+                >
+                  {fetchingMetadata ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      جلب البيانات...
+                    </>
+                  ) : (
+                    'إضافة'
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {media.length === 0 && (

@@ -16,6 +16,7 @@ import {
 import { X, Upload, Star, Loader2, GripVertical, Link } from "lucide-react"
 import { toast } from "sonner"
 import { uploadImage } from "@/lib/api/listings"
+import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { ListingFormData } from "../types"
@@ -230,10 +231,10 @@ export function ImagesStep({
     try {
       const urlObj = new URL(url)
       const hostname = urlObj.hostname.toLowerCase()
-      
+
       // Remove www. prefix for comparison
       const domain = hostname.replace(/^www\./, '')
-      
+
       // Supported domains
       const supportedDomains = [
         'facebook.com',
@@ -244,18 +245,18 @@ export function ImagesStep({
         'instagram.com',
         'tiktok.com'
       ]
-      
-      const isSupported = supportedDomains.some(supported => 
+
+      const isSupported = supportedDomains.some(supported =>
         domain === supported || domain.endsWith('.' + supported)
       )
-      
+
       if (!isSupported) {
         return {
           valid: false,
           error: t('unsupportedDomain')
         }
       }
-      
+
       return { valid: true }
     } catch (error) {
       return {
@@ -266,9 +267,12 @@ export function ImagesStep({
   }
 
   // Handle adding external link with iframely metadata
+  // ... (الكود السابق يبقى كما هو)
+
+  // Handle adding external link with iframely metadata
   const handleAddExternalLink = async () => {
     const trimmedUrl = externalLinkUrl.trim()
-    
+
     if (!trimmedUrl) {
       toast.error(t('invalidUrl'))
       return
@@ -290,39 +294,41 @@ export function ImagesStep({
     setFetchingMetadata(true)
 
     try {
-      // Fetch iframely metadata
-      const iframelyApiKey = process.env.NEXT_PUBLIC_IFRAMELY_API_KEY || '3906e9589bd2ee8d96ec9673748849cf'
-      const encodedUrl = encodeURIComponent(trimmedUrl)
-      const iframelyUrl = `https://cdn.iframe.ly/api/iframe?url=${encodedUrl}&key=${iframelyApiKey}`
+      // Fetch metadata using backend endpoint which proxies Iframely
+      const response = await api.post('/general/fetch-media', { url: trimmedUrl })
 
-      const response = await fetch(iframelyUrl)
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      if (response.isError) {
+        throw new Error(response.message || 'Failed to fetch metadata')
       }
 
-      const iframelyData = await response.json()
+      // Extract iframely data - adjust based on your API response structure
+      const iframelyData = response.data?.data || response.data || response
 
-      if (!iframelyData || iframelyData.error) {
-        throw new Error(iframelyData.error || 'Failed to fetch metadata')
+      // Validate required iframely fields
+      if (!iframelyData?.meta || !iframelyData?.links?.thumbnail?.[0]) {
+        console.error('❌ Missing required iframely fields', { iframelyData })
+        toast.error(t('fetchError'))
+        setFetchingMetadata(false)
+        return
       }
 
-      // Extract thumbnail URL
-      let thumbnailUrl = trimmedUrl
-      if (iframelyData.links?.thumbnail?.[0]?.href) {
-        thumbnailUrl = iframelyData.links.thumbnail[0].href
-      } else if (iframelyData.thumbnail_url) {
-        thumbnailUrl = iframelyData.thumbnail_url
-      }
+      const thumbCandidate = iframelyData.links.thumbnail[0]
+      const thumbnailUrl = thumbCandidate.href || iframelyData.thumbnail_url || trimmedUrl
 
-      // Create media object with iframely data
+      // Build media object matching Flutter structure
       const mediaObject = {
-        type: "image",
+        type: iframelyData.meta.medium === 'video' ? 'video' : 'image',
         url: thumbnailUrl,
         source: "iframely",
         iframely: {
           url: trimmedUrl,
           meta: iframelyData.meta || {},
+          thumbnail: {
+            href: thumbCandidate.href,
+            type: thumbCandidate.type,
+            content_length: thumbCandidate.content_length,
+            media: thumbCandidate.media,
+          },
           links: iframelyData.links || {},
           html: iframelyData.html || '',
           rel: iframelyData.rel || [],
@@ -349,6 +355,8 @@ export function ImagesStep({
       setFetchingMetadata(false)
     }
   }
+
+  // ... (باقي الكود يبقى كما هو)
 
   // Helper to get image URL for display
   const getImageUrl = (mediaItem: any, index: number) => {

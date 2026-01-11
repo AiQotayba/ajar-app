@@ -78,6 +78,8 @@ export function ListingsGallery({
 
   // Prepare images array - use cover image as first if available, then add other images
   const allImages = images
+  console.log(allImages);
+  
 
   // Sort images by sort_order
   const sortedImages = allImages.sort((a, b) => a.sort_order - b.sort_order)

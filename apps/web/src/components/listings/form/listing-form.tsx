@@ -151,7 +151,19 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 city_id: listing.city?.id?.toString() || "",
                 latitude: listing.latitude ? parseFloat(listing.latitude.toString()) : validatedCoords.lat,
                 longitude: listing.longitude ? parseFloat(listing.longitude.toString()) : validatedCoords.lng,
-                images: listing.media?.map((m: any) => m.url || m.image_url || m) || [],
+                // Preserve full media objects (especially iframely objects) when present.
+                images: listing.media?.map((m: any) => {
+                    if (!m) return m
+                    // If it's an iframely object (or already an object with nested data) preserve it
+                    if (typeof m === 'object') {
+                        // If it's an object that contains iframely data, keep the whole object
+                        if (m.iframely || m.source === 'iframely') return m
+                        // If it's a plain media object with url fields, keep the whole object too
+                        if (m.url || m.image_url || m.full_url) return m
+                    }
+                    // Fallback to string values
+                    return typeof m === 'string' ? m : (m?.url || m?.image_url || m || '')
+                }) || [],
                 cover_image_index: (listing as any).cover_image_index || 0,
                 price: listing.price || 0,
                 pay_every: listing.pay_every ? String(listing.pay_every) : "",
@@ -254,6 +266,13 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 if (listing.media && listing.media.length > 0) {
                     const urls = listing.media.map((m: any) => {
                         if (typeof m === 'string') return m
+
+                        // iframely objects: prefer thumbnail if available
+                        if (m.iframely) {
+                            return m.iframely.links?.thumbnail?.[0]?.href || m.iframely.thumbnail_url || m.url || m.image_url || m.full_url || ""
+                        }
+
+                        // plain media object: prefer url fields
                         return m.url || m.image_url || m.full_url || ""
                     }).filter(Boolean)
                     setPreviewUrls(urls)
@@ -582,12 +601,14 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             throw new Error(t('validation.imagesRequired'))
         }
 
+
         const transformedImages = images
             .filter((image) => image !== null && image !== undefined)
-            .map((image, index) => {
+            .map((image: any, index) => {
                 if (image instanceof File) {
                     throw new Error(t('actions.uploadImagesFirst'))
                 } else if (typeof image === 'string' && image.trim() !== '') {
+                    // String URLs for regular images
                     return {
                         type: "image",
                         url: image.trim(),
@@ -595,39 +616,60 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                         sort_order: index + 1
                     }
                 } else if (image && typeof image === 'object' && !Array.isArray(image)) {
-                    const imageObj = image as { 
-                        type?: string; 
-                        url?: string; 
-                        source?: string; 
-                        sort_order?: number;
-                        iframely?: any;
-                    }
-                    
-                    // If it's an iframely object, include the full iframely data
-                    if (imageObj.source === 'iframely' && imageObj.iframely) {
+                    // Handle iframely objects
+                    if ((image.source === 'iframely' || image.iframely) && image.iframely) {
+                        // Ensure iframely object has the required structure for Flutter
+                        const iframelyData = image.iframely
+
+                        // If thumbnail is nested inside iframely object, keep it there
+                        // Otherwise, create a thumbnail object from links.thumbnail[0]
+                        let thumbnailData = iframelyData.thumbnail
+
+                        if (!thumbnailData && iframelyData.links?.thumbnail?.[0]) {
+                            const thumb = iframelyData.links.thumbnail[0]
+                            thumbnailData = {
+                                href: thumb.href,
+                                type: thumb.type,
+                                content_length: thumb.content_length,
+                                media: thumb.media
+                            }
+                        }
+
                         return {
-                            type: imageObj.type || "image",
-                            url: imageObj.url || '',
+                            type: image.type || (iframelyData.meta?.medium === 'video' ? 'video' : 'image'),
+                            url: image.url || '',
                             source: "iframely",
-                            iframely: imageObj.iframely,
-                            sort_order: imageObj.sort_order || index + 1
+                            iframely: {
+                                url: iframelyData.url || image.url || '',
+                                meta: iframelyData.meta || {},
+                                thumbnail: thumbnailData,
+                                links: iframelyData.links || {},
+                                html: iframelyData.html || '',
+                                rel: iframelyData.rel || [],
+                                options: iframelyData.options || {}
+                            },
+                            sort_order: index + 1
                         }
                     }
-                    
+
                     // Regular object without iframely
                     return {
-                        type: imageObj.type || "image",
-                        url: imageObj.url || '',
-                        source: imageObj.source || "file",
-                        sort_order: imageObj.sort_order || index + 1
+                        type: image.type || "image",
+                        url: image.url || '',
+                        source: image.source || "file",
+                        sort_order: index + 1
                     }
                 } else {
                     return null
                 }
             })
-            .filter((item): item is { type: string; url: string; source: string; sort_order: number; iframely?: any } =>
-                item !== null && item !== undefined && item.url !== undefined && item.url !== ''
-            )
+            .filter((item): item is {
+                type: string;
+                url: string;
+                source: string;
+                sort_order: number;
+                iframely?: any
+            } => item !== null && item !== undefined && item.url !== undefined && item.url !== '')
 
         if (transformedImages.length === 0) {
             throw new Error(t('validation.imagesRequired'))
@@ -660,21 +702,104 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             longitude: formData.longitude?.toString() || "",
         }
     }
+    const ensureIframelyForStrings = async (formData: ListingFormData): Promise<ListingFormData> => {
+        const images = formData.images || []
 
+        if (!Array.isArray(images)) {
+            return formData
+        }
+
+        const supportedDomains = ['facebook.com', 'youtube.com', 'youtu.be', 'twitter.com', 'x.com', 'instagram.com', 'tiktok.com']
+
+        const isSupported = (url: string) => {
+            try {
+                const hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, '')
+                return supportedDomains.some(d => hostname === d || hostname.endsWith('.' + d))
+            } catch (e) {
+                return false
+            }
+        }
+
+        const normalizedImages = await Promise.all(images.map(async (img: any) => {
+            // If it's already an object with iframely data, keep it
+            if (img && typeof img === 'object' && img.iframely) {
+                return img
+            }
+
+            // If it's a string URL for supported domains, fetch iframely data
+            if (typeof img === 'string' && img.trim() !== '' && isSupported(img)) {
+                try {
+                    const response = await api.post('/general/fetch-media', { url: img })
+                    if (response.isError || !response.data) {
+                        console.warn('Failed to fetch iframely for URL:', img)
+                        return img // Return as string if fetch fails
+                    }
+
+                    const iframelyData = response.data?.data || response.data
+
+                    // Validate iframely structure
+                    if (!iframelyData?.meta || !iframelyData?.links?.thumbnail?.[0]) {
+                        console.warn('Incomplete iframely data for URL:', img)
+                        return img
+                    }
+
+                    const thumbCandidate = iframelyData.links.thumbnail[0]
+                    const thumbnailUrl = thumbCandidate.href || iframelyData.thumbnail_url || img
+
+                    return {
+                        type: iframelyData.meta.medium === 'video' ? 'video' : 'image',
+                        url: thumbnailUrl,
+                        source: 'iframely',
+                        iframely: {
+                            url: img,
+                            meta: iframelyData.meta || {},
+                            thumbnail: {
+                                href: thumbCandidate.href,
+                                type: thumbCandidate.type,
+                                content_length: thumbCandidate.content_length,
+                                media: thumbCandidate.media,
+                            },
+                            links: iframelyData.links || {},
+                            html: iframelyData.html || '',
+                            rel: iframelyData.rel || [],
+                            options: iframelyData.options || {}
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Error fetching iframely data:', error)
+                    return img // Return as string on error
+                }
+            }
+
+            // Return other types as-is
+            return img
+        }))
+
+        return {
+            ...formData,
+            images: normalizedImages
+        }
+    }
     // Create mutation
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
+            // Already normalized in onSubmit
             const transformedData = transformFormDataToAPI(data)
+
+            // Send to API
             const result = await api.post(`/user/listings`, transformedData)
+            if (result.isError) {
+                throw new Error(result.message || "Failed to create listing")
+            }
             return result
         },
         onSuccess: (data) => {
 
             queryClient.invalidateQueries({ queryKey: ["user-listings"] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
-            setShowSuccess(true)
-            setIsLoading(false)
-            onSuccess?.()
+            // setShowSuccess(true)
+            // setIsLoading(false)
+            // onSuccess?.()
         },
         onError: (error: any) => {
             let errorMessage = t('actions.createError')
@@ -763,34 +888,34 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
 
     // Form submission
     const onSubmit = async (data: ListingFormData) => {
-        const isValid = await trigger()
-        setIsLoading(false)
-
-        if (!isValid) {
-            const validationErrors = methods.formState.errors
-            console.error("❌ [VALIDATION ERRORS] Form validation failed:", validationErrors)
-            toast.error(t('actions.formErrors'))
-            return
-        }
-
         setIsLoading(true)
+
         try {
+            // Ensure external URLs have proper iframely structure
+            const normalizedData = await ensureIframelyForStrings(data)
+
+            const isValid = await trigger()
+
+            if (!isValid) {
+                const validationErrors = methods.formState.errors
+                console.error("❌ [VALIDATION ERRORS] Form validation failed:", validationErrors)
+                toast.error(t('actions.formErrors'))
+                setIsLoading(false)
+                return
+            }
+
             if (currentStep === 4) {
                 if (isEditMode) {
-                    await updateMutation.mutateAsync(data)
+                    await updateMutation.mutateAsync(normalizedData)
                 } else {
-                    await createMutation.mutateAsync(data)
+                    await createMutation.mutateAsync(normalizedData)
                 }
             }
 
             setIsLoading(false)
         } catch (error: any) {
-            // Error handling is done in mutation onError handlers
-            // This catch is just to prevent unhandled promise rejection
             console.error("❌ [SUBMISSION ERROR] Form submission error:", error)
             setIsLoading(false)
-            // Stop the process - don't continue with success flow
-            // The mutation's onError handler will show the toast and handle the error
         }
     }
 

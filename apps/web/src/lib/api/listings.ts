@@ -28,7 +28,8 @@ export interface CreateListingRequest {
   media: Array<{
     type: "image"
     url: string
-    source: "file"
+    source: "file" | "iframely"
+    iframely?: any
     sort_order: number
   }>
 }
@@ -295,12 +296,34 @@ export const transformFormDataToAPI = (formData: any): CreateListingRequest => {
       sort_order: index + 1
     })),
     features: formData.features.map((id: string) => parseInt(id)),
-    media: formData.media.map((mediaItem: any, index: number) => ({
-      type: "image",
-      url: typeof mediaItem === 'string' ? mediaItem : mediaItem.url, // Use uploaded URL or existing URL
-      source: "file",
-      sort_order: index + 1
-    }))
+    media: formData.media.map((mediaItem: any, index: number) => {
+      // If the media item is a string (uploaded file URL)
+      if (typeof mediaItem === 'string') {
+        return {
+          type: "image",
+          url: mediaItem,
+          source: "file",
+          sort_order: index + 1
+        }
+      }
+
+      // If frontend provided a full object
+      const item: any = {}
+      // Determine type: prefer provided type, otherwise default to image
+      item.type = mediaItem.type || (mediaItem.iframely && mediaItem.iframely.meta && mediaItem.iframely.meta.medium === 'video' ? 'video' : 'image')
+      item.url = mediaItem.url || mediaItem.image_url || ''
+
+      // Preserve iframely payload if present
+      if (mediaItem.iframely) {
+        item.source = 'iframely'
+        item.iframely = mediaItem.iframely
+      } else {
+        item.source = mediaItem.source || 'file'
+      }
+
+      item.sort_order = index + 1
+      return item
+    })
   }
 
   return transformedData

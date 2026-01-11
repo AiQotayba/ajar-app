@@ -130,7 +130,7 @@ export function MyListingsContent() {
                     <p className="text-muted-foreground text-center mb-6">
                         {t('noListingsDescription')}
                     </p>
-                    <Link href="/listings/create">
+                    <Link href="/my-listings/create">
                         <Button size="lg">
                             <Plus className="w-5 h-5 mr-2" />
                             {t('addListing')}
@@ -147,7 +147,7 @@ export function MyListingsContent() {
             {/* Add new listing button */}
             <div className="p-4 flex justify-between">
                 <h1 className="text-2xl font-bold">{t('menuItems.myListings')}</h1>
-                <Link href="/listings/create" className="max-w-[300px] ">
+                <Link href="/my-listings/create" className="max-w-[300px] ">
                     <Button className="w-full" size="lg">
                         <Plus className="w-5 h-5 mr-2" />
                         {t('addListing')}

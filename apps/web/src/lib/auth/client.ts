@@ -54,6 +54,8 @@ export function getToken(): string | null {
   if (typeof window === 'undefined') return null;
   try {
     const state = store.getState();
+    console.log(state);
+    
     return state.auth.token;
   } catch {
     return null;
@@ -168,6 +170,8 @@ export function handleAuthResponse(response: AuthResponse): void {
   if (typeof window === 'undefined') return;
   if (response.success && response.access_token) {
     try {
+      console.log(response);
+      
       // Store in Redux (for client-side)
       store.dispatch(setAuth(response));
       // Store in cookies (for middleware and server-side)
