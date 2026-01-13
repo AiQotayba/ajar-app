@@ -16,7 +16,7 @@ import { HeartFillIcon } from "../icons/heart-fill"
 import { PinIcon } from "../icons/pin"
 import { ShareIcon } from "../icons/share"
 import { ShieldCheckIcon } from "../icons/shield-check"
-import { MoreVertical, Edit, Trash2 } from "lucide-react"
+import { MoreVertical, Edit, Trash2, Eye } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -162,7 +162,7 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const t = useTranslations('property')
   const currentLocale = useLocale()
   const router = useRouter()
-  console.log(listing)
+  // console.log(listing)
   // Track view when listing card enters viewport (only in lists, not in details)
   const viewTrackerRef = useListingViewTracker(listing.id, {
     enabled: !openEdit, // Only track in lists, not in edit/delete views
@@ -332,6 +332,15 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
 
           {/* Action Buttons */}
           <div className="absolute top-4 left-4 flex gap-2 z-30">
+            <Button
+              variant="secondary"
+              className="h-10 flex text-white items-center justify-center rounded-full shadow-lg backdrop-blur-sm bg-black/30 hover:bg-black/30"
+            >
+              <Eye className="!h-6 !w-6 text-white" />
+              <span className="-mb-1">
+                {listing.views_count}
+              </span>
+            </Button>
             <Button
               size="icon"
               variant="secondary"

@@ -36,25 +36,29 @@ export const getTypeIcon = (type: string) => {
 // Get readable key name
 export const getKeyLabel = (key: string) => {
     const labels: Record<string, string> = {
-        app_name: "اسم التطبيق",
-        app_name2: "اسم التطبيق",
+        "app_name": "اسم التطبيق",
+        "app_name2": "اسم التطبيق",
         "about-app-ar": "نبذة عن التطبيق بالعربية",
-        "about-app-en": "نبذة عن التطبيق بالانجليزية", 
-        currency: "العملة",
-        phone: "رقم الهاتف",
+        "about-app-en": "نبذة عن التطبيق بالانجليزية",
+        "currency": "العملة",
+        "phone": "رقم الهاتف",
         "policy-ar": "سياسة الخصوصية بالعربية",
         "policy-en": "سياسة الخصوصية بالانجليزية",
         "terms-ar": "الشروط والأحكام بالعربية",
         "terms-en": "الشروط والأحكام بالانجليزية",
-        email: "البريد الإلكتروني",
-        address: "العنوان",
-        whatsapp: "رقم الواتساب",
-        facebook_url: "رابط فيسبوك",
-        twitter_url: "رابط تويتر",
-        instagram_url: "رابط إنستغرام",
-        about_us: "عن التطبيق",
-        terms_and_conditions: "الشروط والأحكام",
-        privacy_policy: "سياسة الخصوصية",
+        "email": "البريد الإلكتروني",
+        "address": "العنوان",
+        "whatsapp": "رقم الواتساب",
+        "facebook_url": "رابط فيسبوك",
+        "twitter_url": "رابط تويتر",
+        "instagram_url": "رابط إنستغرام",
+        "about_us": "عن التطبيق",
+        "terms_and_conditions": "الشروط والأحكام",
+        "privacy_policy": "سياسة الخصوصية",
+        "footer-title-ar": "عنوان الفوتر بالعربية",
+        "footer-title-en": "عنوان الفوتر بالانجليزية",
+        "footer-description-ar": "وصف الفوتر بالعربية",
+        "footer-description-en": "وصف الفوتر بالانجليزية"
     }
     return labels[key] || key
 }
@@ -65,7 +69,7 @@ const SettingsValue = ({ value, row }: { value: string, row: Setting }) => {
         <p className="flex items-center justify-between group text-sm text-foreground line-clamp-2 max-w-md">
             {row.type !== "html" && value}
             {row.type === "html" && <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-                <Eye /> 
+                <Eye />
                 <p className="">عرض html</p>
             </Button>}
             <Dialog open={open} onOpenChange={setOpen}>

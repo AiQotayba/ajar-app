@@ -104,6 +104,7 @@ export function ListingsDetails({ id, locale = 'ar', initialData }: ListingsDeta
     initialData: initialData ? { data: initialData, isError: false, status: 200 } : undefined, // Use cached data from server
     // If we have initial data, the query will use it and won't refetch immediately
   })
+  console.log(response);
 
   // Track view when component mounts and listing is loaded
   // For details page, send immediately without debounce

@@ -1,4 +1,5 @@
 import { Bath, Car, CheckCircle, Heart, Settings, Shield, Truck, Wifi, Wind } from "lucide-react"
+import Image from "next/image"
 
 interface Feature {
   id: number
@@ -12,42 +13,10 @@ interface ListingsFeaturesProps {
   locale?: string
 }
 
-const iconMap = {
-  bath: Bath,
-  wifi: Wifi,
-  ac: Wind,
-  parking: Car,
-  delivery: Truck,
-  handmade: Settings,
-  adjustable: Settings,
-  foldable: Settings,
-  storage: Shield,
-  wheels: Car,
-  waterproof: Shield,
-  eco: Heart,
-  default: CheckCircle,
-}
 
-export function ListingsFeatures({ features, locale = 'ar' }: ListingsFeaturesProps) { 
+export function ListingsFeatures({ features, locale = 'ar' }: ListingsFeaturesProps) {
   if (!features || features.length === 0) {
     return null
-  }
-
-  const getIcon = (featureName: string, icon?: string) => {
-    const name = featureName.toLowerCase()
-    
-    // Check for specific keywords in the feature name
-    if (name.includes('توصيل') || name.includes('delivery')) return Truck
-    if (name.includes('يدوي') || name.includes('handmade')) return Settings
-    if (name.includes('تعديل') || name.includes('adjustable')) return Settings
-    if (name.includes('طي') || name.includes('foldable')) return Settings
-    if (name.includes('تخزين') || name.includes('storage')) return Shield
-    if (name.includes('عجلات') || name.includes('wheel')) return Car
-    if (name.includes('ماء') || name.includes('water')) return Shield
-    if (name.includes('بيئ') || name.includes('eco')) return Heart
-    
-    // Return default icon
-    return CheckCircle
   }
 
   return (
@@ -55,26 +24,26 @@ export function ListingsFeatures({ features, locale = 'ar' }: ListingsFeaturesPr
       <h2 className="text-lg font-bold text-foreground">
         {locale === 'ar' ? 'المميزات:' : 'Features:'}
       </h2>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="flex flex-wrap gap-3">
         {features.map((feature) => {
-          const Icon = getIcon(feature.name, feature.icon)
           return (
             <div
               key={feature.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted/70 transition-colors"
+              className="flex items-center gap-3 bg-primary/10 p-3 rounded-xl transition-colors"
             >
               <div className="flex-shrink-0">
-                <Icon className="h-5 w-5 text-primary" />
+                {feature.icon ? (<Image src={feature.icon} width={20} height={20} className="h-5 w-5 text-primary" alt={`icon ${feature.name}`} />
+                ) : <CheckCircle className="h-5 w-5 text-primary" />}
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-medium text-foreground block">
+                <span className="text-sm font-b text-foreground block">
                   {feature.name}
                 </span>
-                {feature.description && (
+                {/* {feature.description && (
                   <span className="text-xs text-muted-foreground block mt-0.5">
                     {feature.description}
                   </span>
-                )}
+                )} */}
               </div>
             </div>
           )

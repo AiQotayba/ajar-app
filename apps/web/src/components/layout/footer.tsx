@@ -13,6 +13,8 @@ import {
 import Link from "next/link"
 import { useLocale } from "next-intl"
 import { Logo } from "@/components/logo"
+import { useQueries } from "@tanstack/react-query"
+import { api } from "@/lib/api"
 
 interface FooterProps {
   className?: string
@@ -21,6 +23,40 @@ interface FooterProps {
 export function Footer({ className }: FooterProps) {
   const locale = useLocale()
   const isRTL = locale === 'ar'
+
+
+  // Fetch footer title setting based on locale
+  const queryResults = useQueries({
+    queries: [
+      {
+        queryKey: ['footer-title', locale],
+        queryFn: async () => await api.get(`/general/settings/footer-title-${locale}`),
+        staleTime: 60 * 1000, // 1 minute
+      },
+      {
+        queryKey: ['footer-description', locale],
+        queryFn: async () => await api.get(`/general/settings/footer-description-${locale}`),
+        staleTime: 60 * 1000, // 1 minute
+      },
+    ],
+  })
+
+  // Extract data from query results
+  const [titleResult, descriptionResult] = queryResults
+
+  // Access the data property from each query result
+  const title = titleResult.data?.data // assuming api response has data property
+  const description = descriptionResult.data?.data
+
+  console.log({ title, description });
+
+  // Use title and description in your component
+  // You might also want to handle loading/error states
+  const isPending = titleResult.isPending || descriptionResult.isPending
+  const isError = titleResult.isError || descriptionResult.isError
+
+  if (isPending) return <div>Loading...</div>
+  if (isError) return <div>Error loading footer content</div>
 
   return (
     <footer className={cn(
@@ -40,16 +76,13 @@ export function Footer({ className }: FooterProps) {
                 {/* {isRTL ? "أجار" : "Ajar"} */}
               </div>
               <div className="text-sm text-gray-600">
-                {isRTL ? "منصة الإعلانات الرائدة" : "Leading Classifieds Platform"}
+                {title.value}
               </div>
             </Link>
 
             {/* Description */}
             <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
-              {isRTL
-                ? "منصة إعلانات متكاملة تهدف إلى تسهيل عملية البحث عن المنتجات والخدمات ونشر الإعلانات في سوريا. نقدم خدمات عالية الجودة مع ضمان الأمان والموثوقية."
-                : "A comprehensive classifieds platform designed to simplify the process of searching for products and services and posting ads in Syria. We provide high-quality services with guaranteed security and reliability."
-              }
+              {description.value}
             </p>
 
           </div>
