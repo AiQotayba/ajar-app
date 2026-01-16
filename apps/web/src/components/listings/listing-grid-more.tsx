@@ -23,6 +23,10 @@ export function ListingGridMore() {
   const baseParams = useMemo(() => {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('page') // Remove page from base params, we'll handle it in the query
+    // Ensure permanent default filter: status=approved
+    if (!params.has('status')) {
+      params.set('status', 'approved')
+    }
     return params.toString()
   }, [searchParams])
 

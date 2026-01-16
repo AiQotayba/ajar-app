@@ -30,14 +30,20 @@ interface Cluster {
   nudgeZoomIfStillCluster: number
 }
 
-interface Property {
-  type: 'ad'
+interface ApiProperty {
+  // API returns items with type 'rent' | 'sale' (or legacy 'ad')
+  type: 'rent' | 'sale' | 'ad' | string
   id: number
   lat: number
   lng: number
+  image?: string
+  price?: number
+  pay_every?: any
+  address?: string
+  title?: { ar?: string; en?: string } | string
 }
 
-type MapData = Cluster | Property
+type MapData = Cluster | ApiProperty
 
 interface MapBounds {
   north: number
@@ -55,7 +61,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
   const [debouncedZoom, setDebouncedZoom] = useState(12)
   const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null)
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null)
-  const [propertyType, setPropertyType] = useState<'all' | 'rent' | 'sell'>('all')
+  const [propertyType, setPropertyType] = useState<'all' | 'rent' | 'sale'>('all')
   const router = useRouter()
   const boundsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -251,10 +257,12 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
         })
 
         markersRef.current.push(marker)
-      } else if (item.type === 'ad') {
-        const property = item as Property
-        // Create custom property icon based on property type
-        const propertyTypeIcon = propertyType === 'rent' ? "#01805F" : "#F55157"
+        } else {
+          // Treat any non-cluster item as a property returned by the API
+          const property = item as ApiProperty
+          // Use the item's own type (rent/sale/ad) to determine color
+          const itemType = property.type
+          const propertyTypeIcon = itemType === 'rent' ? "#01805F" : "#F55157"
         const propertySize = window.innerWidth < 640 ? 18 : 24
         const propertyIcon = {
           url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
@@ -269,10 +277,14 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
           anchor: new window.google.maps.Point(propertySize / 2, propertySize / 2)
         }
 
+        const titleText = typeof property.title === 'string'
+          ? property.title
+          : (property.title && (property.title as any).en) || (property.title && (property.title as any).ar) || `Property ${property.id}`
+
         const marker = new window.google.maps.Marker({
           position: { lat: property.lat, lng: property.lng },
           map: mapInstanceRef.current,
-          title: `Property ${property.id}`,
+          title: titleText as string,
           icon: propertyIcon
         })
 
@@ -307,7 +319,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
     }
   }
 
-  const handlePropertyTypeChange = (type: 'all' | 'rent' | 'sell') => {
+  const handlePropertyTypeChange = (type: 'all' | 'rent' | 'sale') => {
     setPropertyType(type)
   }
 
@@ -360,8 +372,8 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
               {t('filters.rent')}
             </button>
             <button
-              onClick={() => handlePropertyTypeChange('sell')}
-              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex flex-row gap-1 sm:gap-2 ${propertyType === 'sell'
+              onClick={() => handlePropertyTypeChange('sale')}
+              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex flex-row gap-1 sm:gap-2 ${propertyType === 'sale'
                 ? 'border-primary text-primary border'
                 : ' hover:bg-gray-100'
                 }`}

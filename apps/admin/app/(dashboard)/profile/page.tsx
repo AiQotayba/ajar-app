@@ -37,7 +37,7 @@ export default function MyAccountPage() {
     queryFn: () => api.get(`/user/me`),
   })
 
-  const profile = profileData?.data as AdminUser | undefined  
+  const profile = profileData?.data as AdminUser | undefined
   // Profile form state
   const [profileForm, setProfileForm] = React.useState<UpdateProfileData>({
     first_name: "",
@@ -95,7 +95,12 @@ export default function MyAccountPage() {
 
   // Reset password mutation
   const resetPasswordMutation = useMutation({
-    mutationFn: (data: ResetPasswordData) => api.put(`/user/me/reset-password`, data),
+    mutationFn: (data: ResetPasswordData) => {
+      return api.post(`/auth/reset-password`, {
+        password: data.new_password,
+        password_confirmation: data.new_password_confirmation,
+      })
+    },
     onSuccess: (response: ApiResponse<AdminUser>) => {
 
       // Check if response indicates an error

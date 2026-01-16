@@ -209,7 +209,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     React.useEffect(() => {
         if (isEditMode && listing && !isLoadingListing) {
             const listingKey = `${listingId}-${listing.id}`
-            
+
             // Only reset if we haven't reset for this specific listing
             if (hasResetRef.current !== listingKey) {
 
@@ -496,13 +496,13 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     }
 
     const handlePrevious = () => {
-        if (currentStep > 1) {
-            setCurrentStep(currentStep - 1)
-        }
+        if (currentStep > 1) setCurrentStep(currentStep - 1)
     }
 
     // Transform form data to API format
     const transformFormDataToAPI = (formData: ListingFormData) => {
+        console.log(formData);
+
         // Transform properties from {id, value} to {property_id, value, sort_order}
         const transformedProperties = formData.properties?.map((prop, index) => {
             let value: any
@@ -528,7 +528,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         }) || []
 
         // Transform images to media format
-        const images = formData.images || []
+        const images = methods.getValues("images") || []
 
         if (images.length === 0) {
             console.error("❌ [TRANSFORM] No images found in form data")
@@ -613,9 +613,15 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     // Create mutation
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
+            console.log({ data });
+
             const transformedData = transformFormDataToAPI(data)
-            const result = await api.post(`/admin/listings`, transformedData)
-            return result
+            console.log({ transformedData });
+
+            const result = await api.post(`/user/listings`, transformedData)
+            if (result.isError) {
+                throw new Error(result.message || "Failed to create listing")
+            }
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["table-data", "/admin/listings"] })

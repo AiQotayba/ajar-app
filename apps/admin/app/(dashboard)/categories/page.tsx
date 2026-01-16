@@ -28,7 +28,6 @@ export default function CategoriesPage() {
             }
         },
     })
-    console.log("categories", categories)
 
     const handleSelectCategory = (category: Category | null) => {
         setSelectedCategory(category)

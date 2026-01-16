@@ -165,16 +165,17 @@ export function getAuthHeaders(): Record<string, string> {
  * Handle authentication response and store data in Redux and cookies (client-side)
  */
 export function handleAuthResponse(response: AuthResponse): void {
+  console.log(response);
+  
   if (typeof window === 'undefined') return;
   if (response.success && response.access_token) {
-    try {
-      console.log(response);
+    try { 
       
       // Store in Redux (for client-side)
       store.dispatch(setAuth(response));
       // Store in cookies (for middleware and server-side)
       Cookies.set('ajar_token', response.access_token, {
-        expires: 7, // 7 days
+        expires: 7, // 7 days (cookie lifetime)
         path: '/',
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production'
@@ -186,10 +187,137 @@ export function handleAuthResponse(response: AuthResponse): void {
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production'
       });
+      // Persist token expiry if provided by the API
+      // Prefer using expires_in (seconds) from the auth response.
+      if (typeof response.expires_in === 'number') {
+        try {
+          const expTs = Date.now() + response.expires_in * 1000;
+          Cookies.set('ajar_token_exp', String(expTs), {
+            expires: 7,
+            path: '/',
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production'
+          });
+        } catch (e) {
+          // ignore cookie set errors
+        }
+      } else {
+        // Try to parse exp from JWT token if exists
+        const jwtExp = parseJwtExp(response.access_token);
+        if (jwtExp) {
+          // jwtExp is in seconds, convert to ms
+          Cookies.set('ajar_token_exp', String(jwtExp * 1000), {
+            expires: 7,
+            path: '/',
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production'
+          });
+        }
+      }
     } catch (error) {
       console.error('Error handling auth response:', error);
     }
   }
+}
+
+/**
+ * Try to parse JWT token expiration (exp claim) and return seconds since epoch or null.
+ */
+function parseJwtExp(token: string | null | undefined): number | null {
+  if (!token) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    const payload = parts[1];
+    // Add padding if necessary
+    const padded = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const base64 = padded + '=='.slice((2 - (padded.length % 4)) % 2);
+    const decoded = atob(base64);
+    const obj = JSON.parse(decoded);
+    if (obj && typeof obj.exp === 'number') return obj.exp;
+  } catch (e) {
+    // ignore parse errors
+  }
+  return null;
+}
+
+/**
+ * Get token expiry timestamp (ms) from cookie if present.
+ */
+function getTokenExpiryFromCookie(): number | null {
+  try {
+    const v = Cookies.get('ajar_token_exp');
+    if (!v) return null;
+    const n = Number(v);
+    if (Number.isNaN(n)) return null;
+    return n;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Return true when token is missing or expired.
+ */
+export function isTokenExpired(): boolean {
+  const token = getToken();
+  if (!token) return true;
+
+  // First try to read expiry from cookie
+  const cookieExp = getTokenExpiryFromCookie();
+  if (cookieExp) {
+    return Date.now() >= cookieExp;
+  }
+
+  // Fallback to parsing JWT exp
+  const expSeconds = parseJwtExp(token);
+  if (expSeconds) {
+    return Date.now() >= expSeconds * 1000;
+  }
+
+  // If we can't determine expiry, assume not expired (token present)
+  return false;
+}
+
+/**
+ * Check token expiry and clear auth if needed.
+ */
+function checkAndHandleTokenExpiry() {
+  try {
+    if (isTokenExpired()) {
+      console.info('Auth token missing or expired — clearing auth state')
+      clearAuth();
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+let __tokenWatcherId: number | null = null;
+
+/**
+ * Start a periodic watcher (client-side) that clears auth when token expires.
+ * Safe to call multiple times; it will only create one interval.
+ */
+export function startTokenWatcher(intervalMs = 30_000) {
+  if (typeof window === 'undefined') return;
+  if (__tokenWatcherId !== null) return;
+  // Run an immediate check then schedule periodic checks
+  checkAndHandleTokenExpiry();
+  __tokenWatcherId = window.setInterval(checkAndHandleTokenExpiry, intervalMs) as unknown as number;
+}
+
+export function stopTokenWatcher() {
+  if (typeof window === 'undefined') return;
+  if (__tokenWatcherId !== null) {
+    clearInterval(__tokenWatcherId as unknown as number);
+    __tokenWatcherId = null;
+  }
+}
+
+// Auto-start watcher on module load in browser
+if (typeof window !== 'undefined') {
+  startTokenWatcher();
 }
 
 /**

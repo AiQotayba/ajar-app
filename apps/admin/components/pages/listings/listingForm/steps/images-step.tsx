@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import { useFormContext } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { X, Upload, Star, Loader2, GripVertical, Link } from "lucide-react"
+import { X, Upload, Star, Loader2, GripVertical, Link, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { api } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
@@ -91,7 +91,7 @@ export function ImagesStep({
 
           // Get image URL from response
           const imageUrl = response.data.image_name || response.data.url || response.data.image_url
-          
+
           if (!imageUrl) {
             throw new Error("لم يتم إرجاع رابط الصورة")
           }
@@ -280,33 +280,131 @@ export function ImagesStep({
     setFetchingMetadata(true)
     try {
       const response = await api.post('/general/fetch-media', { url: trimmedUrl })
+
       if (response.isError) {
         throw new Error(response.message || 'فشل جلب البيانات')
       }
 
       const iframelyData = response.data?.data || response.data || response
+      // const iframelyData = {
+      //   "success": true,
+      //   "data": {
+      //     "url": "https://www.facebook.com/photo/?fbid=1404888200997431&set=a.283037039849225",
+      //     "meta": {
+      //       "site": "Facebook",
+      //       "title": "الدكتور - اللهم تقبل عبدك #صالح_الجعفراوي اللهم اغفر له وارحمه وعافه...",
+      //       "description": "اللهم تقبل عبدك #صالح_الجعفراوي اللهم اغفر له وارحمه وعافه واعف عنه وأكرم نزله ووسع مدخله واغسله بالماء والثلج والبرد  اللهم انتقم من قاتليه وممن...",
+      //       "canonical": "https://www.facebook.com/photo.php?fbid=1404888200997431&set=a.283037039849225&id=100044287936733"
+      //     },
+      //     "links": {
+      //       "app": [
+      //         {
+      //           "type": "text/html",
+      //           "rel": [
+      //             "app",
+      //             "ssl",
+      //             "html5"
+      //           ],
+      //           "html": "<div id=\"fb-root\"></div>\n<script async=\"1\" defer=\"1\" crossorigin=\"anonymous\" src=\"https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v24.0\"></script><div class=\"fb-post\" data-href=\"https://www.facebook.com/photo/?fbid=1404888200997431&set=a.283037039849225\" data-width=\"640\"></div>",
+      //           "options": {
+      //             "_hide_text": {
+      //               "label": "Hide author's text caption",
+      //               "value": false
+      //             }
+      //           },
+      //           "media": {
+      //             "max-width": 640
+      //           }
+      //         }
+      //       ],
+      //       "thumbnail": [
+      //         {
+      //           "href": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/561626111_1404888204330764_4604097061219869956_n.jpg?stp=cp0_dst-jpg_e15_fr_q65_tt6&_nc_cat=107&ccb=1-7&_nc_sid=e21142&_nc_ohc=15X1oila8I4Q7kNvwE4Text&_nc_oc=AdnASo1aZIaXLJksqJyoF9162QJihOdkANybGdWptIdRMFfuXyXfzPZ7jeIDhCKj-bU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_rml=0&_nc_ht=scontent-iad3-1.xx&_nc_gid=xc0rsFJsfsBKGGPi7a8UKA&oh=00_AfojY5fqncxexKgJJLb3ECzWnHf-wm9rPi1Q6thld8aeoA&oe=6968716D",
+      //           "type": "image/jpg",
+      //           "rel": [
+      //             "thumbnail",
+      //             "ssl"
+      //           ],
+      //           "content_length": 41722,
+      //           "media": {
+      //             "width": 1080,
+      //             "height": 599
+      //           }
+      //         }
+      //       ],
+      //       "icon": [
+      //         {
+      //           "href": "https://static.xx.fbcdn.net/rsrc.php/yB/r/2sFJRNmJ5OP.ico",
+      //           "rel": [
+      //             "icon",
+      //             "ssl"
+      //           ],
+      //           "type": "image/icon"
+      //         }
+      //       ]
+      //     },
+      //     "messages": [
+      //       "Facebook has retired automated page embeds on November 3, 2025."
+      //     ],
+      //     "rel": [
+      //       "app",
+      //       "inline",
+      //       "html5",
+      //       "ssl",
+      //       "hosted"
+      //     ],
+      //     "html": "<div class=\"iframely-embed\" style=\"max-width: 640px;\"><div class=\"iframely-responsive\" style=\"padding-bottom: 55.463%;\"><a href=\"https://www.facebook.com/photo.php?fbid=1404888200997431&set=a.283037039849225&id=100044287936733\" data-iframely-url=\"https://cdn.iframe.ly/api/iframe?url=https%3A%2F%2Fwww.facebook.com%2Fphoto%2F%3Ffbid%3D1404888200997431%26set%3Da.283037039849225&key=3906e9589bd2ee8d96ec9673748849cf\"></a></div></div><script async src=\"https://cdn.iframe.ly/embed.js\" charset=\"utf-8\"></script>",
+      //     "options": {
+      //       "_hide_text": {
+      //         "label": "Hide author's text caption",
+      //         "value": false
+      //       }
+      //     },
+      //     "message": "Facebook has retired automated page embeds on November 3, 2025."
+      //   },
+      //   "message": "تم جلب الميديا بنجاح"
+      // }.data
+      // Validate required iframely fields
+      const hasMeta = !!iframelyData.meta
+      const thumbCandidate = iframelyData.links?.thumbnail?.[0]
+      // some iframely responses may include `thumbnail_url` at top-level; cast to any to avoid TS type errors
+      const hasThumbnail = !!thumbCandidate?.href || !!(iframelyData as any).thumbnail_url
 
-      // Extract thumbnail
-      let thumbnailUrl = trimmedUrl
-      if (iframelyData.links?.thumbnail?.[0]?.href) {
-        thumbnailUrl = iframelyData.links.thumbnail[0].href
-      } else if (iframelyData.thumbnail_url) {
-        thumbnailUrl = iframelyData.thumbnail_url
+      if (!hasMeta || !hasThumbnail) {
+        console.error('❌ Missing required iframely fields', { iframelyData })
+        toast.error('فشلت عملية جلب بيانات الوسائط: بيانات iframely ناقصة (meta أو thumbnail)')
+        setFetchingMetadata(false)
+        return
       }
 
+      const thumbnailUrl = thumbCandidate?.href || (iframelyData as any).thumbnail_url || trimmedUrl
+
+      // Decide media type based on meta.medium 
+      const determinedType = 'video'
+
+      // Build thumbnail object
+      const thumbnail = thumbCandidate ? {
+        href: thumbCandidate.href,
+        type: thumbCandidate.type,
+        content_length: thumbCandidate.content_length,
+        media: thumbCandidate.media,
+      } : (thumbnailUrl ? { href: thumbnailUrl } : undefined)
+
       const mediaObject = {
-        type: 'image',
+        type: determinedType,
         url: thumbnailUrl,
         source: 'iframely',
         iframely: {
           url: trimmedUrl,
           meta: iframelyData.meta || {},
+          thumbnail,
           links: iframelyData.links || {},
           html: iframelyData.html || '',
           rel: iframelyData.rel || [],
           options: iframelyData.options || {}
         }
       }
+      console.log(mediaObject);
 
       const newMedia = [...media, mediaObject]
       setValue('images', newMedia as any)
@@ -539,6 +637,16 @@ export function ImagesStep({
                   className="absolute top-2 left-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="h-3 w-3" />
+                </Button>
+                {/* Delete Button (text) - appears on hover, for clearer action */}
+                <Button
+                  type="button"
+                  onClick={() => handleRemoveImage(index)}
+                  variant="destructive"
+                  size="sm"
+                  className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded"
+                >
+                  <Trash className="h-3 w-3 mr-1 inline" />
                 </Button>
               </div>
             ))}

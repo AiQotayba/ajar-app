@@ -162,7 +162,6 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const t = useTranslations('property')
   const currentLocale = useLocale()
   const router = useRouter()
-  // console.log(listing)
   // Track view when listing card enters viewport (only in lists, not in details)
   const viewTrackerRef = useListingViewTracker(listing.id, {
     enabled: !openEdit, // Only track in lists, not in edit/delete views

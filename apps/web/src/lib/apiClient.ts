@@ -214,7 +214,7 @@ export function createSimpleApi(
 ): ApiInstance {
     return createApi({
         baseUrl,
-        defaultTimeout: 10000,
+        defaultTimeout: 20000,
         credentials: 'same-origin',
         ...options,
     });

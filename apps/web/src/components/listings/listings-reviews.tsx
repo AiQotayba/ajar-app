@@ -201,7 +201,15 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
             ) : (
               <div className="text-center py-8">
                 <div
-                  onClick={() => setShowAddReview(true)}
+                  onClick={() => {
+                    if (currentUserId) {
+                      setShowAddReview(true)
+                    } else {
+                      toast.error(locale === 'ar' ? 'الرجاء تسجيل الدخول لإضافة تقييم' : 'Please log in to add a review')
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/30 flex items-center justify-center cursor-pointer hover:bg-muted/50 hover:scale-110 active:scale-95 transition-all duration-300"
                 >
                   <Star className="h-8 w-8 text-muted-foreground" />
@@ -298,18 +306,11 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                   )}
 
                   {/* Review Footer */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border/30">
-                    {/* <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>
-                        {locale === 'ar' ? 'مفيد' : 'Helpful'}
-                      </span>
-                      <span>
-                        {locale === 'ar' ? 'مشاركة' : 'Share'}
-                      </span>
-                    </div> */}
 
-                    {/* Delete button for current user's reviews */}
-                    {currentUserId && review.user.id === currentUserId && (
+                  {/* Delete button for current user's reviews */}
+                  {currentUserId && review.user.id === currentUserId && (
+                    // Footer is hidden by default and revealed when hovering the parent `.group` card
+                    <div className="flex items-center justify-between pt-3 border-t border-border/30 max-h-0 overflow-hidden opacity-0 pointer-events-none group-hover:max-h-40 group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200">
                       <div className="flex items-center gap-2 w-full justify-end">
                         <Button
                           size="sm"
@@ -326,8 +327,8 @@ export function ListingsReviews({ rating, reviews, reviewsCount, propertyId, loc
                           )}
                         </Button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

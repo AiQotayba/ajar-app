@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ajar.com'
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ajarsyria.com'
 
     return {
         rules: [
@@ -9,10 +9,8 @@ export default function robots(): MetadataRoute.Robots {
                 userAgent: '*',
                 allow: '/',
                 disallow: [
-                    '/admin/',
                     '/api/',
                     '/_next/',
-                    '/dashboard/',
                     '/profile/',
                     '/settings/',
                 ],

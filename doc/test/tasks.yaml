@@ -1,0 +1,92 @@
+- apps web desktop:
+  - [locale]/
+    - (public)/: ✅
+      - @home ✅
+        - @nav ✅
+        - @langs ✅
+        - @filter
+        - @menu ✅
+        - @footer ✅
+        - @SEO ✅
+        - @content ✅
+          - @catagory ✅
+            - Skeleton ✅
+            - data ✅
+          - @listings ✅
+          - Skeleton ✅
+          - data ✅
+      - (auth)/ ✅
+        - forgot-password ✅
+        - login ✅
+        - register ✅
+        - reset-password ✅
+        - verify-otp ✅
+      - (pages)/[page] ✅
+      - map/ ✅
+        - @view ✅
+        - @Skeleton ✅
+        - @data fatching ✅
+        - @filters ✅
+        - @map ✅
+      - listings/[id]/ ✅
+        - @view ✅
+          - @Gallery ✅ 
+          - @Details ✅
+          - @locations ✅
+          - @Reviews ✅
+          - @SimilarListings
+          - @favorites ✅
+          - @share ✅
+        - @Skeleton ✅
+        - @data fatching ✅
+        - @SEO ✅
+    - (isAuth)/:
+      - favorites ✅
+      - my-listings ✅
+        - [id] ✅
+        - create ✅
+      - notifications ✅
+      - settings ✅
+      - profile  ✅
+          - change-password ✅
+          - edit  ✅
+  - robots.txt ✅
+  - sitemap.xml ⌛
+- apps desktop admin: 
+  - (auth)/ ✅
+    - forgot-password ✅
+    - login ✅
+    - reset-password ✅
+    - verify-otp ✅
+  - (dashboard)/ ✅
+    - dashboard/ ✅
+    - categories/ ✅
+      - properties/ ✅
+      - features/ ✅
+    - listings/ ✅
+      - [id]/ ✅ 
+        - edit/ ✅
+      - create/ ✅
+    - locations/ ✅
+      - governorates/ ✅
+      - cities/ ✅
+    - notifications/ ✅
+    - profile/ ✅
+      - @reset-password ✅
+      - @edit ✅
+    - reviews/ ✅
+      - @view ✅ 
+    - settings/ ✅
+    - sliders/ ✅
+    - users/ ✅
+- tasks:
+  - pnpm audit ✅
+  - logout automatically if token null or expired ✅
+  - في اعلانات بتطلع بتسجيل الدخول هذا خلل رغم انها مسودة ✅
+  - web:❓
+    - في خلل بالمصادقة  ❓
+    - خلل بتسجيل الدخول  ❓
+  - admin: ❌
+    - reviews: change state 404 /admin/reviews/11/reject ❌
+    - listings view gallery images تحسين عرض معرض الصور ❌
+    - عرض الفديو المضمن في الاعلان ❌

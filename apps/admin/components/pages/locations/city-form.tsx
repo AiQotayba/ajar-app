@@ -169,51 +169,31 @@ export function CityForm({ open, onOpenChange, urlEndpoint, city, mode, defaultG
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <Tabs defaultValue="ar" dir="rtl">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="ar" className="gap-2">
-                                    <Languages className="h-4 w-4" />
-                                    العربية
-                                </TabsTrigger>
-                                <TabsTrigger value="en" className="gap-2">
-                                    <Languages className="h-4 w-4" />
-                                    English
-                                </TabsTrigger>
-                            </TabsList>
-
-                            <TabsContent value="ar" className="space-y-4 mt-4">
-                                <FormField
-                                    control={form.control}
-                                    name="name_ar"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>اسم المدينة بالعربية</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="الكرخ" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </TabsContent>
-
-                            <TabsContent value="en" className="space-y-4 mt-4">
-                                <FormField
-                                    control={form.control}
-                                    name="name_en"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>City Name in English</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Al-Karkh" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </TabsContent>
-                        </Tabs>
-
+                        <FormField
+                            control={form.control}
+                            name="name_ar"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>اسم المدينة بالعربية</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="الكرخ" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />                                 <FormField
+                            control={form.control}
+                            name="name_en"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>اسم المدينة بالإنجليزية</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Al-Karkh" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="governorate_id"

@@ -284,14 +284,14 @@ export function Navbar({ className }: NavbarProps) {
                 <input
                   type="text"
                   placeholder={isRTL ? "ابحث عن إعلان، منتج، خدمة، أو موقع..." : "Search for listing, product, service, or location..."}
-                  className="focus:border-primary focus:outline-none h-12 pr-14 placeholder:text-primary/80 px-5 transition-all w-full rounded-2xl"
+                  className="focus:border-primary focus:outline-none h-10 pr-14 placeholder:text-primary/80 px-5 transition-all w-full rounded-2xl"
                 />
               </div>
               <Button
                 size="icon"
                 variant="transparent"
                 onClick={() => setIsFilterOpen(true)}
-                className="h-12 w-14 !p-0 !m-0 transition-all"
+                className="h-10 w-14 !p-0 !m-0 transition-all"
               >
                 <SlidersHorizontal className="h-5 w-5 text-primary" />
               </Button>

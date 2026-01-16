@@ -31,6 +31,8 @@ export default function ListingDetailPage() {
 
     const listing = listingData?.data as Listing | undefined
 
+    const [playingMediaIndex, setPlayingMediaIndex] = React.useState<number | null>(null)
+
     const { data: reviewsData, isLoading: reviewsLoading } = useQuery({
         queryKey: ["listing-reviews", listingId],
         queryFn: () => api.get("/admin/reviews", { params: { "listing.id": listingId ?? 0 } }),
@@ -120,18 +122,39 @@ export default function ListingDetailPage() {
                         <div className="relative">
                             <Carousel dir="ltr" className="w-full">
                                 <CarouselContent>
-                                    {listing.media.map((item) => (
-                                        <CarouselItem key={item.id}>
-                                            <div className="aspect-video bg-muted relative">
-                                                <Images
-                                                    src={item.full_url || item.url}
-                                                    alt={listing.title?.ar || "صورة الإعلان"}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                        </CarouselItem>
-                                    ))}
-                                </CarouselContent>
+                                        {listing.media.map((item: any, idx: number) => (
+                                            <CarouselItem key={item.id}>
+                                                <div className="aspect-video bg-muted relative">
+                                                    {item.type === 'video' ? (
+                                                        <div className="w-full h-full relative">
+                                                            <div className="w-full h-full object-cover" 
+                                                            dangerouslySetInnerHTML={{__html: item.iframely?.html || ''   }} />
+                                                            {/* <Images
+                                                                src={(item.iframely && item.iframely.thumbnail?.href) || item.full_url || item.url}
+                                                                alt={listing.title?.ar || "فيديو"}
+                                                                className="w-full h-full object-cover"
+                                                            /> */}
+                                                            <button
+                                                                aria-label={`Play video ${idx + 1}`}
+                                                                onClick={() => setPlayingMediaIndex(idx)}
+                                                                className="absolute inset-0 m-auto w-20 h-20 rounded-full bg-black/40 flex items-center justify-center"
+                                                            >
+                                                                <svg className="h-10 w-10 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path d="M8 5v14l11-7L8 5z" fill="currentColor" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <Images
+                                                            src={item.full_url || item.url}
+                                                            alt={listing.title?.ar || "صورة الإعلان"}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    )}
+                                                </div>
+                                            </CarouselItem>
+                                        ))}
+                                    </CarouselContent>
                                 <CarouselPrevious className="left-4" />
                                 <CarouselNext className="right-4" />
                             </Carousel>
@@ -150,6 +173,49 @@ export default function ListingDetailPage() {
                                     <Badge variant="secondary" className="bg-black/50 text-white">
                                         {listing.media.length} صورة
                                     </Badge>
+                                </div>
+                            )}
+                            
+                            {/* Video player modal */}
+                            {playingMediaIndex !== null && listing.media && listing.media[playingMediaIndex] && (
+                                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setPlayingMediaIndex(null)}>
+                                    <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+                                        <button aria-label="Close" onClick={() => setPlayingMediaIndex(null)} className="absolute top-2 left-2 z-50 bg-white/80 rounded-full w-8 h-8 flex items-center justify-center">×</button>
+                                        {(() => {
+                                            const item = listing.media[playingMediaIndex] as any
+                                            if (!item) return null
+                                            // Prefer iframely embed html when available
+                                            if (item.iframely && item.iframely.html) {
+                                                // Render embed inside a sandboxed iframe so scripts in the embed HTML execute safely
+                                                return (
+                                                    <iframe
+                                                        title={`embed-${item.id}`}
+                                                        src={(item.iframely as any).url}
+                                                        sandbox="allow-scripts allow-same-origin allow-presentation"
+                                                        className="w-full h-[60vh] bg-black"
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                        allowFullScreen
+                                                    />
+                                                )
+                                            }
+
+                                            // YouTube shortcut
+                                            const url = (item.iframely && item.iframely.url) || item.full_url || item.url
+                                            if (url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
+                                                const videoId = url.includes('v=') ? url.split('v=')[1]?.split('&')[0] : url.split('youtu.be/')[1]?.split('?')[0]
+                                                const src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`
+                                                return <iframe src={src} className="w-full h-[60vh]" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen title="video-player" />
+                                            }
+
+                                            // Fallback to native video element
+                                            return (
+                                                <video controls className="w-full h-[60vh] bg-black">
+                                                    <source src={item.full_url || item.url} />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            )
+                                        })()}
+                                    </div>
                                 </div>
                             )}
                         </div>

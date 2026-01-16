@@ -46,6 +46,12 @@ interface ListingData {
     full_url: string
     sort_order: number
   }>
+  media?: Array<{
+    id: number
+    url: string
+    full_url: string
+    sort_order: number
+  }>
   features?: Array<{
     id: number
     name: { ar: string; en: string }
@@ -104,7 +110,6 @@ export function ListingsDetails({ id, locale = 'ar', initialData }: ListingsDeta
     initialData: initialData ? { data: initialData, isError: false, status: 200 } : undefined, // Use cached data from server
     // If we have initial data, the query will use it and won't refetch immediately
   })
-  console.log(response);
 
   // Track view when component mounts and listing is loaded
   // For details page, send immediately without debounce
@@ -199,7 +204,7 @@ export function ListingsDetails({ id, locale = 'ar', initialData }: ListingsDeta
     : formattedPrice
 
   // Prepare gallery images
-  const galleryImages = property.images || []
+  const galleryImages = property.media || []
   const coverImage = property.cover_image
 
   // Prepare features for display

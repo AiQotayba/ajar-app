@@ -147,6 +147,84 @@ export function ImagesStep({
 
       // Extract iframely data - adjust based on your API response structure
       const iframelyData = response.data?.data || response.data || response
+      // const iframelyData = {
+      //   "success": true,
+      //   "data": {
+      //     "url": "https://www.facebook.com/photo/?fbid=1404888200997431&set=a.283037039849225",
+      //     "meta": {
+      //       "site": "Facebook",
+      //       "title": "الدكتور - اللهم تقبل عبدك #صالح_الجعفراوي اللهم اغفر له وارحمه وعافه...",
+      //       "description": "اللهم تقبل عبدك #صالح_الجعفراوي اللهم اغفر له وارحمه وعافه واعف عنه وأكرم نزله ووسع مدخله واغسله بالماء والثلج والبرد  اللهم انتقم من قاتليه وممن...",
+      //       "canonical": "https://www.facebook.com/photo.php?fbid=1404888200997431&set=a.283037039849225&id=100044287936733"
+      //     },
+      //     "links": {
+      //       "app": [
+      //         {
+      //           "type": "text/html",
+      //           "rel": [
+      //             "app",
+      //             "ssl",
+      //             "html5"
+      //           ],
+      //           "html": "<div id=\"fb-root\"></div>\n<script async=\"1\" defer=\"1\" crossorigin=\"anonymous\" src=\"https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v24.0\"></script><div class=\"fb-post\" data-href=\"https://www.facebook.com/photo/?fbid=1404888200997431&set=a.283037039849225\" data-width=\"640\"></div>",
+      //           "options": {
+      //             "_hide_text": {
+      //               "label": "Hide author's text caption",
+      //               "value": false
+      //             }
+      //           },
+      //           "media": {
+      //             "max-width": 640
+      //           }
+      //         }
+      //       ],
+      //       "thumbnail": [
+      //         {
+      //           "href": "https://scontent-iad3-1.xx.fbcdn.net/v/t39.30808-6/561626111_1404888204330764_4604097061219869956_n.jpg?stp=cp0_dst-jpg_e15_fr_q65_tt6&_nc_cat=107&ccb=1-7&_nc_sid=e21142&_nc_ohc=15X1oila8I4Q7kNvwE4Text&_nc_oc=AdnASo1aZIaXLJksqJyoF9162QJihOdkANybGdWptIdRMFfuXyXfzPZ7jeIDhCKj-bU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_rml=0&_nc_ht=scontent-iad3-1.xx&_nc_gid=xc0rsFJsfsBKGGPi7a8UKA&oh=00_AfojY5fqncxexKgJJLb3ECzWnHf-wm9rPi1Q6thld8aeoA&oe=6968716D",
+      //           "type": "image/jpg",
+      //           "rel": [
+      //             "thumbnail",
+      //             "ssl"
+      //           ],
+      //           "content_length": 41722,
+      //           "media": {
+      //             "width": 1080,
+      //             "height": 599
+      //           }
+      //         }
+      //       ],
+      //       "icon": [
+      //         {
+      //           "href": "https://static.xx.fbcdn.net/rsrc.php/yB/r/2sFJRNmJ5OP.ico",
+      //           "rel": [
+      //             "icon",
+      //             "ssl"
+      //           ],
+      //           "type": "image/icon"
+      //         }
+      //       ]
+      //     },
+      //     "messages": [
+      //       "Facebook has retired automated page embeds on November 3, 2025."
+      //     ],
+      //     "rel": [
+      //       "app",
+      //       "inline",
+      //       "html5",
+      //       "ssl",
+      //       "hosted"
+      //     ],
+      //     "html": "<div class=\"iframely-embed\" style=\"max-width: 640px;\"><div class=\"iframely-responsive\" style=\"padding-bottom: 55.463%;\"><a href=\"https://www.facebook.com/photo.php?fbid=1404888200997431&set=a.283037039849225&id=100044287936733\" data-iframely-url=\"https://cdn.iframe.ly/api/iframe?url=https%3A%2F%2Fwww.facebook.com%2Fphoto%2F%3Ffbid%3D1404888200997431%26set%3Da.283037039849225&key=3906e9589bd2ee8d96ec9673748849cf\"></a></div></div><script async src=\"https://cdn.iframe.ly/embed.js\" charset=\"utf-8\"></script>",
+      //     "options": {
+      //       "_hide_text": {
+      //         "label": "Hide author's text caption",
+      //         "value": false
+      //       }
+      //     },
+      //     "message": "Facebook has retired automated page embeds on November 3, 2025."
+      //   },
+      //   "message": "تم جلب الميديا بنجاح"
+      // }.data
 
       // Validate required iframely fields
       if (!iframelyData?.meta || !iframelyData?.links?.thumbnail?.[0]) {
@@ -157,11 +235,11 @@ export function ImagesStep({
       }
 
       const thumbCandidate = iframelyData.links.thumbnail[0]
-      const thumbnailUrl = thumbCandidate.href || iframelyData.thumbnail_url || trimmedUrl
+      const thumbnailUrl = thumbCandidate.href
 
       // Build media object matching Flutter structure
       const mediaObject = {
-        type: iframelyData.meta.medium === 'video' ? 'video' : 'image',
+        type: 'video',
         url: thumbnailUrl,
         source: "iframely",
         iframely: {
@@ -200,9 +278,9 @@ export function ImagesStep({
     } finally {
       setFetchingMetadata(false)
     }
-  } 
-  console.log("state:" , media);
-  
+  }
+  console.log("state:", media);
+
 
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {

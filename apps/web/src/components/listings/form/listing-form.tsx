@@ -606,7 +606,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
             .filter((image) => image !== null && image !== undefined)
             .map((image: any, index) => {
                 console.log("transformedImages", image);
-                    console.log("iframely", image);
+                console.log("iframely", image);
 
                 if (image instanceof File) {
                     throw new Error(t('actions.uploadImagesFirst'))
@@ -790,24 +790,25 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
             // Already normalized in onSubmit
+            console.log({ data });
+
             const transformedData = transformFormDataToAPI(data)
-            console.log(transformedData.media);
+            console.log(transformedData);
 
             // Send to API
-            // const result = await api.post(`/user/listings`, transformedData)
-            // if (result.isError) {
-            //     throw new Error(result.message || "Failed to create listing")
-            // }
-            // return result
-            return { data: { id: 12345 } } // Mocked response
+            const result = await api.post(`/user/listings`, transformedData)
+            if (result.isError) {
+                throw new Error(result.message || "Failed to create listing")
+            }
+            return result
         },
         onSuccess: (data) => {
 
             queryClient.invalidateQueries({ queryKey: ["user-listings"] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
-            // setShowSuccess(true)
-            // setIsLoading(false)
-            // onSuccess?.()
+            setShowSuccess(true)
+            setIsLoading(false)
+            onSuccess?.()
         },
         onError: (error: any) => {
             let errorMessage = t('actions.createError')
@@ -897,6 +898,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     // Form submission
     const onSubmit = async (data: ListingFormData) => {
         setIsLoading(true)
+        console.log(data);
 
         try {
             // Ensure external URLs have proper iframely structure
@@ -911,12 +913,13 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 setIsLoading(false)
                 return
             }
+            console.log({ ...normalizedData, images: methods.getValues("images") });
 
             if (currentStep === 4) {
                 if (isEditMode) {
                     await updateMutation.mutateAsync(normalizedData)
                 } else {
-                    await createMutation.mutateAsync(normalizedData)
+                    await createMutation.mutateAsync({ ...normalizedData, images: methods.getValues("images") })
                 }
             }
 
@@ -931,10 +934,10 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         setShowSuccess(false)
         if (isEditMode && listingId) {
             // @
-            // router.push(`/my-listings/${listingId}`)
+            router.push(`/listings/${listingId}`) 
         } else {
             // @
-            // router.push("/my-listings")
+            router.push("/my-listings")
         }
     }
 
@@ -945,11 +948,13 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         setCurrentStep(1)
         methods.reset()
         router.push("/my-listings/create")
+        location.pathname = "/my-listings/create"
     }
 
     const handleEditAnother = () => {
         setShowSuccess(false)
         router.push("/my-listings")
+        location.pathname = "/my-listings"
     }
 
     const renderStep = () => {

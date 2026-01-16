@@ -31,12 +31,12 @@ export function Footer({ className }: FooterProps) {
       {
         queryKey: ['footer-title', locale],
         queryFn: async () => await api.get(`/general/settings/footer-title-${locale}`),
-        staleTime: 60 * 1000, // 1 minute
+        staleTime: 60 * 1000 * 60, // 1 hour
       },
       {
         queryKey: ['footer-description', locale],
         queryFn: async () => await api.get(`/general/settings/footer-description-${locale}`),
-        staleTime: 60 * 1000, // 1 minute
+        staleTime: 60 * 1000 * 60, // 1 hour
       },
     ],
   })
@@ -47,8 +47,6 @@ export function Footer({ className }: FooterProps) {
   // Access the data property from each query result
   const title = titleResult.data?.data // assuming api response has data property
   const description = descriptionResult.data?.data
-
-  console.log({ title, description });
 
   // Use title and description in your component
   // You might also want to handle loading/error states
@@ -76,13 +74,13 @@ export function Footer({ className }: FooterProps) {
                 {/* {isRTL ? "أجار" : "Ajar"} */}
               </div>
               <div className="text-sm text-gray-600">
-                {title.value}
+                {title?.value}
               </div>
             </Link>
 
             {/* Description */}
             <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
-              {description.value}
+              {description?.value}
             </p>
 
           </div>

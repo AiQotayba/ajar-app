@@ -78,7 +78,7 @@ class ApiCore implements ApiInstance {
 
   constructor(config: ApiConfig) {
     this.config = {
-      defaultTimeout: 10000,
+      defaultTimeout: 20000,
       credentials: "same-origin",
       ...config,
     }

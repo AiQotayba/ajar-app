@@ -14,7 +14,6 @@ export default function DashboardPage() {
     queryKey: ["dashboardData"],
     queryFn: () => api.get("/admin/dashboard/analytics").then(res => res.data),
   })
-  console.log(data)
   return (
     <div className="space-y-6 md:space-y-8 p-4 md:p-6">
       {/* Page Header */}

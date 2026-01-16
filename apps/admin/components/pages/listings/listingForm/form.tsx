@@ -433,7 +433,7 @@ export function ListingForm({
             ar: formData.description?.ar || "",
             en: formData.description?.en ?? "" // Convert null to empty string
         }
-        
+
         return {
             ...restFormData,
             title: normalizedTitle,
@@ -453,20 +453,115 @@ export function ListingForm({
         }
     }
 
+    // Normalize external string URLs to full iframely-shaped objects (adds iframely.thumbnail)
+    const ensureIframelyForStrings = async (formData: ListingFormData): Promise<ListingFormData> => {
+        const images = formData.images || []
+
+        if (!Array.isArray(images)) return formData
+
+        const supportedDomains = ['facebook.com', 'youtube.com', 'youtu.be', 'twitter.com', 'x.com', 'instagram.com', 'tiktok.com']
+
+        const isSupported = (url: string) => {
+            if (!url) return false
+            try {
+                const u = url.toLowerCase()
+                return supportedDomains.some((d) => u.includes(d))
+            } catch (e) {
+                return false
+            }
+        }
+
+        const normalizedImages = await Promise.all(images.map(async (img: any) => {
+            try {
+                if (!img) return img
+
+                // If it's a plain string and looks like a supported external link, fetch metadata
+                if (typeof img === 'string') {
+                    if (!isSupported(img)) return img
+
+                    const response = await api.post('/general/fetch-media', { url: img })
+                    if (!response || response.isError) return img
+
+                    const iframelyData = response.data || response.data?.data || response
+                    const meta = iframelyData?.meta
+                    const links = iframelyData?.links
+                    const thumbnails = Array.isArray(links?.thumbnail) ? links.thumbnail : []
+                    const thumbnailLink = thumbnails[0] || (iframelyData as any)?.thumbnail_url ? thumbnails[0] || { href: (iframelyData as any)?.thumbnail_url, type: 'image' } : null
+
+                    if (!meta || !thumbnailLink) return img
+
+                    const medium = (meta as any)?.medium
+                    const determinedType = medium === 'video' ? 'video' : 'image'
+
+                    return {
+                        type: determinedType,
+                        url: img,
+                        source: 'iframely',
+                        iframely: {
+                            url: (iframelyData as any)?.url || img,
+                            meta: meta,
+                            thumbnail: {
+                                href: thumbnailLink.href,
+                                type: thumbnailLink.type || 'image',
+                                content_length: thumbnailLink.content_length || undefined,
+                                media: thumbnailLink.media || []
+                            },
+                            links: links,
+                            html: iframelyData?.html,
+                            rel: iframelyData?.rel,
+                            options: iframelyData?.options,
+                        }
+                    }
+                }
+
+                // If it's already an iframely-like object but missing thumbnail, try to augment
+                if (typeof img === 'object' && img.iframely && !img.iframely.thumbnail) {
+                    const iframelyData = img.iframely
+                    const links = iframelyData?.links
+                    const thumbnails = Array.isArray(links?.thumbnail) ? links.thumbnail : []
+                    const thumbnailLink = thumbnails[0] || (iframelyData as any)?.thumbnail_url ? thumbnails[0] || { href: (iframelyData as any)?.thumbnail_url, type: 'image' } : null
+                    if (!thumbnailLink) return img
+
+                    return {
+                        ...img,
+                        iframely: {
+                            ...iframelyData,
+                            thumbnail: {
+                                href: thumbnailLink.href,
+                                type: thumbnailLink.type || 'image',
+                                content_length: thumbnailLink.content_length || undefined,
+                                media: thumbnailLink.media || []
+                            }
+                        }
+                    }
+                }
+
+                return img
+            } catch (e) {
+                return img
+            }
+        }))
+
+        return {
+            ...formData,
+            images: normalizedImages
+        }
+    }
+
     // Mutations
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
             const transformedData = transformFormDataToAPI(data)
-            const result = await api.post(`/admin/listings`, transformedData)
-            return result
+            // const result = await api.post(`/admin/listings`, transformedData)
+            // return result
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["table-data", urlEndpoint] })
             queryClient.invalidateQueries({ queryKey: ["listings"] })
             queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
-            
+
             queryClient.refetchQueries({ queryKey: ["table-data", urlEndpoint] })
-            
+
             setShowSuccess(true)
             setIsLoading(false)
         },
@@ -480,7 +575,7 @@ export function ListingForm({
     const updateMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
             if (!listing?.id) throw new Error("Listing ID is required")
-            
+
             const transformedData = transformFormDataToAPI(data)
             const result = await api.put(`/admin/listings/${listing.id}`, transformedData)
             return result
@@ -490,7 +585,7 @@ export function ListingForm({
             queryClient.invalidateQueries({ queryKey: ["listings"] })
             queryClient.invalidateQueries({ queryKey: ["admin-listings"] })
             queryClient.invalidateQueries({ queryKey: ["listing", listing?.id] })
-            
+
             queryClient.refetchQueries({ queryKey: ["table-data", urlEndpoint] })
             queryClient.refetchQueries({ queryKey: ["listing", listing?.id] })
             setShowSuccess(true)
@@ -621,7 +716,7 @@ export function ListingForm({
                 } else {
                     setAvailableFeatures([])
                 }
-            } catch (error) {   
+            } catch (error) {
                 setAvailableFeatures([])
             }
         }
@@ -655,16 +750,20 @@ export function ListingForm({
 
         setIsLoading(true)
         try {
+            // Normalize external string URLs (YouTube, TikTok, etc.) into iframely-shaped objects
+            const normalized = await ensureIframelyForStrings(data)
+
             if (isEditing && listing?.id) {
-                await updateMutation.mutateAsync(data)
+                await updateMutation.mutateAsync(normalized)
             } else {
-                await createMutation.mutateAsync(data)
+                await createMutation.mutateAsync(normalized)
             }
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || error?.message || "حدث خطأ أثناء حفظ الإعلان"
             toast.error(errorMessage)
             setIsLoading(false)
         } finally {
+            setIsLoading(false)
         }
     }
 
