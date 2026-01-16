@@ -1,10 +1,10 @@
-- apps web desktop: ✅
-  - [locale]/ ✅
+- apps web desktop:
+  - [locale]/
     - (public)/: ✅
       - @home ✅
         - @nav ✅
         - @langs ✅
-        - @filter ✅
+        - @filter
         - @menu ✅
         - @footer ✅
         - @SEO ✅
@@ -34,12 +34,13 @@
           - @Details ✅
           - @locations ✅
           - @Reviews ✅
+          - @SimilarListings
           - @favorites ✅
           - @share ✅
         - @Skeleton ✅
         - @data fatching ✅
         - @SEO ✅
-    - (isAuth)/: ✅
+    - (isAuth)/:
       - favorites ✅
       - my-listings ✅
         - [id] ✅
@@ -50,8 +51,8 @@
           - change-password ✅
           - edit  ✅
   - robots.txt ✅
-  - sitemap.xml ✅
-- apps desktop admin: ✅ 
+  - sitemap.xml ⌛
+- apps desktop admin: 
   - (auth)/ ✅
     - forgot-password ✅
     - login ✅
@@ -82,11 +83,10 @@
   - pnpm audit ✅
   - logout automatically if token null or expired ✅
   - في اعلانات بتطلع بتسجيل الدخول هذا خلل رغم انها مسودة ✅
-  - web: ❓
-    - sitemap.xml غير محدث ✅
+  - web:❓
     - في خلل بالمصادقة  ❓
     - خلل بتسجيل الدخول  ❓
   - admin: ❌
     - reviews: change state 404 /admin/reviews/11/reject ❌
     - listings view gallery images تحسين عرض معرض الصور ❌
-    - عرض الفديو المضمن في الاعلان ❌ 
+    - عرض الفديو المضمن في الاعلان ❌
