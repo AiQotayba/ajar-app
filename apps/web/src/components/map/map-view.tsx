@@ -61,7 +61,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
   const [debouncedZoom, setDebouncedZoom] = useState(12)
   const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null)
   const [debouncedBounds, setDebouncedBounds] = useState<MapBounds | null>(null)
-  const [propertyType, setPropertyType] = useState<'all' | 'rent' | 'sale'>('all')
+  const [propertyType, setPropertyType] = useState<'all' | 'rented' | 'solded'>('all')
   const router = useRouter()
   const boundsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -200,7 +200,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
       })
 
       if (propertyType !== 'all') {
-        params.append('property_type', propertyType)
+        params.append('availability_status', propertyType)
       }
 
       const response = await api.get(`/user/listings?${params.toString()}`)
@@ -318,8 +318,8 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
       mapInstanceRef.current.setZoom(currentZoom - 1)
     }
   }
-
-  const handlePropertyTypeChange = (type: 'all' | 'rent' | 'sale') => {
+  
+  const handlePropertyTypeChange = (type: 'all' | 'rented' | 'solded') => {
     setPropertyType(type)
   }
 
@@ -362,8 +362,8 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
               {t('filters.all')}
             </button>
             <button
-              onClick={() => handlePropertyTypeChange('rent')}
-              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex flex-row gap-1 sm:gap-2 ${propertyType === 'rent'
+              onClick={() => handlePropertyTypeChange('rented')}
+              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex flex-row gap-1 sm:gap-2 ${propertyType === 'rented'
                 ? 'border-primary text-primary border'
                 : ' hover:bg-gray-100'
                 }`}
@@ -372,8 +372,8 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
               {t('filters.rent')}
             </button>
             <button
-              onClick={() => handlePropertyTypeChange('sale')}
-              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex flex-row gap-1 sm:gap-2 ${propertyType === 'sale'
+              onClick={() => handlePropertyTypeChange('solded')}
+              className={`px-2 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors flex flex-row gap-1 sm:gap-2 ${propertyType === 'solded'
                 ? 'border-primary text-primary border'
                 : ' hover:bg-gray-100'
                 }`}
