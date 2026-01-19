@@ -230,7 +230,12 @@ export function ListingsGallery({
 
         toast.success(data.message)
       } else {
-        toast.error(data.message || (locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites'))
+
+        // Handle API error 
+        if (data.key === "You are not logged in") {
+          toast.error(locale === 'ar' ? 'يرجى تسجيل الدخول لإضافة المفضلة' : 'Please log in to add to favorites')
+        }
+        else toast.error(data.message || (locale === 'ar' ? 'حدث خطأ في تحديث المفضلة' : 'Error updating favorites'))
       }
     } catch (error) {
       console.error('Error toggling favorite:', error)
@@ -579,7 +584,7 @@ export function ListingsGallery({
                           onError={() => setImageErrors(prev => new Set(prev).add(index))}
                         />
                       )}
-                      
+
                       {imageErrors.has(index) && (
                         <div className="absolute inset-0 bg-gray-200 flex items-center justify-center rounded-2xl">
                           <div className="flex flex-col items-center">
@@ -693,7 +698,7 @@ export function ListingsGallery({
                     onError={() => setImageErrors(prev => new Set(prev).add(index))}
                   />
                 )}
-                
+
                 {imageErrors.has(index) && (
                   <div className="absolute inset-0 bg-gray-200 flex items-center justify-center rounded-xl">
                     <div className="flex flex-col items-center">
@@ -706,7 +711,7 @@ export function ListingsGallery({
                     </div>
                   </div>
                 )}
-                
+
                 {currentIndex === index && (
                   <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                     <div className="bg-primary text-primary-foreground rounded-full px-3 py-1 text-xs font-medium">

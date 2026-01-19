@@ -39,8 +39,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification?.title || 'إشعار جديد';
     const notificationOptions = {
         body: payload.notification?.body || 'لديك إشعار جديد في لوحة التحكم',
-        icon: '/placeholder-logo.svg',
-        badge: '/placeholder-logo.svg',
+        icon: '/images/logo.svg',
+        badge: '/images/logo.svg',
         data: payload.data || {},
         tag: 'ajar-admin-notification',
         requireInteraction: true,
@@ -48,7 +48,7 @@ messaging.onBackgroundMessage((payload) => {
         //     {
         //         action: 'open',
         //         title: 'فتح',
-        //         icon: '/placeholder-logo.svg'
+        //         icon: '/images/logo.svg'
         //     },
         //     {
         //         action: 'close',

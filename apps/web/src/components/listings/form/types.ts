@@ -55,14 +55,14 @@ export const listingFormSchema = z.object({
   // Step 3: Images - Support both File objects and string URLs
   images: z.array(z.union([
     z.instanceof(File),
-    z.string().min(5, "رابط الصورة مطلوب"),
+    z.string().min(1, "رابط الصورة مطلوب"),
     z.object({
       url: z.string().min(1, "رابط الصورة مطلوب"),
       type: z.string().optional(),
       source: z.string().optional(),
       sort_order: z.number().optional()
     }).transform(obj => obj.url)
-  ])).min(5, "يجب رفع 5 صور على الأقل"),
+  ])).min(1, "يجب رفع صورة على الأقل"),
   cover_image_index: z.number().default(0),
   
   // Step 4: Price

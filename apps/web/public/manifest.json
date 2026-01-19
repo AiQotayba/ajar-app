@@ -12,13 +12,13 @@
     "dir": "rtl",
     "icons": [
         {
-            "src": "/images/placeholder-logo.png",
+            "src": "/images/logo.svg",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "/images/placeholder-logo.png",
+            "src": "/images/logo.svg",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
@@ -37,7 +37,7 @@
             "url": "/ar/listings",
             "icons": [
                 {
-                    "src": "/images/placeholder-logo.png",
+                    "src": "/images/logo.svg",
                     "sizes": "96x96"
                 }
             ]
@@ -49,7 +49,7 @@
             "url": "/ar/listings/create",
             "icons": [
                 {
-                    "src": "/images/placeholder-logo.png",
+                    "src": "/images/logo.svg",
                     "sizes": "96x96"
                 }
             ]

@@ -198,6 +198,7 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
       if (!data.isError) {
         // Update favorite state based on API response
         const action = data?.data?.action
+        console.log(action);
 
         if (action === 'added') {
           setIsFavorite(true)
@@ -215,8 +216,11 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
         // Show success message
         toast.success(data.message)
       } else {
-        // Handle API error
-        toast.error(data.message || t('favoritesError'))
+        // Handle API error 
+        if (data.key === "You are not logged in") {
+          toast.error(locale === 'ar' ? 'يرجى تسجيل الدخول لإضافة المفضلة' : 'Please log in to add to favorites')
+        }
+        else toast.error(data.message || t('favoritesError'))
       }
     } catch (error) {
       console.error('Error toggling favorite:', error)
