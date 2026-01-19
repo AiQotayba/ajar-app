@@ -41,8 +41,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification?.title || 'إشعار جديد';
     const notificationOptions = {
         body: payload.notification?.body || 'لديك إشعار جديد',
-        icon: '/images/logo.svg',
-        badge: '/images/logo.svg',
+        icon: '/images/logo.png',
+        badge: '/images/logo.png',
         data: payload.data || {},
         tag: 'ajar-notification',
         requireInteraction: true,
@@ -50,7 +50,7 @@ messaging.onBackgroundMessage((payload) => {
         //     {
         //         action: 'open',
         //         title: 'فتح',
-        //         icon: '/images/logo.svg'
+        //         icon: '/images/logo.png'
         //     },
         //     {
         //         action: 'close',

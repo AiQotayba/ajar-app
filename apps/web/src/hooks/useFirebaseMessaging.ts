@@ -166,8 +166,8 @@ export const useFirebaseMessaging = () => {
         if (permission === 'granted') {
             new Notification('إشعار تجريبي', {
                 body: 'هذا إشعار تجريبي من أجار',
-                icon: '/images/logo.svg',
-                badge: '/images/logo.svg'
+                icon: '/images/logo.png',
+                badge: '/images/logo.png'
             });
             toast.success('تم إرسال إشعار تجريبي');
         } else {

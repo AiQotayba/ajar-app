@@ -39,8 +39,8 @@ export default function ForegroundNotificationListener() {
         if (permission === "granted") {
             new Notification(payload.notification?.title || "إشعار جديد", {
                 body: payload.notification?.body,
-                icon: "/images/logo.svg",
-                badge: "/images/logo.svg",
+                icon: "/images/logo.png",
+                badge: "/images/logo.png",
             });
         }
     }
