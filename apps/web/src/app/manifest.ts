@@ -6,11 +6,9 @@ type Props = {
   }
 }
 
-export default function manifest(
-  { params }: Props
-): MetadataRoute.Manifest {
-  const { locale } = params
-  const isArabic = locale === 'ar'
+export default function manifest(): MetadataRoute.Manifest {
+  const defaultLocale: 'ar' | 'en' = 'ar'
+  const isArabic = defaultLocale === 'ar'
 
   return {
     name: isArabic
@@ -23,8 +21,8 @@ export default function manifest(
       ? 'منصة شاملة للعقارات في سوريا'
       : 'Comprehensive real estate platform in Syria',
 
-    start_url: `/${locale}`,
-    scope: `/${locale}`,
+    start_url: '/',
+    scope: '/',
 
     display: 'standalone',
     background_color: '#ffffff',
@@ -32,7 +30,7 @@ export default function manifest(
 
     orientation: 'portrait-primary',
 
-    lang: locale,
+    lang: defaultLocale,
     dir: isArabic ? 'rtl' : 'ltr',
 
     categories: ['business', 'lifestyle', 'utilities'],

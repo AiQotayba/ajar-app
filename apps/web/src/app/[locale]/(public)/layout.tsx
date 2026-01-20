@@ -81,7 +81,7 @@ export default async function LocaleLayout({
                 <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
                 <meta name="apple-mobile-web-app-title" content="ajar" />
                 {/* <link rel="manifest" href="/manifest.json" /> */}
-                <link rel="manifest" href="/site.webmanifest" />
+                <link rel="manifest" href="/manifest.webmanifest" />
 
                 {/* Font Preloading for Better Performance */}
                 <link rel="preload" href="/fonts/itfQomraArabic-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
