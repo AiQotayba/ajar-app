@@ -94,6 +94,14 @@ const nextConfig = {
             value: 'public, max-age=0, must-revalidate',
           },
         ],
+      }, {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/manifest+json; charset=utf-8',
+          },
+        ],
       },
     ];
   },

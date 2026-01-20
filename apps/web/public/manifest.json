@@ -1,58 +1,50 @@
 {
-    "name": "أجار - منصة العقارات",
+    "id": "/pwa",
+    "name": "أجار",
     "short_name": "أجار",
-    "description": "منصة شاملة للعقارات في سوريا",
+    "description": "منصة شاملة للإعلانات في سوريا",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#2563eb",
-    "orientation": "portrait-primary",
+    "orientation": "portrait",
     "scope": "/",
     "lang": "ar",
     "dir": "rtl",
+    "categories": [
+        "business",
+        "shopping"
+    ],
     "icons": [
         {
-            "src": "/images/logo.png",
-            "sizes": "192x192",
+            "src": "/icons/icon-144x144.png",
+            "sizes": "144x144",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         },
         {
-            "src": "/images/logo.png",
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
-        }
-    ],
-    "categories": [
-        "business",
-        "lifestyle",
-        "productivity"
-    ],
-    "shortcuts": [
-        {
-            "name": "البحث عن عقارات",
-            "short_name": "البحث",
-            "description": "ابحث عن عقارات في سوريا",
-            "url": "/ar/listings",
-            "icons": [
-                {
-                    "src": "/images/logo.png",
-                    "sizes": "96x96"
-                }
-            ]
         },
         {
-            "name": "إضافة إعلان",
-            "short_name": "إضافة",
-            "description": "أضف إعلان عقاري جديد",
-            "url": "/ar/listings/create",
-            "icons": [
-                {
-                    "src": "/images/logo.png",
-                    "sizes": "96x96"
-                }
-            ]
+            "src": "/icons/maskable-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/icons/maskable-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ]
 }

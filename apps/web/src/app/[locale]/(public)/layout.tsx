@@ -21,7 +21,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     const isArabic = locale === 'ar';
-    
+
     return generateSEOMetadata({
         title: isArabic ? 'أجار - منصة الإعلانات في سوريا' : 'Ajar - Syrian Classifieds Platform',
         description: isArabic ? SEO_CONSTANTS.DEFAULT_DESCRIPTION_AR : SEO_CONSTANTS.DEFAULT_DESCRIPTION_EN,
@@ -72,20 +72,25 @@ export default async function LocaleLayout({
                 <meta name="apple-mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
                 <meta name="apple-mobile-web-app-title" content="أجار" />
-                
+
                 {/* Favicon */}
-                <link rel="icon" href="/favicon.ico" />
-                <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-                <link rel="manifest" href="/manifest.json" />
-                
+                <link rel="icon" href="/icons/favicon.ico" />
+                <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96" />
+                <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+                <link rel="shortcut icon" href="/icons/favicon.ico" />
+                <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+                <meta name="apple-mobile-web-app-title" content="ajar" />
+                {/* <link rel="manifest" href="/manifest.json" /> */}
+                <link rel="manifest" href="/site.webmanifest" />
+
                 {/* Font Preloading for Better Performance */}
                 <link rel="preload" href="/fonts/itfQomraArabic-Regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
                 <link rel="preload" href="/fonts/itfQomraArabic-Medium.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
                 <link rel="preload" href="/fonts/itfQomraArabic-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-                
+
                 {/* Font Loading Optimization */}
                 <style dangerouslySetInnerHTML={{
-                  __html: `
+                    __html: `
                     @font-face {
                       font-family: "ITF Qomra Arabic";
                       src: url('/fonts/itfQomraArabic-Regular.woff2') format('woff2');
@@ -95,7 +100,7 @@ export default async function LocaleLayout({
                     }
                   `
                 }} />
-                
+
             </head>
             <body className="antialiased">
                 <ReduxProvider>

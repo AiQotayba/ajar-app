@@ -54,6 +54,7 @@ export const proxy = async (req: NextRequest) => {
   // استثناء طلب ملف الـ Service Worker والخطوط
   if (req.nextUrl.pathname === '/firebase-messaging-sw.js' || 
       req.nextUrl.pathname === '/manifest.json' ||
+      req.nextUrl.pathname === '/site.webmanifest' ||
       req.nextUrl.pathname === '/sitemap.xml' || 
       req.nextUrl.pathname === '/robots.txt' ||
       req.nextUrl.pathname.startsWith('/fonts/')) {
