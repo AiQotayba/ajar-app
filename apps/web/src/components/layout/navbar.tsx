@@ -300,11 +300,13 @@ export function Navbar({ className }: NavbarProps) {
             {/* {isAuthenticated && ( */}
             <Link
               href={`/${locale}/my-listings/create`} 
+              aria-label={isRTL ? "إضافة إعلان" : "Add listing"}
               className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center max-w-max text-xs"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Plus className="w-4 h-4 mr-2 rtl:mr-0 ltr:mr-0 rtl:ml-0 rtl:md:ml-2  " />
+              <Plus aria-hidden="true" className="w-4 h-4 mr-2 rtl:mr-0 ltr:mr-0 rtl:ml-0 rtl:md:ml-2" />
               <span className="hidden sm:block">{isRTL ? "إضافة إعلان" : "Add listing"}</span>
+              <span className="sr-only">{isRTL ? "إضافة إعلان" : "Add listing"}</span>
             </Link>
             {/* )} */}
             {/* Mobile Search Icon */}
@@ -412,8 +414,8 @@ export function Navbar({ className }: NavbarProps) {
                   className="text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
                   asChild
                 >
-                  <Link href={`/${locale}/login`}>
-                    <User className="w-5 h-5" />
+                  <Link href={`/${locale}/login`} aria-label={isRTL ? "تسجيل الدخول" : "Login"}>
+                    <User aria-hidden="true" className="w-5 h-5" />
                   </Link>
                 </Button>
               )}

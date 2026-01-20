@@ -130,9 +130,10 @@ function ListingActions({ isOpen, setIsOpen, listingId, locale, onEdit, onDelete
         <Button
           size="icon"
           variant="secondary"
+          aria-label={(locale || currentLocale) === 'ar' ? 'المزيد من الإجراءات' : 'More actions'}
           className="h-10 w-10 rounded-full shadow-lg backdrop-blur-sm bg-white/90 hover:bg-white"
         >
-          <MoreVertical className="h-5 w-5" />
+          <MoreVertical aria-hidden="true" className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 bg-white">
@@ -280,9 +281,14 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
     }
   }
 
+  const isRTL = (locale || currentLocale) === 'ar'
   const url = openEdit ? `/my-listings/${listing.id}` : `/listings/${listing.id}`
   return (
-    <Link href={url} className="block group" >
+    <Link
+      href={url}
+      className="block group"
+      aria-label={isRTL ? `فتح الإعلان: ${displayTitle}` : `Open listing: ${displayTitle}`}
+    >
       <div ref={viewTrackerRef} className="bg-card  overflow-hidden transition-all duration-300">
         <div className="relative h-56 overflow-hidden">
           {/* Image Layer */}
@@ -337,9 +343,10 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
           <div className="absolute top-4 left-4 flex gap-2 z-30">
             <Button
               variant="secondary"
+              aria-label={isRTL ? `عدد المشاهدات ${listing.views_count}` : `${listing.views_count} views`}
               className="h-10 flex text-white items-center justify-center rounded-full shadow-lg backdrop-blur-sm bg-black/30 hover:bg-black/30"
             >
-              <Eye className="!h-6 !w-6 text-white" />
+              <Eye aria-hidden="true" className="!h-6 !w-6 text-white" />
               <span className="-mb-1">
                 {listing.views_count}
               </span>
@@ -348,24 +355,30 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
               size="icon"
               variant="secondary"
               onClick={handleShare}
+              aria-label={isRTL ? 'مشاركة الإعلان' : 'Share listing'}
               className="h-10 w-10 rounded-full shadow-lg backdrop-blur-sm bg-white/90 hover:bg-white"
             >
-              <ShareIcon className="!h-6 !w-6" />
+              <ShareIcon aria-hidden="true" className="!h-6 !w-6" />
             </Button>
             <Button
               size="icon"
               variant="secondary"
               onClick={handleToggleFavorite}
               disabled={isLoading}
+              aria-label={
+                isFavorite
+                  ? (isRTL ? 'إزالة من المفضلة' : 'Remove from favorites')
+                  : (isRTL ? 'إضافة إلى المفضلة' : 'Add to favorites')
+              }
               className={cn(
                 "h-10 w-10 rounded-full shadow-lg backdrop-blur-sm bg-white/90 hover:bg-white transition-all",
                 isFavorite && "text-destructive",
                 isLoading && "opacity-50 cursor-not-allowed"
               )}
             >
-              {isFavorite ?
-                <HeartFillIcon className={cn("!h-6 !w-6 text-red-500")} />
-                : <HeartIcon className={cn("!h-6 !w-6 text-muted-foreground hover:text-red-500")} />
+              {isFavorite
+                ? <HeartFillIcon aria-hidden="true" className={cn("!h-6 !w-6 text-red-500")} />
+                : <HeartIcon aria-hidden="true" className={cn("!h-6 !w-6 text-muted-foreground hover:text-red-500")} />
               }
             </Button>
           </div>
@@ -413,18 +426,18 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
           {/* Property Details */}
           <div className="flex items-center gap-4 pt-3 border-t border-border text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
-              <PinIcon className="h-4 w-4 text-primary" />
+              <PinIcon aria-hidden="true" className="h-4 w-4 text-primary" />
               <span>{displayLocation}</span>
             </div>
             {listing.features && listing.features.length > 0 && (
               <div className="flex items-center gap-1.5">
-                <CoushIcon className="h-4 w-4" />
+                <CoushIcon aria-hidden="true" className="h-4 w-4" />
                 <span>{isFurnished ? t('furnished') : t('unfurnished')}</span>
               </div>
             )}
             {listing.insurance && (
               <div className="flex items-center gap-2 text-sm">
-                <ShieldCheckIcon className="h-4 w-4 text-muted-foreground" />
+                <ShieldCheckIcon aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">{t('insurance')}: {listing.insurance.toLocaleString()} {listing.currency}</span>
               </div>
             )}

@@ -16,9 +16,10 @@ export function SearchBar() {
         size="icon"
         variant="ghost"
         onClick={() => setFilterOpen(true)}
+        aria-label="Open search"
         className="text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
       >
-        <Search className="w-5 h-5" />
+        <Search aria-hidden="true" className="w-5 h-5" />
       </Button>
 
       <FilterDrawerWrapper open={filterOpen} onOpenChange={setFilterOpen} />
