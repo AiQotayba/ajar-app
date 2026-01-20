@@ -83,7 +83,7 @@ export default function ImageViewer({
               quality={quality}
               loading={loading}
               fill={fill}
-              className={rest.className as string}
+              className={className as string}
               {...(rest as any)}
             />
           </button>
