@@ -1,99 +1,23 @@
-- apps web desktop: ✅
-  - [locale]/ ✅
-    - (public)/: ✅
-      - @home ✅
-        - @nav ✅
-        - @langs ✅
-        - @filter ✅
-        - @menu ✅
-        - @footer ✅
-        - @SEO ✅
-        - @content ✅
-          - @catagory ✅
-            - Skeleton ✅
-            - data ✅
-          - @listings ✅
-          - Skeleton ✅
-          - data ✅
-      - (auth)/ ✅
-        - forgot-password ✅
-        - login ✅
-        - register ✅
-        - reset-password ✅
-        - verify-otp ✅
-      - (pages)/[page] ✅
-      - map/ ✅
-        - @view ✅
-        - @Skeleton ✅
-        - @data fatching ✅
-        - @filters ✅
-        - @map ✅
-      - listings/[id]/ ✅
-        - @view ✅
-          - @Gallery ✅ 
-          - @Details ✅
-          - @locations ✅
-          - @Reviews ✅
-          - @favorites ✅
-          - @share ✅
-        - @Skeleton ✅
-        - @data fatching ✅
-        - @SEO ✅
-    - (isAuth)/: ✅
-      - favorites ✅
-      - my-listings ✅
-        - [id] ✅
-        - create ✅
-      - notifications ✅
-      - settings ✅
-      - profile  ✅
-          - change-password ✅
-          - edit  ✅
-  - robots.txt ✅
-  - sitemap.xml ✅
-- apps desktop admin: ✅ 
-  - (auth)/ ✅
-    - forgot-password ✅
-    - login ✅
-    - reset-password ✅
-    - verify-otp ✅
-  - (dashboard)/ ✅
-    - dashboard/ ✅
-    - categories/ ✅
-      - properties/ ✅
-      - features/ ✅
-    - listings/ ✅
-      - [id]/ ✅ 
-        - edit/ ✅
-      - create/ ✅
-    - locations/ ✅
-      - governorates/ ✅
-      - cities/ ✅
-    - notifications/ ✅
-    - profile/ ✅
-      - @reset-password ✅
-      - @edit ✅
-    - reviews/ ✅
-      - @view ✅ 
-    - settings/ ✅
-    - sliders/ ✅
-    - users/ ✅
+- Bug fixes:
+    # - مشكلة الركويستات:
+    #     rudex:
+    #         - catagory
+    #         - governorates 
+    - رابط الفيديوهات مو شغالة
+        - اختبار
+    - مافي حجوزات طلعت بالشام
+        اختبار api
 - tasks:
-  - pnpm audit ✅
-  - logout automatically if token null or expired ✅
-  - في اعلانات بتطلع بتسجيل الدخول هذا خلل رغم انها مسودة ✅
-  - web: ✅
-    - sitemap.xml غير محدث ✅
-    - في خلل بالمصادقة  ✅
-    - خلل بتسجيل الدخول  ✅
-  - admin: ❌ 
-    - listings view gallery images تحسين عرض معرض الصور ❌ 
+    - نحط العلم الجديد ❓
+    - مشكلة عدد الإعلانات الثابت في الخريطة 😈
+    - مافي غير اعلان واحد رغم أني مفعل ٢ ❌ 
+    - الخريطة مو شغال البيع والشراء 😈
+    - listings view gallery images تحسين عرض معرض الصور ❌
 
-- tasks:
-  - اللغة مع المراجعات
-  - رابط الفيديوهات مو شغالة 
-  - السلايدات ما ظهر فيهم الجديد:
-    - هاي المزة لحتى نخلي الحمل على الموقع اقل - اي تعديل يضهر بعد 10 دقائق لانه في كاش
-  - مافي حجوزات طلعت بالشام
-  - مشكلة عدد الإعلانات الثابت في الخريطة 😈
-  - الخريطة مو شغال البيع والشراء 😈
+- Error:
+    - name: الخرائط فيها مشاكل 
+        - وقت بيقرب كثير على نقطة تجمع لنقاط تبقى cluster
+        - البيع والشراء مو شغال لساته
+    - api/home: 
+        path: /user/home
+        bug: البيانات تبع السلايدر عم ترجع ناقصة مع انه بلوحة التحكم فعلتهم بس ما عم يرجعو يطلعو

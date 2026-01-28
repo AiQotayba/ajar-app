@@ -346,3 +346,7 @@ body {
 [dir="ltr"] .page-content h6 {
   text-align: left !important;
 }
+
+.before\:bg-gradient-to-r:before {
+  background-image: none !important;
+}

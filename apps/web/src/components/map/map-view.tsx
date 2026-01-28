@@ -184,7 +184,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
     isFetching,
   } = useQuery({
     queryKey: ['map-listings', debouncedBounds, propertyType, debouncedZoom],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!debouncedBounds) return null
 
       const params = new URLSearchParams({
@@ -203,7 +203,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
         params.append('availability_status', propertyType)
       }
 
-      const response = await api.get(`/user/listings?${params.toString()}`)
+      const response = await api.get(`/user/listings?${params.toString()}`, { fetchOptions: { signal } })
 
       if (response.isError) {
         throw new Error(response.message || 'Failed to load map data')

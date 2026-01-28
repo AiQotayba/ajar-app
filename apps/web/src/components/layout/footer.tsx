@@ -1,15 +1,6 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import {
-  Phone,
-  Mail,
-  MapPin,
-  Heart,
-  Shield,
-  Award,
-  Users
-} from "lucide-react"
+import { cn } from "@/lib/utils" 
 import Link from "next/link"
 import { useLocale } from "next-intl"
 import { Logo } from "@/components/logo"
@@ -30,12 +21,12 @@ export function Footer({ className }: FooterProps) {
     queries: [
       {
         queryKey: ['footer-title', locale],
-        queryFn: async () => await api.get(`/general/settings/footer-title-${locale}`),
+        queryFn: async ({ signal }) => api.get(`/general/settings/footer-title-${locale}`, { fetchOptions: { signal } }),
         staleTime: 60 * 1000 * 60, // 1 hour
       },
       {
         queryKey: ['footer-description', locale],
-        queryFn: async () => await api.get(`/general/settings/footer-description-${locale}`),
+        queryFn: async ({ signal }) => api.get(`/general/settings/footer-description-${locale}`, { fetchOptions: { signal } }),
         staleTime: 60 * 1000 * 60, // 1 hour
       },
     ],

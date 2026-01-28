@@ -167,6 +167,7 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const viewTrackerRef = useListingViewTracker(listing.id, {
     enabled: !openEdit, // Only track in lists, not in edit/delete views
   })
+  console.log(listing);
 
   const getLocalizedText = (text: { ar: string; en: string }) => text[(locale || currentLocale) as keyof typeof text] || text.ar
 
@@ -394,17 +395,30 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
 
           {/* Price */}
           <div className="flex items-center justify-between gap-2 ">
-            <div className="flex flex-wrap  items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <div className="p-2 text-primary font-bold w-max">
                 {displayPrice}
                 {listing.type === 'rent' && ` / ${t('perMonth')}`}
               </div>
-              {periodText && (
-                <Badge variant="default" className="text-md p-2 rounded-full px-4 text-[14px] text-gray-600 bg-primary/10">
-                  {periodText}
+              {/* معلومات الدفع إذا كانت متاحة */}
+              {listing.type === 'rent' && listing.pay_every && listing.pay_every > 1 && (
+                <Badge variant="default" className="text-md p-1 rounded-md px-4 text-[14px] text-gray-600 bg-primary/10">
+                  {locale === 'ar'
+                    ? `الدفع كل ${listing.pay_every} أشهر`
+                    : t('payEvery', { months: listing.pay_every })}
                 </Badge>
               )}
+              {/* Badge للبيع أو الإيجار */}
+              <Badge variant="default" className="text-md p-1 rounded-md px-4 text-[14px] text-gray-600 bg-primary/10">
+                {listing.type === 'rent'
+                  ? locale === 'ar' ? 'للإيجار' : 'for Rent'
+                  : locale === 'ar' ? 'للبيع' : 'for Sale'
+                }
+              </Badge>
+
+
             </div>
+
             {isOpen && (
               <div className="p-2 text-primary font-bold w-max">
                 {t('openListing')}

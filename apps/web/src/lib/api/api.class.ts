@@ -138,7 +138,7 @@ export class ApiCore implements ApiInstance {
                 }
             }
 
-            // Add timeout
+            // Add timeout controller (align behavior with admin api-client)
             const timeout = finalOptions.timeout || this.config.defaultTimeout || 10000;
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -159,7 +159,6 @@ export class ApiCore implements ApiInstance {
             this.handleSuccess(finalResponse, finalOptions);
 
             return finalResponse;
-
         } catch (error) {
             // Handle error
             return this.handleError(error, options);
@@ -283,28 +282,27 @@ export class ApiCore implements ApiInstance {
     }
 
     /**
-     * Parse the response from fetch
+     * Parse the response from fetch (align with admin: try/catch around json, always return status)
      */
     private async parseResponse<T>(response: Response): Promise<ApiResponse<T>> {
         const isError = !response.ok;
-        let data: T | undefined = await response.json();
-        let message: string | undefined;
+        let data: unknown;
 
         try {
-            const contentType = response.headers.get('content-type');
+            data = await response.json();
             return {
                 isError,
-                ...data,
-            };
-        } catch (parseError) {
-            message = 'Failed to parse response';
-            data = undefined;
+                ...(typeof data === 'object' && data !== null ? data : {}),
+                status: response.status,
+            } as ApiResponse<T>;
+        } catch {
             return {
                 isError,
-                ...data,
-            };
+                data: undefined,
+                message: 'Failed to parse response',
+                status: response.status,
+            } as ApiResponse<T>;
         }
-
     }
 
     /**

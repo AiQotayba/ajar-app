@@ -56,11 +56,6 @@ export const getUsersColumns = (): TableColumn<User>[] => [
                                 {initials}
                             </AvatarFallback>
                         </Avatar>
-                        {/* Status indicator */}
-                        <span
-                            className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${statusColors[row.status as keyof typeof statusColors] || statusColors.active}`}
-                            title={statusConfig.label}
-                        />
                     </div>
                     <div>
                         <p className="font-semibold text-foreground" dir="rtl">

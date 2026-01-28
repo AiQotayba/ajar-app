@@ -21,16 +21,15 @@ export default function HomePage({ locale }: HomePageProps) {
   const currentLocale = locale || nextLocale || 'ar';
   const searchParams = useSearchParams();
   const queryParams = searchParams.toString();
-  const hasFilters = queryParams.length > 0;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['home',],
-    queryFn: async () => {
-      const url = `/user/home${queryParams ? `?${queryParams}` : ''}`;
-      return api.get(url)
+    queryFn: async ({ signal }) => {
+      const url = `/user/home`;
+      return api.get(url, { fetchOptions: { signal } });
     },
-    staleTime: hasFilters ? STALE_TIME_WITH_FILTERS : STALE_TIME_WITHOUT_FILTERS,
-    gcTime: GC_TIME,
+    // staleTime: hasFilters ? STALE_TIME_WITH_FILTERS : STALE_TIME_WITHOUT_FILTERS,
+    // gcTime: GC_TIME,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
   });

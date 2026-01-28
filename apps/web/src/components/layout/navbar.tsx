@@ -459,9 +459,10 @@ function NotificationBell({ locale }: NotificationBellProps) {
   // Fetch notifications
   const { data: notificationsData } = useQuery({
     queryKey: ['notifications', 'header'],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const response = await api.get('/user/notifications', {
-        params: { per_page: 5 }
+        params: { per_page: 5 },
+        fetchOptions: { signal }
       })
 
       if (response.isError) {

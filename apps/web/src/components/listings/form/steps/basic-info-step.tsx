@@ -68,7 +68,7 @@ export function BasicInfoStep({
 
       <div className="space-y-2">
         <Label htmlFor="title_ar" className="text-start block text-sm sm:text-base">
-          {t('title')} <span className="text-destructive">*</span>
+          {locale == "ar" ? "نص لعنوان العرض": "Text for the presentation title"} <span className="text-destructive">*</span>
         </Label>
         <Input
           id="title[ar]"

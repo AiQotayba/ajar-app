@@ -3,10 +3,9 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { useLocale, useTranslations } from "next-intl"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
-import { Info } from "lucide-react"
 
 interface Category {
   id: number;
@@ -30,7 +29,6 @@ interface Category {
   created_at: string;
   updated_at: string;
 }
-
 
 export function CategoryFilter({ data, isLoading }: { data: Category[] | undefined, isLoading: boolean }) {
   const [info, setInfo] = useState<Category | undefined>(undefined)
@@ -72,6 +70,12 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
   const router = useRouter()
   const searchParams = useSearchParams()
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
+  
+  // Refs للسحب الأفقي
+  const tabsListRef = useRef<HTMLDivElement>(null)
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const scrollLeftRef = useRef(0)
 
   // Initialize active category from searchParams
   useEffect(() => {
@@ -106,6 +110,44 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
     router.push(`?${params.toString()}`, { scroll: false })
   }
 
+  // وظائف السحب الأفقي
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!tabsListRef.current) return
+    
+    isDraggingRef.current = true
+    startXRef.current = e.pageX - tabsListRef.current.offsetLeft
+    scrollLeftRef.current = tabsListRef.current.scrollLeft
+    
+    // تغيير المؤشر أثناء السحب
+    tabsListRef.current.style.cursor = 'grabbing'
+    tabsListRef.current.style.userSelect = 'none'
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !tabsListRef.current) return
+    
+    e.preventDefault()
+    const x = e.pageX - tabsListRef.current.offsetLeft
+    const walk = (x - startXRef.current) * 1.5 // زيادة السرعة
+    tabsListRef.current.scrollLeft = scrollLeftRef.current - walk
+  }
+
+  const handleMouseUpOrLeave = () => {
+    if (!tabsListRef.current) return
+    
+    isDraggingRef.current = false
+    tabsListRef.current.style.cursor = 'grab'
+    tabsListRef.current.style.removeProperty('user-select')
+  }
+
+  // إضافة event listeners للتشغيل العادي (للنقر)
+  const handleMouseDownForClick = (e: React.MouseEvent) => {
+    // إذا كنا نسحب، لا نقوم بالنقر
+    if (isDraggingRef.current) {
+      e.preventDefault()
+    }
+  }
+
   // Show loading skeleton if loading
   if (isLoading) {
     return <CategoryFilterSkeleton direction={direction} />
@@ -123,6 +165,7 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
         dir={direction}
       >
         <TabsList
+          ref={tabsListRef}
           className={cn(
             "flex w-full h-auto gap-2 p-1",
             "overflow-x-auto overflow-y-hidden",
@@ -130,8 +173,17 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
             "snap-x snap-mandatory",
             "scroll-smooth",
             "justify-start px-2",
-            // direction === 'rtl' ? "justify-start" : "justify-end",
+            "cursor-grab active:cursor-grabbing", // إضافة أنماط المؤشر
+            "select-none touch-none", // منع التحديد لتحسين السحب
+            // إضافة ظل بسيط للإشارة إلى إمكانية السحب
+            "relative before:absolute before:inset-y-0 before:right-0 before:w-8 before:bg-gradient-to-l before:from-white/80 before:to-transparent before:pointer-events-none",
+            direction === 'rtl' && "before:right-auto before:left-0 before:bg-gradient-to-r"
           )}
+          // إضافة event listeners للسحب
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
         >
           {/* All Categories Button */}
           <TabsTrigger
@@ -143,7 +195,8 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
               data-[state=active]:text-primary-foreground
               data-[state=active]:shadow-md
               whitespace-nowrap transition-all !flex-0 cursor-pointer
-            "
+              select-auto touch-auto !cursor-pointer" // إعادة تعيين المؤشر للأزرار
+            onMouseDown={handleMouseDownForClick}
           >
             {t('all')}
           </TabsTrigger>
@@ -159,7 +212,9 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
                 data-[state=active]:text-primary-foreground
                 data-[state=active]:shadow-md
                 whitespace-nowrap transition-all !flex-0 cursor-pointer
+                select-auto touch-auto !cursor-pointer" // إعادة تعيين المؤشر للأزرار
               `}
+              onMouseDown={handleMouseDownForClick}
             >
               {category.icon && (
                 <Image

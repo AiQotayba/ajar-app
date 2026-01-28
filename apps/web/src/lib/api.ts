@@ -13,7 +13,7 @@ export const api = createFullApi(
             // Call logout to clear local auth data and redirect
             await logout();
         },
-        defaultTimeout: 10000,
+        defaultTimeout: 20000,
         credentials: 'same-origin',
     }
 );

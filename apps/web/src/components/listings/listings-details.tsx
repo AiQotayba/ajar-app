@@ -104,7 +104,7 @@ export function ListingsDetails({ id, locale = 'ar', initialData }: ListingsDeta
 
   const { data: response, isLoading, error } = useQuery({
     queryKey: ['property', id, locale],
-    queryFn: () => api.get(`/user/listings/${id}`),
+    queryFn: ({ signal }) => api.get(`/user/listings/${id}`, { fetchOptions: { signal } }),
     staleTime: 5 * 60 * 1000, // 5 minutes - server cache
     gcTime: 10 * 60 * 1000, // 10 minutes
     initialData: initialData ? { data: initialData, isError: false, status: 200 } : undefined, // Use cached data from server

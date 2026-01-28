@@ -43,13 +43,17 @@ import { ApiResponse } from "@/lib/api-client"
 const sliderFormSchema = z.object({
     title_ar: z.string().min(3, "العنوان بالعربية يجب أن يكون 3 أحرف على الأقل"),
     title_en: z.string().min(3, "العنوان بالإنجليزية يجب أن يكون 3 أحرف على الأقل"),
-    description_ar: z.string().optional().or(z.literal("")),
-    description_en: z.string().optional().or(z.literal("")),
+    description_ar: z.string().nullable().optional().transform(v => v ?? ""),
+    description_en: z.string().nullable().optional().transform(v => v ?? ""),
     image_url: z.string().min(1, "يجب رفع صورة السلايد"), // Can be image_name (path) or full URL
-    target_url: z.union([
-        z.string().url("يجب إدخال رابط صحيح"),
-        z.literal("")
-    ]).optional(),
+
+    target_url: z
+        .string()
+        .url("يجب إدخال رابط صحيح")
+        .nullable()
+        .optional()
+        .transform(v => v ?? ""),
+
     start_at: z.date({
         required_error: "يجب تحديد تاريخ البداية",
     }),

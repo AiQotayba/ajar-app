@@ -1,28 +1,4 @@
-<!-- # new report
- 
-# POST /api/v1/admin/properties 
- في هاي المشكلة بس ماني عارف حلها مع انه هاي القيم موجودة في قاعدة البيانات
-{
-  "name": { "ar": "الاسم بالعربية", "en": "الاسم بالانجليزية" }, 
-  "description": { "ar": "الوصف بالعربية", "en": "الوصف بالانجليزية" },
-  "category_id": 522,
-  "icon": "properties/694e45e3d69a4.webp",
-  "type": "enum",
-  "is_filter": false,
-  "options": [
-    "q1",
-    "a1"
-  ]
-}
 
-{
-  "message": "الحقل type المحدد غير صالح.",
-  "errors": {
-    "type": [
-      "الحقل type المحدد غير صالح."
-    ]
-  }
-} -->
  
 # إضافة رابط خارجي قصدي تضمين ماني عارف كيف اعملها 
 POST {{base_url}}/general/fetch-media

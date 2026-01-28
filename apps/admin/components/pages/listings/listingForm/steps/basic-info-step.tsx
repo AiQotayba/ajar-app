@@ -65,7 +65,7 @@ export function BasicInfoStep({
 
       <div className="space-y-2">
         <Label htmlFor="title_ar" className="text-right block text-sm sm:text-base">
-          العنوان <span className="text-destructive">*</span>
+          نص لعنوان العرض <span className="text-destructive">*</span>
         </Label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div className="col-span-1">
@@ -438,7 +438,7 @@ export function BasicInfoStep({
                   <div className="flex flex-row gap-2 items-center justify-start">
                     {(feature as any)?.icon && (
                       <Image src={(feature as any)?.icon} alt={feature.name.ar} width={20} height={20} />
-                    )} 
+                    )}
                   </div>
                   {feature.name.ar}
                   {feature.description && (
