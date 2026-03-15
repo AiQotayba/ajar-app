@@ -21,9 +21,7 @@ import {
   Heart,
   User,
   Home,
-  Plus,
-  Building2,
-  Key,
+  Plus, 
   Info,
   SlidersHorizontal,
   Pencil,
@@ -35,7 +33,7 @@ import {
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Clock } from "lucide-react"
@@ -299,7 +297,7 @@ export function Navbar({ className }: NavbarProps) {
 
             {/* {isAuthenticated && ( */}
             <Link
-              href={`/${locale}/my-listings/create`} 
+              href={`/${locale}/my-listings/create`}
               aria-label={isRTL ? "إضافة إعلان" : "Add listing"}
               className="w-full p-2 flex items-center rounded-md bg-primary text-white justify-center max-w-max text-xs"
               onClick={() => setIsMenuOpen(false)}
@@ -313,7 +311,7 @@ export function Navbar({ className }: NavbarProps) {
             <div className="lg:hidden">
               <SearchBar />
             </div>
- 
+
             {/* Language Switcher */}
             <div className="hidden sm:flex">
               <LanguageSwitcher />
@@ -451,7 +449,6 @@ interface Notification {
 
 function NotificationBell({ locale }: NotificationBellProps) {
   const queryClient = useQueryClient()
-  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const { user } = useAuth()
   const isRTL = locale === 'ar'

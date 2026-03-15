@@ -36,7 +36,7 @@
     ".next/types/**/*.ts",
     "../../doc/index copy.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "../../@Osama/table/columns.tsx"  ],
   "exclude": [
     "node_modules"
   ]

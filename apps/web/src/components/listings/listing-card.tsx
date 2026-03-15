@@ -167,7 +167,6 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
   const viewTrackerRef = useListingViewTracker(listing.id, {
     enabled: !openEdit, // Only track in lists, not in edit/delete views
   })
-  console.log(listing);
 
   const getLocalizedText = (text: { ar: string; en: string }) => text[(locale || currentLocale) as keyof typeof text] || text.ar
 
@@ -200,7 +199,6 @@ export function ListingCard({ listing, locale, onFavoriteRemoved, openEdit, dele
       if (!data.isError) {
         // Update favorite state based on API response
         const action = data?.data?.action
-        console.log(action);
 
         if (action === 'added') {
           setIsFavorite(true)

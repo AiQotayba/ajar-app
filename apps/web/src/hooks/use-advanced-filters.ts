@@ -6,6 +6,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/lib/redux/store'
 
 interface Category {
   id: number
@@ -69,7 +71,7 @@ interface AdvancedFilterState {
   rooms: string
   furnished: string
   searchQuery: string
-  
+
   // Advanced filters
   selectedCategory: Category | null
   selectedSubCategory: Category | null
@@ -81,9 +83,9 @@ interface AdvancedFilterState {
 }
 
 export function useAdvancedFilters() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  
+  const { categories, governorates, cities }: any = useSelector((state: RootState) => state.home)
+
   const [filters, setFilters] = useState<AdvancedFilterState>(() => {
     const selectedProperties: Record<number, string> = {}
     searchParams.forEach((value, key) => {
@@ -120,38 +122,10 @@ export function useAdvancedFilters() {
     }
   })
 
-  // Fetch categories
-  const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await api.get('/user/categories')
-      return response.data || []
-    }
-  })
-
-  // Fetch governorates
-  const { data: governorates = [] } = useQuery({
-    queryKey: ['governorates'],
-    queryFn: async () => {
-      const response = await api.get('/user/governorates')
-      return response.data || []
-    }
-  })
-
-  // Fetch cities
-  const { data: cities = [] } = useQuery({
-    queryKey: ['cities', filters.governorate_id],
-    queryFn: async () => {
-      const response = await api.get('/user/cities')
-      return response.data || []
-    },
-    enabled: !!filters.governorate_id
-  })
-
   const organizeCategories = useCallback((categories: Category[]) => {
     const mainCategories = categories.filter(cat => !cat.parent_id)
     const subCategories = categories.filter(cat => cat.parent_id)
-    
+
     return mainCategories.map(main => ({
       ...main,
       children: subCategories.filter(sub => sub.parent_id === main.id)
@@ -162,7 +136,7 @@ export function useAdvancedFilters() {
   const selectedMainCategoryData = organizedCategories.find(cat => cat.id.toString() === filters.propertyCategory)
   const availableSubCategories = selectedMainCategoryData?.children || []
 
-  const filteredCities = cities.filter((city: any) => 
+  const filteredCities = cities.filter((city: any) =>
     !filters.governorate_id || city.governorate_id.toString() === filters.governorate_id
   )
 
@@ -172,7 +146,7 @@ export function useAdvancedFilters() {
       // Find and set selected category
       const categoryId = filters.propertyCategory
       if (categoryId) {
-        const category = categories.find(cat => cat.id.toString() === categoryId)
+        const category = categories.find((cat: any) => cat.id.toString() === categoryId)
         if (category) {
           setFilters(prev => ({
             ...prev,
@@ -183,7 +157,7 @@ export function useAdvancedFilters() {
 
           // Check if it's a subcategory
           if (category.parent_id) {
-            const parentCategory = categories.find(cat => cat.id === category.parent_id)
+            const parentCategory = categories.find((cat: any) => cat.id === category.parent_id)
             if (parentCategory) {
               setFilters(prev => ({
                 ...prev,
@@ -200,10 +174,10 @@ export function useAdvancedFilters() {
   // Restore filters from URL on page load/refresh
   const restoreFiltersFromURL = useCallback(() => {
     const urlParams = new URLSearchParams(window.location.search)
-    
+
     // Update filters from URL params
     const newFilters: Partial<AdvancedFilterState> = {}
-    
+
     if (urlParams.get('property_type')) newFilters.propertyType = urlParams.get('property_type')!
     if (urlParams.get('category')) newFilters.propertyCategory = urlParams.get('category')!
     if (urlParams.get('governorate_id')) newFilters.governorate_id = urlParams.get('governorate_id')!
@@ -219,7 +193,7 @@ export function useAdvancedFilters() {
     // Parse properties and features
     const selectedProperties: Record<number, string> = {}
     const selectedFeatures: number[] = []
-    
+
     urlParams.forEach((value, key) => {
       if (key.startsWith('property_')) {
         const propertyId = parseInt(key.replace('property_', ''))
@@ -266,8 +240,8 @@ export function useAdvancedFilters() {
 
   // Handle category selection
   const handleCategoryChange = useCallback(async (categoryId: string) => {
-    const category = categories.find(cat => cat.id.toString() === categoryId)
-    
+    const category = categories.find((cat: any) => cat.id.toString() === categoryId)
+
     if (category) {
       setFilters(prev => ({
         ...prev,
@@ -301,7 +275,7 @@ export function useAdvancedFilters() {
   // Handle subcategory selection
   const handleSubCategoryChange = useCallback(async (subCategoryId: string) => {
     const subCategory = availableSubCategories.find(cat => cat.id.toString() === subCategoryId)
-    
+
     if (subCategory) {
       setFilters(prev => ({
         ...prev,
@@ -333,7 +307,7 @@ export function useAdvancedFilters() {
   // Handle sub-subcategory selection
   const handleSubSubCategoryChange = useCallback(async (subSubCategoryId: string) => {
     const subSubCategory = availableSubCategories.find(cat => cat.id.toString() === subSubCategoryId)
-    
+
     if (subSubCategory) {
       setFilters(prev => ({
         ...prev,
@@ -375,7 +349,7 @@ export function useAdvancedFilters() {
   // Update URL parameters
   const updateURLParams = useCallback((newFilters: AdvancedFilterState) => {
     const params = new URLSearchParams()
-    
+
     // Basic filters
     if (newFilters.propertyType && newFilters.propertyType !== 'بيع') {
       params.set('property_type', newFilters.propertyType)
@@ -410,19 +384,19 @@ export function useAdvancedFilters() {
     if (newFilters.searchQuery) {
       params.set('search', newFilters.searchQuery)
     }
-    
+
     // Add selected properties
     Object.entries(newFilters.selectedProperties).forEach(([propertyId, value]) => {
       if (value) {
         params.set(`property_${propertyId}`, value)
       }
     })
-    
+
     // Add selected features
     if (newFilters.selectedFeatures.length > 0) {
       params.set('features', newFilters.selectedFeatures.join(','))
     }
-    
+
     // Update URL without page reload
     const newUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`
     window.history.replaceState({}, '', newUrl)
@@ -472,8 +446,8 @@ export function useAdvancedFilters() {
   // Check if there are active filters
   const hasActiveFilters = useCallback(() => {
     return Object.entries(filters).some(([key, value]) => {
-      if (key === 'selectedCategory' || key === 'selectedSubCategory' || key === 'selectedSubSubCategory' || 
-          key === 'availableProperties' || key === 'availableFeatures' || key === 'selectedProperties' || key === 'selectedFeatures') {
+      if (key === 'selectedCategory' || key === 'selectedSubCategory' || key === 'selectedSubSubCategory' ||
+        key === 'availableProperties' || key === 'availableFeatures' || key === 'selectedProperties' || key === 'selectedFeatures') {
         return false // Skip complex objects
       }
       return value && value !== 'furnished' && value !== 'بيع'
@@ -483,21 +457,21 @@ export function useAdvancedFilters() {
   // Get active filters count
   const getActiveFiltersCount = useCallback(() => {
     let count = 0
-    
+
     Object.entries(filters).forEach(([key, value]) => {
-      if (key === 'selectedCategory' || key === 'selectedSubCategory' || key === 'selectedSubSubCategory' || 
-          key === 'availableProperties' || key === 'availableFeatures' || key === 'selectedProperties' || key === 'selectedFeatures') {
+      if (key === 'selectedCategory' || key === 'selectedSubCategory' || key === 'selectedSubSubCategory' ||
+        key === 'availableProperties' || key === 'availableFeatures' || key === 'selectedProperties' || key === 'selectedFeatures') {
         return // Skip complex objects
       }
-      
+
       if (value && value !== 'furnished' && value !== 'بيع') {
         count++
       }
     })
-    
+
     count += Object.keys(filters.selectedProperties).length
     count += filters.selectedFeatures.length
-    
+
     return count
   }, [filters])
 

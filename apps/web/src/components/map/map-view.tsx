@@ -187,7 +187,7 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
     queryFn: async ({ signal }) => {
       if (!debouncedBounds) return null
 
-      const params = new URLSearchParams({
+      const baseParams = new URLSearchParams({
         map_mode: '1',
         north: debouncedBounds.north.toString(),
         south: debouncedBounds.south.toString(),
@@ -199,17 +199,32 @@ export function MapView({ hasPermission, onResetPermission }: MapViewProps) {
         merge_factor: '1.1'
       })
 
-      if (propertyType !== 'all') {
-        params.append('availability_status', propertyType)
+      if (propertyType === 'rented') {
+        baseParams.append('type', 'rent')
+      } else if (propertyType === 'solded') {
+        baseParams.append('type', 'sale')
       }
 
-      const response = await api.get(`/user/listings?${params.toString()}`, { fetchOptions: { signal } })
-
-      if (response.isError) {
-        throw new Error(response.message || 'Failed to load map data')
+      const fetchOne = async (typeParam?: 'rent' | 'sale') => {
+        const params = new URLSearchParams(baseParams)
+        if (typeParam) params.set('type', typeParam)
+        const response = await api.get(`/user/listings?${params.toString()}`, { fetchOptions: { signal } })
+        if (response.isError) {
+          throw new Error(response.message || 'Failed to load map data')
+        }
+        const raw = response.data
+        return (Array.isArray(raw) ? raw : (raw as { data?: MapData[] })?.data ?? []) as MapData[]
       }
 
-      return response.data as MapData[]
+      if (propertyType === 'all') {
+        const [saleData, rentData] = await Promise.all([
+          fetchOne('sale'),
+          fetchOne('rent')
+        ])
+        return [...saleData, ...rentData]
+      }
+
+      return fetchOne()
     },
     enabled: !!debouncedBounds && !!mapInstanceRef.current,
     staleTime: 30 * 1000, // 30 seconds

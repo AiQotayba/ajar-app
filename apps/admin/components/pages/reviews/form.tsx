@@ -28,7 +28,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { api } from "@/lib/api"
-import type { Review } from "@/lib/types/review"
+import type { Review } from "@/lib/types/review" 
 import { renderStars } from "./columns"
 
 // Form validation schema

@@ -3,12 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { X, Search } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
-import { api } from "@/lib/api"
 import { useAdvancedFilters } from "@/hooks/use-advanced-filters"
 import { useLocale, useTranslations } from "next-intl"
 import { useState, useEffect } from "react"
@@ -20,42 +17,6 @@ interface FilterDrawerProps {
   onOpenChange: (open: boolean) => void
 }
 
-interface Category {
-  id: number
-  name: {
-    ar: string
-    en: string
-  }
-  parent_id?: number
-  children?: Category[]
-  level?: number
-}
-
-interface Governorate {
-  id: number
-  name: {
-    ar: string
-    en: string
-  }
-}
-
-interface City {
-  id: number
-  name: {
-    ar: string
-    en: string
-  }
-  governorate_id: number
-}
-
-interface Property {
-  id: number
-  name: {
-    ar: string
-    en: string
-  }
-}
-
 export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
   const {
     filters,
@@ -65,7 +26,6 @@ export function FilterDrawer({ open, onOpenChange }: FilterDrawerProps) {
     availableSubCategories,
     handleCategoryChange,
     handleSubCategoryChange,
-    handleSubSubCategoryChange,
     handlePropertyChange,
     handleFeatureToggle,
     handleFilterChange,

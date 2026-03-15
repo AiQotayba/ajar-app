@@ -6,6 +6,8 @@ import { useLocale, useTranslations } from "next-intl"
 import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
+import { useSelector } from "react-redux"
+import { RootState } from "@/lib/redux/store"
 
 interface Category {
   id: number;
@@ -30,8 +32,9 @@ interface Category {
   updated_at: string;
 }
 
-export function CategoryFilter({ data, isLoading }: { data: Category[] | undefined, isLoading: boolean }) {
+export function CategoryFilter() {
   const [info, setInfo] = useState<Category | undefined>(undefined)
+  const { categories: data, loading: isLoading } = useSelector((state: RootState) => state.home)
 
   const locale = useLocale()
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
@@ -63,14 +66,14 @@ export function CategoryFilter({ data, isLoading }: { data: Category[] | undefin
   )
 }
 
-export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | undefined, isLoading: boolean, setInfo: any }) {
+export function CategoryTabs({ data, isLoading, setInfo }: { data: any[] | undefined, isLoading: boolean, setInfo: any }) {
   const [activeCategory, setActiveCategory] = useState<Category | undefined>(undefined)
   const locale = useLocale()
   const t = useTranslations('filters')
   const router = useRouter()
   const searchParams = useSearchParams()
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
-  
+
   // Refs للسحب الأفقي
   const tabsListRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
@@ -113,11 +116,11 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
   // وظائف السحب الأفقي
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!tabsListRef.current) return
-    
+
     isDraggingRef.current = true
     startXRef.current = e.pageX - tabsListRef.current.offsetLeft
     scrollLeftRef.current = tabsListRef.current.scrollLeft
-    
+
     // تغيير المؤشر أثناء السحب
     tabsListRef.current.style.cursor = 'grabbing'
     tabsListRef.current.style.userSelect = 'none'
@@ -125,7 +128,7 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDraggingRef.current || !tabsListRef.current) return
-    
+
     e.preventDefault()
     const x = e.pageX - tabsListRef.current.offsetLeft
     const walk = (x - startXRef.current) * 1.5 // زيادة السرعة
@@ -134,7 +137,7 @@ export function CategoryTabs({ data, isLoading, setInfo }: { data: Category[] | 
 
   const handleMouseUpOrLeave = () => {
     if (!tabsListRef.current) return
-    
+
     isDraggingRef.current = false
     tabsListRef.current.style.cursor = 'grab'
     tabsListRef.current.style.removeProperty('user-select')

@@ -1,11 +1,10 @@
 "use client"
 
-import { cn } from "@/lib/utils" 
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useLocale } from "next-intl"
 import { Logo } from "@/components/logo"
-import { useQueries } from "@tanstack/react-query"
-import { api } from "@/lib/api"
+import { useAppSelector } from "@/lib/redux/hooks"
 
 interface FooterProps {
   className?: string
@@ -13,40 +12,24 @@ interface FooterProps {
 
 export function Footer({ className }: FooterProps) {
   const locale = useLocale()
-  const isRTL = locale === 'ar'
+  const isRTL = locale === "ar"
+  const footer = useAppSelector((state) => state.home.footer)
 
+  const title = locale === "ar" ? footer.titleAr : footer.titleEn
+  const description = locale === "ar" ? footer.descriptionAr : footer.descriptionEn
 
-  // Fetch footer title setting based on locale
-  const queryResults = useQueries({
-    queries: [
-      {
-        queryKey: ['footer-title', locale],
-        queryFn: async ({ signal }) => api.get(`/general/settings/footer-title-${locale}`, { fetchOptions: { signal } }),
-        staleTime: 60 * 1000 * 60, // 1 hour
-      },
-      {
-        queryKey: ['footer-description', locale],
-        queryFn: async ({ signal }) => api.get(`/general/settings/footer-description-${locale}`, { fetchOptions: { signal } }),
-        staleTime: 60 * 1000 * 60, // 1 hour
-      },
-    ],
-  })
-
-  // Extract data from query results
-  const [titleResult, descriptionResult] = queryResults
-
-  // Access the data property from each query result
-  const title = titleResult.data?.data // assuming api response has data property
-  const description = descriptionResult.data?.data
-
-  // Use title and description in your component
-  // You might also want to handle loading/error states
-  const isPending = titleResult.isPending || descriptionResult.isPending
-  const isError = titleResult.isError || descriptionResult.isError
-
-  if (isPending) return <div>Loading...</div>
-  if (isError) return <div>Error loading footer content</div>
-
+  if (footer && !title && !description) {
+    return (
+      <footer className={cn("bg-gradient-to-br from-gray-50 to-white", className)}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+          <div className="flex flex-col items-center justify-center gap-4 py-8">
+            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-72 bg-gray-100 rounded animate-pulse" />
+          </div>
+        </div>
+      </footer>
+    )
+  }
   return (
     <footer className={cn(
       "bg-gradient-to-br from-gray-50 to-white",
@@ -65,13 +48,13 @@ export function Footer({ className }: FooterProps) {
                 {/* {isRTL ? "أجار" : "Ajar"} */}
               </div>
               <div className="text-sm text-gray-600">
-                {title?.value}
+                {title ?? ""}
               </div>
             </Link>
 
             {/* Description */}
             <p className="text-gray-600 text-sm leading-relaxed mb-6 text-center">
-              {description?.value}
+              {description ?? ""}
             </p>
 
           </div>
