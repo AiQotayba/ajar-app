@@ -17,10 +17,12 @@ export function useHomeCache() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (shouldRefetch && !home.loading && !home.error) {
+    // Trigger fetch whenever cache is empty/expired and there is no in-flight request,
+    // even إذا كان في خطأ سابق، حتى لا نبقى عالقين بدون بيانات.
+    if (shouldRefetch && !home.loading) {
       dispatch(fetchHomeCacheData());
     }
-  }, [shouldRefetch, home.loading, home.error, dispatch]);
+  }, [shouldRefetch, home.loading, dispatch]);
 
   return {
     footer: home.footer,

@@ -1,6 +1,8 @@
-import HomePage from "@/components/home/home";
-import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { CategoryFilter } from "@/components/filters/category-filter";
+import { HeroSlider } from "@/components/home/hero-slider";
+import { ListingGridMore } from "@/components/listings/listing-grid-more";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 interface HomePageProps {
   params: {
@@ -57,12 +59,53 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   };
 }
 
+// ISR: regenerate the page every 60 seconds
+export const revalidate = 60;
 
 export default async function HomePageSSR({ params }: HomePageProps) {
   const { locale } = await params;
 
   // Validate locale
-  if (!['ar', 'en'].includes(locale)) notFound();
+  if (!["ar", "en"].includes(locale)) notFound();
 
-  return <HomePage locale={locale} />;
+  // Fetch home data on the server using fetch (SSR + ISR)
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://backend.ajarsyria.com/api/v1";
+
+  const res = await fetch(`${baseUrl}/user/home`, {
+    next: { revalidate },
+  });
+
+  const result = await res.json();
+  const homeData = (result?.data ?? result) as any | undefined;
+
+  const hasError = !res.ok || !homeData;
+  const errorMessage = hasError
+    ? locale === "ar"
+      ? "حدث خطأ في تحميل البيانات"
+      : "Error loading data"
+    : null;
+
+  const sliders = homeData?.sliders;
+
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">{errorMessage}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-24">
+      <main className="space-y-6 mt-2">
+        <HeroSlider sliders={sliders} isLoading={false} />
+        <CategoryFilter />
+        <div className="px-4">
+          <ListingGridMore />
+        </div>
+      </main>
+    </div>
+  );
 }

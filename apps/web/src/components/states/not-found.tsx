@@ -81,7 +81,7 @@ export function NotFound() {
               </Button>
             </Link>
             
-            <Link href="/listings" className="flex-1">
+            <Link href="/" className="flex-1">
               <Button 
                 variant="outline"
                 className="w-full h-14 px-8 text-base font-semibold rounded-2xl border-2 hover:bg-muted/50 transition-all"

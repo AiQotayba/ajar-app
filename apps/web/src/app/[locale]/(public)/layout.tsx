@@ -11,6 +11,7 @@ import type React from "react";
 import { Toaster } from "sonner";
 import "../globals.css";
 import { MainLayout } from "@/components/layout";
+import { HomeCacheInitializer } from "@/components/home/home-cache-initializer";
 import ForegroundNotificationListenerProvider from "@/components/notifications/foreground-notification-listener-provider";
 import { LogRocketProvider } from "@/components/logrocket-provider";
 
@@ -109,6 +110,7 @@ export default async function LocaleLayout({
                             <LogRocketProvider />
                             <ForegroundNotificationListenerProvider />
                             <LocaleSaver />
+                            <HomeCacheInitializer />
                             <MainLayout>
                                 <main className="min-h-screen/50">{children}</main>
                             </MainLayout>
