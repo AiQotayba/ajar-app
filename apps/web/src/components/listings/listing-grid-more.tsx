@@ -42,9 +42,12 @@ export function ListingGridMore() {
     queryKey: ['listings-infinite', locale, baseParams],
     queryFn: async ({ pageParam = 1, signal }) => {
       const params = new URLSearchParams(baseParams)
-      params.set('page', pageParam.toString())
+      params.set('page', String(pageParam))
+      params.set('per_page', '24')
 
-      const response = await api.get(`/user/listings?${params.toString()}&per_page=24`, { fetchOptions: { signal } })
+      const response = await api.get(`/user/listings?${params.toString()}`, {
+        fetchOptions: { signal },
+      })
       return response
     },
     getNextPageParam: (lastPage) => {

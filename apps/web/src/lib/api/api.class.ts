@@ -208,9 +208,59 @@ export class ApiCore implements ApiInstance {
     }
 
     /**
+     * Build same-origin proxy URL: /api/ssr?url=/user/listings&...
+     */
+    private buildSsrProxyUrl(endpoint: string, options: ApiOptions): string {
+        const proxyPath = this.config.ssrProxyPath || '/api/ssr';
+        const normalized = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+        const qIndex = normalized.indexOf('?');
+        const pathPart = qIndex >= 0 ? normalized.slice(0, qIndex) : normalized;
+        const endpointQuery = qIndex >= 0 ? normalized.slice(qIndex + 1) : '';
+
+        const params = new URLSearchParams();
+        params.set('url', pathPart);
+
+        if (endpointQuery) {
+            new URLSearchParams(endpointQuery).forEach((v, k) => {
+                params.append(k, v);
+            });
+        }
+
+        if (options.query && this.config.getSearchParams) {
+            const searchParams = this.config.getSearchParams();
+            if (searchParams) {
+                const queryString =
+                    typeof searchParams === 'string'
+                        ? searchParams
+                        : new URLSearchParams(searchParams).toString();
+                if (queryString) {
+                    new URLSearchParams(queryString).forEach((v, k) => {
+                        params.append(k, v);
+                    });
+                }
+            }
+        }
+
+        if (options.params && Object.keys(options.params).length > 0) {
+            Object.entries(options.params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    params.append(key, String(value));
+                }
+            });
+        }
+
+        const qs = params.toString();
+        return `${proxyPath}?${qs}`;
+    }
+
+    /**
      * Build the full URL with base URL and query parameters
      */
     private buildUrl(endpoint: string, options: ApiOptions): string {
+        if (this.config.useSsrProxy) {
+            return this.buildSsrProxyUrl(endpoint, options);
+        }
+
         // Remove leading slash from endpoint if baseUrl ends with slash
         const cleanEndpoint = endpoint.startsWith('/') && this.config.baseUrl.endsWith('/')
             ? endpoint.slice(1)

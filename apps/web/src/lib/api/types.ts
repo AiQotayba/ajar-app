@@ -64,6 +64,14 @@ export interface ApiOptions {
 export interface ApiConfig {
     /** Base URL for all API requests */
     baseUrl: string;
+    /**
+     * When true, requests are sent to same-origin SSR proxy:
+     * `{ssrProxyPath}?url=<path>&<query>` instead of `baseUrl + path`.
+     * The proxy route must forward to `baseUrl` (server-side env).
+     */
+    useSsrProxy?: boolean;
+    /** Defaults to `/api/ssr` */
+    ssrProxyPath?: string;
     /** Function to get authentication token */
     getToken?: () => string | null | undefined;
     /** Function to get current language/locale */
