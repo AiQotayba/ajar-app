@@ -186,7 +186,6 @@ export function ImagesStep({
 
       // Add to media array
       const newMedia = [...media, mediaObject]
-      console.log(newMedia);
 
       setValue("images", newMedia as any)
 
@@ -205,7 +204,6 @@ export function ImagesStep({
       setFetchingMetadata(false)
     }
   }
-  console.log("state:", media);
 
 
 

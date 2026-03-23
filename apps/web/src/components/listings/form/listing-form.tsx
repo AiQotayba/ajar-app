@@ -605,8 +605,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         const transformedImages = images
             .filter((image) => image !== null && image !== undefined)
             .map((image: any, index) => {
-                console.log("transformedImages", image);
-                console.log("iframely", image);
 
                 if (image instanceof File) {
                     throw new Error(t('actions.uploadImagesFirst'))
@@ -619,7 +617,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                         sort_order: index + 1
                     }
                 } else if (image && typeof image === 'object' && !Array.isArray(image)) {
-                    console.log("iframely", image);
 
                     // Handle iframely objects
                     if ((image.source === 'iframely' || image.iframely) && image.iframely) {
@@ -790,10 +787,8 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     const createMutation = useMutation({
         mutationFn: async (data: ListingFormData) => {
             // Already normalized in onSubmit
-            console.log({ data });
 
             const transformedData = transformFormDataToAPI(data)
-            console.log(transformedData);
 
             // Send to API
             const result = await api.post(`/user/listings`, transformedData)
@@ -898,7 +893,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
     // Form submission
     const onSubmit = async (data: ListingFormData) => {
         setIsLoading(true)
-        console.log(data);
 
         try {
             // Ensure external URLs have proper iframely structure
@@ -913,7 +907,6 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
                 setIsLoading(false)
                 return
             }
-            console.log({ ...normalizedData, images: methods.getValues("images") });
 
             if (currentStep === 4) {
                 if (isEditMode) {
@@ -934,7 +927,7 @@ export function ListingForm({ listingId, mode, onSuccess, onCancel }: ListingFor
         setShowSuccess(false)
         if (isEditMode && listingId) {
             // @
-            router.push(`/listings/${listingId}`) 
+            router.push(`/listings/${listingId}`)
         } else {
             // @
             router.push("/my-listings")

@@ -59,6 +59,12 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   };
 }
 
+// async function getListings(baseUrl: string) {
+//   const data = await fetch(`${baseUrl}/user/listings?status=approved&per_page=24`)
+//     .then(async res => await res.json())
+//     .then(data => data.data)
+//   return data;
+// }
 // ISR: regenerate the page every 60 seconds
 export const revalidate = 60;
 
@@ -81,21 +87,15 @@ export default async function HomePageSSR({ params }: HomePageProps) {
   const homeData = (result?.data ?? result) as any | undefined;
 
   const hasError = !res.ok || !homeData;
-  const errorMessage = hasError
-    ? locale === "ar"
-      ? "حدث خطأ في تحميل البيانات"
-      : "Error loading data"
-    : null;
-
+  const errorMessage = hasError ? locale === "ar" ? "حدث خطأ في تحميل البيانات" : "Error loading data" : null;
+  // const listings = await getListings(baseUrl);
   const sliders = homeData?.sliders;
 
-  if (hasError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-muted-foreground">{errorMessage}</p>
-      </div>
-    );
-  }
+  if (hasError) return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-muted-foreground">{errorMessage}</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -103,7 +103,9 @@ export default async function HomePageSSR({ params }: HomePageProps) {
         <HeroSlider sliders={sliders} isLoading={false} />
         <CategoryFilter />
         <div className="px-4">
-          <ListingGridMore />
+          <ListingGridMore
+            // listings={listings}
+          />
         </div>
       </main>
     </div>

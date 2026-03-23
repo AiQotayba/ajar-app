@@ -165,7 +165,6 @@ export function getAuthHeaders(): Record<string, string> {
  * Handle authentication response and store data in Redux and cookies (client-side)
  */
 export function handleAuthResponse(response: AuthResponse): void {
-  console.log(response);
   
   if (typeof window === 'undefined') return;
   if (response.success && response.access_token) {

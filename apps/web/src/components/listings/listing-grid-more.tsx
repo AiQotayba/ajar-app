@@ -6,12 +6,12 @@ import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useMemo } from "react"
 import type React from "react"
-import { cn } from "@/lib/utils" 
+import { cn } from "@/lib/utils"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Search, Filter, RefreshCw, Home } from "lucide-react"
 import { api } from "@/lib/api2"
 
-export function ListingGridMore() {
+export function ListingGridMore({ listings }: { listings?: any }) {
   const locale = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -44,10 +44,9 @@ export function ListingGridMore() {
       const params = new URLSearchParams(baseParams)
       params.set('page', String(pageParam))
       params.set('per_page', '24')
+      // params.set('per_page', '12')
 
-      const response = await api.get(`/user/listings?${params.toString()}`, {
-        fetchOptions: { signal },
-      })
+      const response = await api.get(`/user/listings?${params.toString()}`, { fetchOptions: { signal } })
       return response
     },
     getNextPageParam: (lastPage) => {
