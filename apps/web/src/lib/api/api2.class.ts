@@ -134,6 +134,7 @@ export class ApiCore implements ApiInstance {
                     fetchOptions.body = data;
                 } else {
                     fetchOptions.body = JSON.stringify(data);
+                    // Only JSON requests need Content-Type.
                     headers['Content-Type'] = 'application/json';
                 }
             }
@@ -311,14 +312,6 @@ export class ApiCore implements ApiInstance {
             const lang = this.config.getLang();
             if (lang) {
                 headers['Accept-Language'] = lang;
-            }
-        }
-
-        // Add authorization header if token is available
-        if (this.config.getToken) {
-            const token = this.config.getToken();
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
             }
         }
 

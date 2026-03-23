@@ -6,10 +6,10 @@ import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useMemo } from "react"
 import type React from "react"
-import { cn } from "@/lib/utils"
-import { api } from "@/lib/api"
+import { cn } from "@/lib/utils" 
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Search, Filter, RefreshCw, Home } from "lucide-react"
+import { api } from "@/lib/api2"
 
 export function ListingGridMore() {
   const locale = useLocale()
