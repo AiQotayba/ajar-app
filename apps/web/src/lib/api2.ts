@@ -7,7 +7,8 @@ const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_URL || 'https://ajar-backend.mystore.social/api/v1';
 
 /** When true, the client calls `/api/ssr?url=/path&...` and the Next route proxies to `apiBaseUrl`. */
-const useSsrProxy = process.env.NEXT_PUBLIC_USE_API_SSR_PROXY === 'true';
+// const useSsrProxy = process.env.NEXT_PUBLIC_USE_API_SSR_PROXY === 'true';
+const useSsrProxy = false;
 
 export const api = createFullApi(
     apiBaseUrl,

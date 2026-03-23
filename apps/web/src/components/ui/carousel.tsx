@@ -60,11 +60,28 @@ function Carousel({
   )
   const [canScrollPrev, setCanScrollPrev] = React.useState(false)
   const [canScrollNext, setCanScrollNext] = React.useState(false)
+  const isMountedRef = React.useRef(false)
 
   const onSelect = React.useCallback((api: CarouselApi) => {
     if (!api) return
-    setCanScrollPrev(api.canScrollPrev())
-    setCanScrollNext(api.canScrollNext())
+    // Embla can emit `select` very early; defer state updates to avoid
+    // React warning about updating during another component's render.
+    const nextCanScrollPrev = api.canScrollPrev()
+    const nextCanScrollNext = api.canScrollNext()
+
+    if (typeof queueMicrotask === 'function') {
+      queueMicrotask(() => {
+        if (!isMountedRef.current) return
+        setCanScrollPrev(nextCanScrollPrev)
+        setCanScrollNext(nextCanScrollNext)
+      })
+    } else {
+      setTimeout(() => {
+        if (!isMountedRef.current) return
+        setCanScrollPrev(nextCanScrollPrev)
+        setCanScrollNext(nextCanScrollNext)
+      }, 0)
+    }
   }, [])
 
   const scrollPrev = React.useCallback(() => {
@@ -87,6 +104,13 @@ function Carousel({
     },
     [scrollPrev, scrollNext],
   )
+
+  React.useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   React.useEffect(() => {
     if (!api || !setApi) return
