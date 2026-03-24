@@ -59,43 +59,19 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   };
 }
 
-// async function getListings(baseUrl: string) {
-//   const data = await fetch(`${baseUrl}/user/listings?status=approved&per_page=24`)
-//     .then(async res => await res.json())
-//     .then(data => data.data)
-//   return data;
-// }
 // ISR: regenerate the page every 60 seconds
 export const revalidate = 60;
 
 export default async function HomePageSSR({ params }: HomePageProps) {
   const { locale } = await params;
-
-  // Validate locale
   if (!["ar", "en"].includes(locale)) notFound();
 
   // Fetch home data on the server using fetch (SSR + ISR)
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "https://backend.ajarsyria.com/api/v1";
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend.ajarsyria.com/api/v1";
 
-  const res = await fetch(`${baseUrl}/user/home`, {
-    next: { revalidate },
-  });
-
-  const result = await res.json();
-  const homeData = (result?.data ?? result) as any | undefined;
-
-  const hasError = !res.ok || !homeData;
-  const errorMessage = hasError ? locale === "ar" ? "حدث خطأ في تحميل البيانات" : "Error loading data" : null;
-  // const listings = await getListings(baseUrl);
-  const sliders = homeData?.sliders;
-
-  if (hasError) return (
-    <div className="flex items-center justify-center h-64">
-      <p className="text-muted-foreground">{errorMessage}</p>
-    </div>
-  );
+  const { sliders } = await fetch(`${baseUrl}/user/home`, { next: { revalidate } })
+    .then(async res => await res.json())
+    .then(data => data.data)
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -103,9 +79,7 @@ export default async function HomePageSSR({ params }: HomePageProps) {
         <HeroSlider sliders={sliders} isLoading={false} />
         <CategoryFilter />
         <div className="px-4">
-          <ListingGridMore
-            // listings={listings}
-          />
+          <ListingGridMore />
         </div>
       </main>
     </div>

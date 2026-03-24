@@ -4,12 +4,30 @@ import { ListingCard } from "./listing-card"
 import { Button } from "@/components/ui/button"
 import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams, useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
-import type React from "react"
+import { useEffect, useMemo, useState, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { useInfiniteQuery } from "@tanstack/react-query"
 import { Search, Filter, RefreshCw, Home } from "lucide-react"
-import { api } from "@/lib/api2"
+import { api } from "@/lib/api"
+
+type ListingGridResponse = {
+  data?: any[]
+  meta?: {
+    current_page?: number
+    last_page?: number
+    total?: number
+  } | null
+}
+
+type ListingGridCacheValue = {
+  listings: any[]
+  meta: ListingGridResponse["meta"]
+  nextPage: number
+  cachedAt: number
+}
+
+const GRID_CACHE_TTL_MS = 2 * 60 * 1000
+const GRID_SESSION_STORAGE_KEY_PREFIX = "listing-grid-cache::"
+const listingGridCache = new Map<string, ListingGridCacheValue>()
 
 export function ListingGridMore({ listings }: { listings?: any }) {
   const locale = useLocale()
@@ -18,7 +36,6 @@ export function ListingGridMore({ listings }: { listings?: any }) {
   const t = useTranslations('property')
   const tCommon = useTranslations('common')
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
-  const [awaiting, setAwaiting] = useState(2000)
 
   // Build base query params (without page parameter)
   const baseParams = useMemo(() => {
@@ -30,56 +47,171 @@ export function ListingGridMore({ listings }: { listings?: any }) {
     }
     return params.toString()
   }, [searchParams])
+  const cacheKey = useMemo(() => `${locale}::${baseParams}`, [locale, baseParams])
+  const inFlightPagesRef = useRef<Set<number>>(new Set())
+  const prefetchedPagesRef = useRef<Map<number, ListingGridResponse>>(new Map())
+  const [allListings, setAllListings] = useState<any[]>(Array.isArray(listings) ? listings : [])
+  const [paginationMeta, setPaginationMeta] = useState<ListingGridResponse["meta"]>(null)
+  const [nextPage, setNextPage] = useState<number>(2)
+  const [isListingsLoading, setIsListingsLoading] = useState<boolean>(true)
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  // Use infinite query to load pages incrementally
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: isListingsLoading,
-    error: isListingsError,
-  } = useInfiniteQuery({
-    queryKey: ['listings-infinite', locale, baseParams],
-    queryFn: async ({ pageParam = 1, signal }) => {
-      const params = new URLSearchParams(baseParams)
-      params.set('page', String(pageParam))
-      params.set('per_page', '24')
-      // params.set('per_page', '12')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/listings?${params.toString()}`, { signal: signal as AbortSignal })
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+  const hasNextPage = useMemo(() => {
+    if (!paginationMeta?.last_page) return false
+    return nextPage <= paginationMeta.last_page
+  }, [nextPage, paginationMeta?.last_page])
+
+  const sessionStorageKey = useMemo(
+    () => `${GRID_SESSION_STORAGE_KEY_PREFIX}${cacheKey}`,
+    [cacheKey]
+  )
+
+  const readSessionCache = useCallback((): ListingGridCacheValue | null => {
+    try {
+      const raw = window.sessionStorage.getItem(sessionStorageKey)
+      if (!raw) return null
+      const parsed = JSON.parse(raw) as ListingGridCacheValue
+      if (!parsed || !Array.isArray(parsed.listings)) return null
+      return parsed
+    } catch {
+      return null
+    }
+  }, [sessionStorageKey])
+
+  const writeSessionCache = useCallback((value: ListingGridCacheValue) => {
+    try {
+      window.sessionStorage.setItem(sessionStorageKey, JSON.stringify(value))
+    } catch {
+      // Ignore quota/storage errors.
+    }
+  }, [sessionStorageKey])
+
+  const fetchPage = useCallback(async (page: number, signal?: AbortSignal): Promise<ListingGridResponse> => {
+    const params = new URLSearchParams(baseParams)
+    params.set("page", String(page))
+    params.set("per_page", "24")
+
+    const response = await api.get(`/user/listings?${params.toString()}`, {
+      fetchOptions: signal ? { signal } : undefined,
+    })
+
+    if (response.isError) {
+      throw new Error(response.message || "Failed to fetch listings")
+    }
+
+    const data = Array.isArray(response.data?.data)
+      ? response.data.data
+      : Array.isArray(response.data)
+        ? response.data
+        : []
+
+    const meta = (response.data?.meta || response.meta || null) as ListingGridResponse["meta"]
+    return { data, meta }
+  }, [baseParams])
+
+  const loadPage = useCallback(async (page: number, append: boolean, signal?: AbortSignal) => {
+    if (inFlightPagesRef.current.has(page)) return
+    inFlightPagesRef.current.add(page)
+    try {
+      const prefetched = prefetchedPagesRef.current.get(page)
+      const result = prefetched ?? await fetchPage(page, signal)
+      if (prefetched) {
+        prefetchedPagesRef.current.delete(page)
       }
-      const data = await response.json()
-      return data
-    },
-    getNextPageParam: (lastPage: any) => {
-      const meta = lastPage?.meta
-      if (!meta) return undefined
+      const items = result.data || []
+      const meta = result.meta || null
+      setPaginationMeta(meta)
+      setErrorMessage(null)
+      setAllListings((prev) => {
+        if (!append) return items
+        const seen = new Set(prev.map((item: any) => item?.id))
+        const merged = [...prev]
+        items.forEach((item: any) => {
+          if (!seen.has(item?.id)) merged.push(item)
+        })
+        return merged
+      })
 
-      // Return next page number if there are more pages
-      if (meta.current_page < meta.last_page) {
-        return meta.current_page + 1
+      if (meta?.current_page && meta?.last_page && meta.current_page < meta.last_page) {
+        setNextPage(meta.current_page + 1)
+      } else {
+        setNextPage(Number.MAX_SAFE_INTEGER)
       }
-      return undefined
-    },
-    initialPageParam: 1,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
-  })
+    } catch (error: any) {
+      if (error?.name !== "AbortError") {
+        setErrorMessage(error?.message || "Failed to load listings")
+      }
+    } finally {
+      inFlightPagesRef.current.delete(page)
+    }
+  }, [fetchPage])
 
-  // Flatten all pages into a single array of listings
-  const allListings = useMemo(() => {
-    if (!data?.pages) return []
-    return data.pages.flatMap((page: any) => page?.data || [])
-  }, [data?.pages])
+  useEffect(() => {
+    const cached = listingGridCache.get(cacheKey)
+    const now = Date.now()
+    const controller = new AbortController()
+    const sessionCached = readSessionCache()
 
-  // Get pagination meta from the last page
-  const paginationMeta = useMemo(() => {
-    if (!data?.pages || data.pages.length === 0) return null
-    return data.pages[data.pages.length - 1]?.meta as any
-  }, [data?.pages])
+    if (cached && now - cached.cachedAt < GRID_CACHE_TTL_MS) {
+      setAllListings(cached.listings)
+      setPaginationMeta(cached.meta)
+      setNextPage(cached.nextPage)
+      setErrorMessage(null)
+      setIsListingsLoading(false)
+      return () => controller.abort()
+    }
+    if (sessionCached && now - sessionCached.cachedAt < GRID_CACHE_TTL_MS) {
+      setAllListings(sessionCached.listings)
+      setPaginationMeta(sessionCached.meta)
+      setNextPage(sessionCached.nextPage)
+      setErrorMessage(null)
+      setIsListingsLoading(false)
+      listingGridCache.set(cacheKey, sessionCached)
+      return () => controller.abort()
+    }
+
+    setIsListingsLoading(true)
+    setErrorMessage(null)
+    setAllListings([])
+    setPaginationMeta(null)
+    setNextPage(2)
+
+    loadPage(1, false, controller.signal).finally(() => setIsListingsLoading(false))
+    return () => controller.abort()
+  }, [cacheKey, loadPage, readSessionCache])
+
+  useEffect(() => {
+    if (isListingsLoading) return
+    const value: ListingGridCacheValue = {
+      listings: allListings,
+      meta: paginationMeta,
+      nextPage,
+      cachedAt: Date.now(),
+    }
+    listingGridCache.set(cacheKey, value)
+    writeSessionCache(value)
+  }, [allListings, cacheKey, isListingsLoading, nextPage, paginationMeta, writeSessionCache])
+
+  useEffect(() => {
+    if (!hasNextPage || isListingsLoading || isFetchingNextPage || nextPage === Number.MAX_SAFE_INTEGER) {
+      return
+    }
+    if (prefetchedPagesRef.current.has(nextPage) || inFlightPagesRef.current.has(nextPage)) {
+      return
+    }
+
+    const controller = new AbortController()
+    fetchPage(nextPage, controller.signal)
+      .then((result) => {
+        prefetchedPagesRef.current.set(nextPage, result)
+      })
+      .catch(() => {
+        // Silent prefetch failure; manual load can retry.
+      })
+
+    return () => controller.abort()
+  }, [fetchPage, hasNextPage, isFetchingNextPage, isListingsLoading, nextPage])
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -87,7 +219,7 @@ export function ListingGridMore({ listings }: { listings?: any }) {
 
     const displayedCount = allListings.length
     const totalCount = paginationMeta.total || 0
-    const pagesLoaded = data?.pages?.length || 0
+    const pagesLoaded = paginationMeta.current_page || 0
     const totalPages = paginationMeta.last_page || 0
 
     // Count by type
@@ -103,17 +235,25 @@ export function ListingGridMore({ listings }: { listings?: any }) {
       rentCount,
       percentage: totalCount > 0 ? Math.round((displayedCount / totalCount) * 100) : 0,
     }
-  }, [allListings, paginationMeta, data?.pages])
+  }, [allListings, paginationMeta])
 
-  const handleLoadMore = () => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
+  const handleLoadMore = async () => {
+    if (!hasNextPage || isFetchingNextPage || nextPage === Number.MAX_SAFE_INTEGER) return
+    setIsFetchingNextPage(true)
+    await loadPage(nextPage, true)
+    setIsFetchingNextPage(false)
   }
 
   const showLoadMore = hasNextPage && !isListingsLoading
 
   if (isListingsLoading) return <LoadingSkeleton />
+  if (errorMessage) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center text-sm text-red-700">
+        {errorMessage}
+      </div>
+    )
+  }
 
 
   return (
