@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
 import {
   fetchHomeCacheData,
@@ -15,14 +15,6 @@ export function useHomeCache() {
   const refetch = useCallback(() => {
     dispatch(fetchHomeCacheData());
   }, [dispatch]);
-
-  useEffect(() => {
-    // Trigger fetch whenever cache is empty/expired and there is no in-flight request,
-    // even إذا كان في خطأ سابق، حتى لا نبقى عالقين بدون بيانات.
-    if (shouldRefetch && !home.loading) {
-      dispatch(fetchHomeCacheData());
-    }
-  }, [shouldRefetch, home.loading, dispatch]);
 
   return {
     footer: home.footer,

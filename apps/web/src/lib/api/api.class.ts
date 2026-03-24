@@ -334,19 +334,22 @@ export class ApiCore implements ApiInstance {
      * Parse the response from fetch (align with admin: try/catch around json, always return status)
      */
     private async parseResponse<T>(response: Response): Promise<ApiResponse<T>> {
-        const isError = !response.ok;
+        const httpError = !response.ok;
         let data: unknown;
 
         try {
             data = await response.json();
+            const body = typeof data === 'object' && data !== null ? (data as Record<string, unknown>) : {};
+            // Align with diplomasi behavior: body success=false should be treated as request failure.
+            const businessError = body.success === false;
             return {
-                isError,
-                ...(typeof data === 'object' && data !== null ? data : {}),
+                isError: httpError || businessError,
+                ...body,
                 status: response.status,
             } as ApiResponse<T>;
         } catch {
             return {
-                isError,
+                isError: httpError,
                 data: undefined,
                 message: 'Failed to parse response',
                 status: response.status,

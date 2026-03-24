@@ -92,6 +92,19 @@ export const fetchHomeCacheData = createAsyncThunk(
       const message = err instanceof Error ? err.message : "Failed to load home cache";
       return rejectWithValue(message);
     }
+  },
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as { home: HomeCacheState };
+      const home = state.home;
+      if (!home) return true;
+
+      // Prevent duplicate requests (including React StrictMode double effects).
+      if (home.loading) return false;
+
+      // Only fetch when cache is empty/expired.
+      return isHomeCacheExpiredOrEmpty(home);
+    },
   }
 );
 
