@@ -4,7 +4,7 @@ import { ListingCard } from "./listing-card"
 import { Button } from "@/components/ui/button"
 import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams, useRouter } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import type React from "react"
 import { cn } from "@/lib/utils"
 import { useInfiniteQuery } from "@tanstack/react-query"
@@ -18,6 +18,7 @@ export function ListingGridMore({ listings }: { listings?: any }) {
   const t = useTranslations('property')
   const tCommon = useTranslations('common')
   const direction = locale === 'ar' ? 'rtl' : 'ltr'
+  const [awaiting, setAwaiting] = useState(2000)
 
   // Build base query params (without page parameter)
   const baseParams = useMemo(() => {
@@ -45,11 +46,14 @@ export function ListingGridMore({ listings }: { listings?: any }) {
       params.set('page', String(pageParam))
       params.set('per_page', '24')
       // params.set('per_page', '12')
-
-      const response = await api.get(`/user/listings?${params.toString()}`, { fetchOptions: { signal } })
-      return response
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/listings?${params.toString()}`, { signal: signal as AbortSignal })
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      return data
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: any) => {
       const meta = lastPage?.meta
       if (!meta) return undefined
 
@@ -68,13 +72,13 @@ export function ListingGridMore({ listings }: { listings?: any }) {
   // Flatten all pages into a single array of listings
   const allListings = useMemo(() => {
     if (!data?.pages) return []
-    return data.pages.flatMap((page) => page?.data || [])
+    return data.pages.flatMap((page: any) => page?.data || [])
   }, [data?.pages])
 
   // Get pagination meta from the last page
   const paginationMeta = useMemo(() => {
     if (!data?.pages || data.pages.length === 0) return null
-    return data.pages[data.pages.length - 1]?.meta
+    return data.pages[data.pages.length - 1]?.meta as any
   }, [data?.pages])
 
   // Calculate statistics
