@@ -92,22 +92,11 @@ export function ListingGridMore({ listings }: { listings?: any }) {
     params.set("page", String(page))
     params.set("per_page", "24")
 
-    const response = await api.get(`/user/listings?${params.toString()}`, {
-      fetchOptions: signal ? { signal } : undefined,
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/listings?${params.toString()}`, {
+      signal: signal as AbortSignal,
     })
-
-    if (response.isError) {
-      throw new Error(response.message || "Failed to fetch listings")
-    }
-
-    const data = Array.isArray(response.data?.data)
-      ? response.data.data
-      : Array.isArray(response.data)
-        ? response.data
-        : []
-
-    const meta = (response.data?.meta || response.meta || null) as ListingGridResponse["meta"]
-    return { data, meta }
+    const data = await response.json()
+    return data
   }, [baseParams])
 
   const loadPage = useCallback(async (page: number, append: boolean, signal?: AbortSignal) => {
