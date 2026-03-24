@@ -7,7 +7,6 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState, useCallback, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { Search, Filter, RefreshCw, Home } from "lucide-react"
-import { api } from "@/lib/api"
 
 type ListingGridResponse = {
   data?: any[]
@@ -16,6 +15,11 @@ type ListingGridResponse = {
     last_page?: number
     total?: number
   } | null
+}
+
+type ListingGridMoreProps = {
+  listings?: any[]
+  initialResponse?: ListingGridResponse | null
 }
 
 type ListingGridCacheValue = {
@@ -29,7 +33,7 @@ const GRID_CACHE_TTL_MS = 2 * 60 * 1000
 const GRID_SESSION_STORAGE_KEY_PREFIX = "listing-grid-cache::"
 const listingGridCache = new Map<string, ListingGridCacheValue>()
 
-export function ListingGridMore({ listings }: { listings?: any }) {
+export function ListingGridMore({ listings, initialResponse }: ListingGridMoreProps) {
   const locale = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -93,18 +97,22 @@ export function ListingGridMore({ listings }: { listings?: any }) {
     params.set("per_page", "24")
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/listings?${params.toString()}`, {
-      signal: signal as AbortSignal,
+      signal,
+      cache: "no-store",
     })
+    if (!response.ok) {
+      throw new Error(`Failed to load listings: ${response.status}`)
+    }
     const data = await response.json()
     return data
   }, [baseParams])
 
-  const loadPage = useCallback(async (page: number, append: boolean, signal?: AbortSignal) => {
+  const loadPage = useCallback(async (page: number, append: boolean) => {
     if (inFlightPagesRef.current.has(page)) return
     inFlightPagesRef.current.add(page)
     try {
       const prefetched = prefetchedPagesRef.current.get(page)
-      const result = prefetched ?? await fetchPage(page, signal)
+      const result = prefetched ?? await fetchPage(page)
       if (prefetched) {
         prefetchedPagesRef.current.delete(page)
       }
@@ -160,15 +168,33 @@ export function ListingGridMore({ listings }: { listings?: any }) {
       return () => controller.abort()
     }
 
+    if (initialResponse?.data?.length) {
+      const initialMeta = initialResponse.meta || null
+      setAllListings(initialResponse.data)
+      setPaginationMeta(initialMeta)
+      setErrorMessage(null)
+      if (
+        initialMeta?.current_page &&
+        initialMeta?.last_page &&
+        initialMeta.current_page < initialMeta.last_page
+      ) {
+        setNextPage(initialMeta.current_page + 1)
+      } else {
+        setNextPage(Number.MAX_SAFE_INTEGER)
+      }
+      setIsListingsLoading(false)
+      return () => controller.abort()
+    }
+
     setIsListingsLoading(true)
     setErrorMessage(null)
     setAllListings([])
     setPaginationMeta(null)
     setNextPage(2)
 
-    loadPage(1, false, controller.signal).finally(() => setIsListingsLoading(false))
+    loadPage(1, false).finally(() => setIsListingsLoading(false))
     return () => controller.abort()
-  }, [cacheKey, loadPage, readSessionCache])
+  }, [cacheKey, initialResponse, loadPage, readSessionCache])
 
   useEffect(() => {
     if (isListingsLoading) return
